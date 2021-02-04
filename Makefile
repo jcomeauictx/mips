@@ -10,9 +10,13 @@ MATCH := ^$(LABEL)$(DUMP)$(INSTR)$(ARG)$
 VERBOSE ?= -OO  # quiet by default
 SIDEBYSIDE ?= -y  # set to empty string for normal diff
 export
-check: 0.asm
-%.asm: mips.py %.dat
-	python $(VERBOSE) ./$< disassemble $*.dat | tee $@
+check: 0.img
+%.img: %.asm mips.py
+	python $(VERBOSE) mips.py assemble $< > $@tmp
+	mv $@tmp $@
+%.asm: %.dat
+	python $(VERBOSE) mips.py disassemble $< > $@tmp
+	mv $@tmp $@
 debug:
 	$(MAKE) VERBOSE= check
 %.xxd: %.dat

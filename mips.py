@@ -467,7 +467,7 @@ def assemble(filespec):
     # assembler leaves a hint at the end of a comment when it turns
     # a machine instruction into a macro/pseudoop. we use these to
     # create identical images to original from unedited disassemblies.
-    linepattern += r"(?:#.*(?:[(]from '(?P<previous>[a-z0-9.]+)'[)])?)?\s*$"
+    linepattern += r"(?:#.*?(?:[(]from '(?P<previous>[a-z0-9.]+)'[)])?)?\s*$"
     re_debug = re.DEBUG if __debug__ else 0
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()

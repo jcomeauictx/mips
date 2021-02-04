@@ -13,7 +13,12 @@ export
 check: 0.img
 %.img: %.asm mips.py
 	python $(VERBOSE) mips.py assemble $< > $@tmp
-	mv $@tmp $@
+	if [ -s $@tmp ]; then \
+		mv $@tmp $@; \
+	else \
+		echo Image has zero file size, deleting... >&2; \
+		rm -f $@tmp; \
+	fi
 %.asm: %.dat
 	python $(VERBOSE) mips.py disassemble $< > $@tmp
 	mv $@tmp $@

@@ -467,7 +467,7 @@ def assemble(filespec):
     # assembler leaves a hint at the end of a comment when it turns
     # a machine instruction into a macro/pseudoop. we use these to
     # create identical images to original from unedited disassemblies.
-    linepattern += r'(?:#[^(]*[(]from (?P<previous>)[)])?\s*$'
+    linepattern += r"(?:#.*[(]from '(?P<previous>[a-z0-9.]+)'[)])?\s*$"
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
     for line in filedata:
@@ -476,9 +476,7 @@ def assemble(filespec):
             raise ValueError('No match for regex %r to line %r' %
                              (linepattern, line))
         else:
-            logging.debug('processing: %s %s',
-                          match.group('mnemonic'),
-                          match.group('args'))
+            logging.debug('processing: %s', match.groupdict())
 
 def process(loop, index, chunk, labels):
     '''

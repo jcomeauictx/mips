@@ -48,3 +48,4 @@ debug:
 %: %.S
 	mips-linux-gnu-gcc $< -o $@
 .FORCE:
+.PRECIOUS: %.asm

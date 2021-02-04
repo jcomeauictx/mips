@@ -461,7 +461,7 @@ def assemble(filespec):
     '''
     primitive assembler
     '''
-    linepattern = r'^(?:(?P<label>[a-z0-9.]+):)?\s+'  # match label
+    linepattern = r'^(?:(?P<label>[a-z0-9.]+):\s*)?'  # match label
     linepattern += r'(?P<mnemonic>[a-z0-9.]+)\s+'  # match mnemonic
     linepattern += r'(?P<args>[a-z0-9()._,-]+)?\s*'  # match args
     # assembler leaves a hint at the end of a comment when it turns
@@ -469,14 +469,16 @@ def assemble(filespec):
     # create identical images to original from unedited disassemblies.
     linepattern += r'(?:#[^(]*[(]from (?P<previous>)[)])?\s*$'
     with open(filespec, 'r') as infile:
-        filedata = infile.readlines()
+        filedata = infile.read().splitlines()
     for line in filedata:
-        match = linepattern.match(line)
+        match = re.compile(linepattern).match(line)
         if not match:
             raise ValueError('No match for regex %r to line %r' %
                              (linepattern, line))
         else:
-            logging.debug('processing: %s %s', match.mnemonic, match.args)
+            logging.debug('processing: %s %s',
+                          match.group('mnemonic'),
+                          match.group('args'))
 
 def process(loop, index, chunk, labels):
     '''

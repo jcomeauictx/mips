@@ -461,9 +461,9 @@ def assemble(filespec):
     '''
     primitive assembler
     '''
-    linepattern = r'^(?:(?P<label>[a-z0-9.]+):\s*)?'  # match label
+    linepattern = r'^(?:(?P<label>[a-z0-9.]+):)?\s*'  # match label
     linepattern += r'(?P<mnemonic>[a-z0-9.]+)\s+'  # match mnemonic
-    linepattern += r'(?P<args>[a-z0-9()._,-]+)?\s*'  # match args
+    linepattern += r'(?P<args>[a-z0-9$()._,-]+)?\s*'  # match args
     # assembler leaves a hint at the end of a comment when it turns
     # a machine instruction into a macro/pseudoop. we use these to
     # create identical images to original from unedited disassemblies.

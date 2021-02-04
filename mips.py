@@ -462,16 +462,17 @@ def assemble(filespec):
     primitive assembler
     '''
     linepattern = r'^(?:(?P<label>[a-z0-9.]+):)?\s*'  # match label
-    linepattern += r'(?P<mnemonic>[a-z0-9.]+)\s+'  # match mnemonic
-    linepattern += r'(?P<args>[a-z0-9$()._,-]+)?\s*'  # match args
+    linepattern += r'(?:(?P<mnemonic>[a-z0-9.]+)\s+)?'  # match mnemonic
+    linepattern += r'(?:(?P<args>[a-z0-9$()._,-]+)?\s*)?'  # match args
     # assembler leaves a hint at the end of a comment when it turns
     # a machine instruction into a macro/pseudoop. we use these to
     # create identical images to original from unedited disassemblies.
-    #linepattern += r"(?:#.*[(]from '(?P<previous>[a-z0-9.]+)'[)])?\s*$"
+    linepattern += r"(?:#.*(?:[(]from '(?P<previous>[a-z0-9.]+)'[)])?)?\s*$"
+    re_debug = re.DEBUG if __debug__ else 0
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
     for line in filedata:
-        match = re.compile(linepattern).match(line)
+        match = re.match(linepattern, line, flags=re_debug)
         if not match:
             raise ValueError('No match for regex %r to line %r' %
                              (linepattern, line))

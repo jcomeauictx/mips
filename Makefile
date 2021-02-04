@@ -47,5 +47,7 @@ debug:
 	diff $< $@
 %: %.S
 	mips-linux-gnu-gcc $< -o $@
+edit: mips.py Makefile
+	$(EDITOR) $+
 .FORCE:
 .PRECIOUS: %.asm

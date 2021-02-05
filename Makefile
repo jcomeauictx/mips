@@ -50,8 +50,6 @@ debug:
 %.sedcheck:  %.dsm  # for checking sed patterns
 	sed -n '/$(MATCH)/p' $< > $@
 	diff $< $@
-%: %.S
-	mips-linux-gnu-gcc $< -o $@
 edit: mips.py Makefile
 	$(EDITOR) $+
 .FORCE:

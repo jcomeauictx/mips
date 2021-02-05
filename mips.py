@@ -375,6 +375,83 @@ INSTRUCTIONS = {
     'COP3': COP3,
 }
 
+REFERENCE = {
+    # This is primarily for assembly, whereas other tables were made
+    # for disassembly. Ideally we will come up with a format that suits
+    # both purposes well, and possibly emulation too.
+    # from https://s3-eu-west-1.amazonaws.com/downloads-mips/documents/
+    # MD00086-2B-MIPS32BIS-AFP-05.04.pdf starting page 45
+    'fmt': {  # 5-bit field for floating point instructions
+        # from http://hades.mech.northwestern.edu/images/a/af/
+        # MIPS32_Architecture_Volume_I-A_Introduction.pdf, table 7.20
+        'docs': [
+            ['0-15', 'reserved'],
+            ['S', '0b10000', 'single precision, 32 bits'],
+            ['D', '0b10001', 'double precision, 64 bits'],
+            ['18-19', 'reserved'],
+            ['W', '0b10100', 'fixed-point word, 32 bits'],
+            ['L', '0b10101', 'fixed-point long, 64 bits'],
+            ['PS', '0b10110', 'paired single, 32 bits each'],  # removed rel. 6
+            ['23-31', 'reserved'],
+        ],
+    },
+    'fmt3': {  # 3-bit field for floating point instructions
+        # from http://hades.mech.northwestern.edu/images/a/af/
+        # MIPS32_Architecture_Volume_I-A_Introduction.pdf, table 7.20
+        'docs': [
+            ['S', '0b000', 'single precision, 32 bits'],
+            ['D', '0b001', 'double precision, 64 bits'],
+            ['2-3', 'reserved'],
+            ['W', '0b100', 'fixed-point word, 32 bits'],
+            ['L', '0b101', 'fixed-point long, 64 bits'],
+            ['PS', '0b110', 'paired single, 32 bits each'],  # removed rel. 6
+            ['7', 'reserved'],
+    },
+    'abs.s': {
+        'fields': [
+            ['COP1', '0b010001'],
+            ['fmt', '0b10000'],  # fmt for single is 16, 0x10
+            ['0', '0b00000'],
+            ['fs', '0bnnnnn'],
+            ['fd', '0bnnnnn'],
+            ['ABS', '0b000101'],
+        'args': 'fd,fs',
+        'emulation': 'fd = abs(fs)'
+    },
+    'abs.d': {
+        'fields': [
+            ['COP1', '0b010001'],
+            ['fmt', '0b10001'],  # fmt for double is 17, 0x11
+            ['0', '0b00000'],
+            ['fs', '0bnnnnn'],
+            ['fd', '0bnnnnn'],
+            ['ABS', '0b000101'],
+        'args': 'fd,fs',
+        'emulation': 'fd = abs(fs)'
+    },
+    'abs.ps': {
+        'fields': [
+            ['COP1', '0b10001'],
+            ['fmt', '0b10110'],  # fmt for paired-single is 22, 0x16
+            ['0', '0b00000'],
+            ['fs', '0bnnnnn'],
+            ['fd', '0bnnnnn'],
+            ['ABS', '0b000101'],
+        'args': 'fd,fs',
+        'emulation': 'fd = abs(fs)'
+    },
+    ],
+    'add': [
+        ['SPECIAL', '0b000000'],
+        ['rs', '0bnnnnn'],
+        ['rt', '0bnnnnn'],
+        ['rd', '0bnnnnn'],
+        ['0', '0b00000'],
+        ['ADD', '0b100000'],
+        {'args': 'rd,rs,rt', 'emulation': 'rd = rs + rt'},
+    ],
+    'beq': [
+
 CONVERSION = {
     # NOTE: put the most restrictive conditions FIRST, because the conversion
     # process is not a loop; for example, 'b' should come before 'beqz'

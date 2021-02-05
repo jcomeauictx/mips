@@ -472,14 +472,16 @@ REFERENCE = {
         'emulation': 'if rs == rt: jump(offset << 2 + pc)',
     },
     'b': {
-        'alias_of': [['beq', '$zero,$zero']]
+        'alias_of': [['beq', '$zero,$zero,offset']],
+        'args': 'offset'
     },
     'beqz': {
-        'alias_of': [['beq', 'rs,$zero']]
+        'alias_of': [['beq', 'rs,$zero,offset']],
+        'args': 'rs,offset'
     },
     '.set': {
         'type': 'assembler directive',
-        'action': 'logging.debug("Nothing to do for %s", "mnemonic")',
+        'action': 'logging.debug("Nothing to do for %r", mnemonic)',
     },
 }
 
@@ -595,11 +597,11 @@ def assemble(filespec):
             instruction = assemble_instruction(loop, labels,
                                                **match.groupdict())
             if instruction is not None:
-                offset += 4
                 if loop == 1:
                     outfile.write(struct.pack('<L', instruction))
                 elif label is not None:
                     labels[label] = offset
+                offset += 4
 
 def process(loop, index, chunk, labels):
     '''

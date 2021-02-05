@@ -10,6 +10,8 @@ MATCH_OBJDUMP_DISASSEMBLE = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLE'))
 # labels will cause objdump -D output and mips disassemble output to differ
 # same if instructions with bad args are turned into .word 0xNNNNNNNN
 USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLE
+logging.warn('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
+             AGGRESSIVE_WORDING)
 
 REGISTER = [
     '$' + registername for registername in [
@@ -563,7 +565,7 @@ def disassemble(filespec):
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
         # store labels of b, j, etc. instruction targets, to print later
-    labels = {0: 'start'}
+    labels = {0: 'start'} if USE_LABELS else {}
     for loop in [0, 1]:
         for index in range(0, len(filedata), 4):
             chunk = filedata[index:index + 4]

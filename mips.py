@@ -406,6 +406,7 @@ REFERENCE = {
             ['L', '0b101', 'fixed-point long, 64 bits'],
             ['PS', '0b110', 'paired single, 32 bits each'],  # removed rel. 6
             ['7', 'reserved'],
+        ],
     },
     'abs.s': {
         'fields': [
@@ -415,6 +416,7 @@ REFERENCE = {
             ['fs', '0bnnnnn'],
             ['fd', '0bnnnnn'],
             ['ABS', '0b000101'],
+        ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
@@ -426,6 +428,7 @@ REFERENCE = {
             ['fs', '0bnnnnn'],
             ['fd', '0bnnnnn'],
             ['ABS', '0b000101'],
+        ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
@@ -437,20 +440,33 @@ REFERENCE = {
             ['fs', '0bnnnnn'],
             ['fd', '0bnnnnn'],
             ['ABS', '0b000101'],
+        ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
-    ],
-    'add': [
-        ['SPECIAL', '0b000000'],
-        ['rs', '0bnnnnn'],
-        ['rt', '0bnnnnn'],
-        ['rd', '0bnnnnn'],
-        ['0', '0b00000'],
-        ['ADD', '0b100000'],
-        {'args': 'rd,rs,rt', 'emulation': 'rd = rs + rt'},
-    ],
-    'beq': [
+    'add': {
+        'fields': [
+            ['SPECIAL', '0b000000'],
+            ['rs', '0bnnnnn'],
+            ['rt', '0bnnnnn'],
+            ['rd', '0bnnnnn'],
+            ['0', '0b00000'],
+            ['ADD', '0b100000'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd = rs + rt',
+    },
+    'beq': {
+        'fields': [
+            ['BEQ', '0b000100'],
+            ['rs', '0bnnnnn'],
+            ['rt', '0bnnnnn'],
+            ['offset', '0bnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rs,rt,offset',
+        'emulation': 'if rs == rt: jump(offset << 2 + pc)',
+    },
+}
 
 CONVERSION = {
     # NOTE: put the most restrictive conditions FIRST, because the conversion

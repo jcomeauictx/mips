@@ -527,11 +527,11 @@ CONVERSION = {
     # objdump disassembly returns .word for sel != 0
     #'mtc0': [['sel != 0', ['mtc0', 'coproc_move3', None, 'True', None]]],
     #'mfc0': [['sel != 0', ['mfc0', 'coproc_move3', None, 'True', None]]],
-    'mtc0': [['sel != 0', ['.word', 'word', False, 'True', False]]],
-    'mfc0': [['sel != 0', ['.word', 'word', False, 'True', False]]],
+    'mtc0': [['sel != 0', WORD]],
+    'mfc0': [['sel != 0', WORD]],
     'jalr': [['dest == 31', ['jalr', 'jumpr', True, 'True', True]]],
     # objdump sync becomes .word if sync type set in amount field
-    'sync': [['amount != 0', ['.word', 'word', False, 'True', False]]],
+    'sync': [['amount != 0', WORD]],
     'syscall': [['longcode == 0', ['syscall', 'simple', None, 'True', None]]],
 }
 

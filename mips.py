@@ -386,12 +386,12 @@ REFERENCE = {
         # MIPS32_Architecture_Volume_I-A_Introduction.pdf, table 7.20
         'docs': [
             ['0-15', 'reserved'],
-            ['S', '0b10000', 'single precision, 32 bits'],
-            ['D', '0b10001', 'double precision, 64 bits'],
+            ['S', '10000', 'single precision, 32 bits'],
+            ['D', '10001', 'double precision, 64 bits'],
             ['18-19', 'reserved'],
-            ['W', '0b10100', 'fixed-point word, 32 bits'],
-            ['L', '0b10101', 'fixed-point long, 64 bits'],
-            ['PS', '0b10110', 'paired single, 32 bits each'],  # removed rel. 6
+            ['W', '10100', 'fixed-point word, 32 bits'],
+            ['L', '10101', 'fixed-point long, 64 bits'],
+            ['PS', '10110', 'paired single, 32 bits each'],  # removed rel. 6
             ['23-31', 'reserved'],
         ],
     },
@@ -399,72 +399,82 @@ REFERENCE = {
         # from http://hades.mech.northwestern.edu/images/a/af/
         # MIPS32_Architecture_Volume_I-A_Introduction.pdf, table 7.20
         'docs': [
-            ['S', '0b000', 'single precision, 32 bits'],
-            ['D', '0b001', 'double precision, 64 bits'],
+            ['S', '000', 'single precision, 32 bits'],
+            ['D', '001', 'double precision, 64 bits'],
             ['2-3', 'reserved'],
-            ['W', '0b100', 'fixed-point word, 32 bits'],
-            ['L', '0b101', 'fixed-point long, 64 bits'],
-            ['PS', '0b110', 'paired single, 32 bits each'],  # removed rel. 6
+            ['W', '100', 'fixed-point word, 32 bits'],
+            ['L', '101', 'fixed-point long, 64 bits'],
+            ['PS', '110', 'paired single, 32 bits each'],  # removed rel. 6
             ['7', 'reserved'],
         ],
     },
     'abs.s': {
         'fields': [
-            ['COP1', '0b010001'],
-            ['fmt', '0b10000'],  # fmt for single is 16, 0x10
-            ['0', '0b00000'],
-            ['fs', '0bnnnnn'],
-            ['fd', '0bnnnnn'],
-            ['ABS', '0b000101'],
+            ['COP1', '010001'],
+            ['fmt', '10000'],  # fmt for single is 16, 0x10
+            ['0', '00000'],
+            ['fs', 'nnnnn'],
+            ['fd', 'nnnnn'],
+            ['ABS', '000101'],
         ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
     'abs.d': {
         'fields': [
-            ['COP1', '0b010001'],
-            ['fmt', '0b10001'],  # fmt for double is 17, 0x11
-            ['0', '0b00000'],
-            ['fs', '0bnnnnn'],
-            ['fd', '0bnnnnn'],
-            ['ABS', '0b000101'],
+            ['COP1', '010001'],
+            ['fmt', '10001'],  # fmt for double is 17, 0x11
+            ['0', '00000'],
+            ['fs', 'nnnnn'],
+            ['fd', 'nnnnn'],
+            ['ABS', '000101'],
         ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
     'abs.ps': {
         'fields': [
-            ['COP1', '0b10001'],
-            ['fmt', '0b10110'],  # fmt for paired-single is 22, 0x16
-            ['0', '0b00000'],
-            ['fs', '0bnnnnn'],
-            ['fd', '0bnnnnn'],
-            ['ABS', '0b000101'],
+            ['COP1', '10001'],
+            ['fmt', '10110'],  # fmt for paired-single is 22, 0x16
+            ['0', '00000'],
+            ['fs', 'nnnnn'],
+            ['fd', 'nnnnn'],
+            ['ABS', '000101'],
         ],
         'args': 'fd,fs',
         'emulation': 'fd = abs(fs)'
     },
     'add': {
         'fields': [
-            ['SPECIAL', '0b000000'],
-            ['rs', '0bnnnnn'],
-            ['rt', '0bnnnnn'],
-            ['rd', '0bnnnnn'],
-            ['0', '0b00000'],
-            ['ADD', '0b100000'],
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['ADD', '100000'],
         ],
         'args': 'rd,rs,rt',
         'emulation': 'rd = rs + rt',
     },
     'beq': {
         'fields': [
-            ['BEQ', '0b000100'],
-            ['rs', '0bnnnnn'],
-            ['rt', '0bnnnnn'],
-            ['offset', '0bnnnnnnnnnnnnnnnn'],
+            ['BEQ', '000100'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
         'args': 'rs,rt,offset',
         'emulation': 'if rs == rt: jump(offset << 2 + pc)',
+    },
+    'b': {
+        'alias_of': ['beq', '$zero,$zero']
+    },
+    'beqz': {
+        'alias_of': ['beq', 'rs,$zero']
+    },
+    '.set': {
+        'type': 'assembler directive',
+        'action': 'logging.debug("Nothing to do for %s", "mnemonic")',
     },
 }
 
@@ -565,17 +575,27 @@ def assemble(filespec):
     linepattern += r"(?:#.*?(?:[(]from '(?P<previous>[a-z0-9.]+)'[)])?)?\s*$"
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
-    for line in filedata:
-        match = re.match(linepattern, line)
-        if not match:
-            raise ValueError('No match for regex %r to line %r' %
-                             (linepattern, line))
-        else:
-            logging.debug('processing: %s', match.groupdict())
-            reference = REFERENCE.get(match.group('mnemonic'))
-            if not reference:
-                raise NotImplementedError('%s not yet added to REFERENCE' %
-                                          match.group('mnemonic'))
+    # first pass, just build labels
+    labels = {}
+    for loop in range(2):
+        offset = 0
+        for line in filedata:
+            label = None
+            match = re.match(linepattern, line)
+            if match:
+                logging.debug('processing: %s', match.groupdict())
+                label = match.group('label')
+            else:
+                raise ValueError('No match for regex %r to line %r' %
+                                 (linepattern, line))
+            instruction = assemble_instruction(loop, labels,
+                                               **match.groupdict())
+            if instruction is not None:
+                offset += 4
+                if loop == 1:
+                    outfile.write(struct.pack('<L', instruction))
+                elif label is not None:
+                    labels[label] = offset
 
 def process(loop, index, chunk, labels):
     '''
@@ -683,6 +703,41 @@ def shorten(hashtable):
         except TypeError:  # ignore len(int)
             pass
     return hashtable
+
+def assemble_instruction(loop, labels, mnemonic=None, label=None, args=None,
+        previous=None):
+    '''
+    Assemble an instruction given the assembly source line
+    '''
+    instruction = 0
+    if mnemonic in REFERENCE:
+        if 'fields' in REFERENCE[mnemonic]:
+            for name, value in REFERENCE[mnemonic]['fields']:
+                instruction <<= len(value)
+                if value.isdigit:
+                    instruction |= int(value, 2)
+                else:
+                    arg = args.pop(0)
+                    if arg[0].isdigit():
+                        instruction |= eval(args[0])
+                    elif arg in labels:
+                        instruction |= labels[arg]
+                    else:
+                        # check for coprocessor register special names
+                        if '_' in arg:
+                            arg = arg.replace(arg[arg.index('_') - 1], '%d')
+                        if arg in REGISTER_REFERENCE:
+                            instruction |= REGISTER_REFERENCE[arg]
+                        elif loop == 0:
+                            instruction = 'pending label list completion'
+        elif REFERENCE[mnemonic].get('action') is not None:
+            exec(REFERENCE[mnemonic]['action'])
+            instruction = None
+        else:
+            raise NotImplementedError('No action found for %s' % mnemonic)
+    else:
+        raise NotImplementedError('%s not in REFERENCE' % mnemonic)
+    return instruction
 
 if __name__ == '__main__':
     eval(sys.argv[1])(*sys.argv[2:])

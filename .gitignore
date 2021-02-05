@@ -2,3 +2,7 @@
 *.dis
 *.asm
 *.img
+*.pyc
+*.pyo
+*.asmtmp
+*.imgtmp

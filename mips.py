@@ -468,6 +468,8 @@ REFERENCE = {
     },
 }
 
+REGISTER_REFERENCE = {}  # filled in by init()
+
 CONVERSION = {
     # NOTE: put the most restrictive conditions FIRST, because the conversion
     # process is not a loop; for example, 'b' should come before 'beqz'
@@ -664,6 +666,10 @@ def init():
                 listing.insert(listing.index(item), WORD)
         while len(listing) < size:
             listing.append(WORD)
+    REGISTER_REFERENCE.update({value: key for key, value in COREGISTER.items()})
+    for listing in REGISTER, ALTREG, FLOATREG:
+        hashtable = zip(listing, range(len(listing)))
+        REGISTER_REFERENCE.update(hashtable)
 
 def shorten(hashtable):
     '''

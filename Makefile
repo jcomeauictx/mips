@@ -7,12 +7,12 @@ SUBST := s%^$(LABEL)$(DUMP)$(INSTR)$(ARG)$$%\4\5  \# \1 \3%
 REGSUBST := s/\<\(zero\|at\|[vk][01]\|a[0-3]\|[st][0-9]\|[gsf]p\|ra\)\>/$$\1/g
 INSERT := s/^\(\w\+:\)\?\(\s\+\)\(0x\)/\1\2.word\t\3/
 MATCH := ^$(LABEL)$(DUMP)$(INSTR)$(ARG)$
-VERBOSE ?= -OO  # quiet by default
+QUIET ?= -OO  # quiet by default
 SIDEBYSIDE ?= -y  # set to empty string for normal diff
 export
 check: 0.img
 %.img: %.asm mips.py
-	python $(VERBOSE) mips.py assemble $< > $@tmp
+	python $(QUIET) mips.py assemble $< > $@tmp
 	if [ -s $@tmp ]; then \
 		mv $@tmp $@; \
 	else \
@@ -20,10 +20,10 @@ check: 0.img
 		rm -f $@tmp; \
 	fi
 %.asm: %.dat
-	python $(VERBOSE) mips.py disassemble $< > $@tmp
+	python $(QUIET) mips.py disassemble $< > $@tmp
 	mv $@tmp $@
 debug:
-	$(MAKE) VERBOSE= check
+	$(MAKE) QUIET= check
 %.xxd: %.dat
 	xxd -a $< $@
 %.diff: %.dis %.asm

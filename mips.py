@@ -6,6 +6,11 @@ import sys, os, struct, ctypes, re, logging
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
+MATCH_OBJDUMP_DISASSEMBLE = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLE'))
+# labels will cause objdump -D output and mips disassemble output to differ
+# same if instructions with bad args are turned into .word 0xNNNNNNNN
+USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLE
+
 REGISTER = [
     '$' + registername for registername in [
         'zero',
@@ -467,10 +472,10 @@ REFERENCE = {
         'emulation': 'if rs == rt: jump(offset << 2 + pc)',
     },
     'b': {
-        'alias_of': ['beq', '$zero,$zero']
+        'alias_of': [['beq', '$zero,$zero']]
     },
     'beqz': {
-        'alias_of': ['beq', 'rs,$zero']
+        'alias_of': [['beq', 'rs,$zero']]
     },
     '.set': {
         'type': 'assembler directive',
@@ -583,7 +588,6 @@ def assemble(filespec):
             label = None
             match = re.match(linepattern, line)
             if match:
-                logging.debug('processing: %s', match.groupdict())
                 label = match.group('label')
             else:
                 raise ValueError('No match for regex %r to line %r' %
@@ -652,7 +656,7 @@ def process(loop, index, chunk, labels):
         immediate = ctypes.c_short(immediate).value
     offset = index + 4 + (immediate << 2)
     # don't use labels until we've ascertained that output is like objdump
-    if not __debug__:
+    if USE_LABELS:
         destination = labels.get(offset, '0x%x' % offset)
     else:
         destination = '0x%x' % offset
@@ -665,7 +669,7 @@ def process(loop, index, chunk, labels):
             else:
                 logging.debug('eval %r failed in %s', condition,
                               shorten(locals()))
-    if not __debug__ and labeled and offset not in labels:
+    if USE_LABELS and labeled and offset not in labels:
         labels[offset] = 's%x' % offset
         #logging.debug('labels: %s', labels)
     pattern = PATTERN[style]
@@ -704,17 +708,19 @@ def shorten(hashtable):
             pass
     return hashtable
 
-def assemble_instruction(loop, labels, mnemonic=None, label=None, args=None,
-        previous=None):
+def assemble_instruction(loop, labels, mnemonic='', label='', args='',
+        previous=''):
     '''
     Assemble an instruction given the assembly source line
     '''
+    logging.debug('processing: %s', locals())
     instruction = 0
     if mnemonic in REFERENCE:
+        args = args.split(',')
         if 'fields' in REFERENCE[mnemonic]:
             for name, value in REFERENCE[mnemonic]['fields']:
                 instruction <<= len(value)
-                if value.isdigit:
+                if value.isdigit():
                     instruction |= int(value, 2)
                 else:
                     arg = args.pop(0)
@@ -730,9 +736,20 @@ def assemble_instruction(loop, labels, mnemonic=None, label=None, args=None,
                             instruction |= REGISTER_REFERENCE[arg]
                         elif loop == 0:
                             instruction = 'pending label list completion'
+                            break
         elif REFERENCE[mnemonic].get('action') is not None:
             exec(REFERENCE[mnemonic]['action'])
             instruction = None
+        elif REFERENCE[mnemonic].get('alias_of') is not None:
+            aliases = REFERENCE[mnemonic]['alias_of']
+            logging.debug('dict(aliases): %s', dict(aliases))
+            if previous in dict(aliases):
+                args = dict(aliases)[previous]
+                mnemonic = previous
+            else:
+                mnemonic, args = aliases[0]
+            return assemble_instruction(loop, labels, mnemonic,
+                                        label, args, None)
         else:
             raise NotImplementedError('No action found for %s' % mnemonic)
     else:

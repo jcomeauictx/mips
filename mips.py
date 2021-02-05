@@ -570,6 +570,10 @@ def assemble(filespec):
                              (linepattern, line))
         else:
             logging.debug('processing: %s', match.groupdict())
+            reference = REFERENCE.get(match.group('mnemonic'))
+            if not reference:
+                raise NotImplementedError('%s not yet added to REFERENCE' %
+                                          match.group('mnemonic'))
 
 def process(loop, index, chunk, labels):
     '''

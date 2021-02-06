@@ -496,7 +496,8 @@ REFERENCE = {
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
         'args': 'rt,rs,immediate',
-        'emulation': 'rt = rs + immediate',
+        'emulation': 'disable(MipsOverflow); rt = rs + immediate'
+                     'enable(MipsOverflow)',
     },
     'b': {
         'alias_of': [['beq', '$zero,$zero,offset']],
@@ -526,6 +527,16 @@ REFERENCE = {
         'args': 'immediate',
         'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
     },
+    'daddi': {
+        'fields': [
+            ['DADDI', '011000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs + immediate',
+    },
     'li': {
         'alias_of': [['addiu', 'rt,$zero,offset']],
         'args': 'rt,offset',
@@ -545,6 +556,16 @@ REFERENCE = {
         ],
         'args': 'rd,rt,sa',
         'emulation': 'rd = rt << sa',
+    },
+    'xori': {
+        'fields': [
+            ['XORI', '001110'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs ^ immediate',
     },
 }
 

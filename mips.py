@@ -3,6 +3,7 @@
 Intelligently disassemble and reassemble MIPS binaries
 '''
 import sys, os, struct, ctypes, re, logging
+from collections import OrderedDict
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -735,21 +736,51 @@ def shorten(hashtable):
             pass
     return hashtable
 
+def buildargs(provided, expected):
+    '''
+    build a dict of expected args to those provided
+    '''
+    given = re.compile(r',\s*').split(provided)
+    wanted = expected.split(',')
+    if len(given) != len(wanted):
+        raise ValueError('Args expected: %s, provided: %s' % (wanted, given))
+    return OrderedDict(zip(wanted, given))
+
+def rebuildargs(args, pseudoop_args, newargs):
+    '''
+    rebuild argstring from pseudoop to original instruction
+
+    example 'b' has a single arg 'offset', but aliases to
+    'beq $zero,$zero,offset'. so if 'offset' is 's209c',
+    '$zero,$zero,s209c' must be provided to assemble_instruction,
+    which will match the expected 'rs,rt,offset'.
+    '''
+    argslist = [re.compile(r',\s*').split(string)
+                for string in args, pseudoop_args, newargs]
+    if len(argslist[0]) != len(argslist[1]):
+        raise ValueError('Length mismatch: %s' % argslist[:2])
+    for index in range(len(argslist[2])):
+        arg = argslist[2][index]
+        if arg in argslist[1]:
+            argslist[2][index] = argslist[0][argslist[1].index(arg)]
+    return ','.join(argslist[2])
+
 def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
     logging.debug('processing: %s', locals())
     instruction = 0
-    if mnemonic in REFERENCE:
-        args = args.split(',')
-        if 'fields' in REFERENCE[mnemonic]:
-            for name, value in REFERENCE[mnemonic]['fields']:
+    reference = REFERENCE.get(mnemonic)
+    if reference:
+        if {'fields', 'args'}.issubset(reference.keys()):
+            argsdict = buildargs(args, reference['args'])
+            for name, value in reference['fields']:
                 instruction <<= len(value)
                 if value.isdigit():
                     instruction |= int(value, 2)
                 else:  # typically 'nnnnn'
-                    arg = args.pop(0)
+                    arg = argsdict[name]
                     if arg[0].isdigit():
                         instruction |= eval(args[0])
                     elif arg in labels:
@@ -763,19 +794,21 @@ def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
                         elif loop == 0:
                             instruction = 'pending label list completion'
                             break
-        elif REFERENCE[mnemonic].get('action') is not None:
-            exec(REFERENCE[mnemonic]['action'])
+        elif reference.get('action') is not None:
+            exec(reference['action'])
             instruction = None
-        elif REFERENCE[mnemonic].get('alias_of') is not None:
-            aliases = REFERENCE[mnemonic]['alias_of']
+        elif reference.get('alias_of') is not None:
+            aliases = reference['alias_of']
+            expected = reference['args']
             logging.debug('dict(aliases): %s', dict(aliases))
             if was in dict(aliases):
-                args = dict(aliases)[was]
+                newargs = dict(aliases)[was]
                 mnemonic = was
             else:
-                mnemonic, args = aliases[0]
-            return assemble_instruction(loop, labels, mnemonic,
-                                        label, args, None)
+                mnemonic, newargs = aliases[0]
+            return assemble_instruction(loop, labels, mnemonic, label,
+                                        rebuildargs(args, expected, newargs),
+                                        None)
         else:
             raise NotImplementedError('No action found for %s' % mnemonic)
     else:

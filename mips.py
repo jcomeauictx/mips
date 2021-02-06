@@ -499,6 +499,16 @@ REFERENCE = {
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
+    'andi': {
+        'fields': [
+            ['ANDI', '001100'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs & immediate',
+    },
     'b': {
         'alias_of': [['beq', '$zero,$zero,offset']],
         'args': 'offset',
@@ -535,7 +545,37 @@ REFERENCE = {
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
         'args': 'rt,rs,immediate',
-        'emulation': 'rt = rs + immediate',
+        'emulation': 'pushbits(32); rt = rs + immediate; popbits()',
+    },
+    'daddiu': {
+        'fields': [
+            ['DADDI', '011001'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'disable(MipsOverflow); rt = rs + immediate'
+                     'enable(MipsOverflow)',
+    },
+    'jalx': {
+        'fields': [
+            ['JALX', '011101'],
+            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'target',
+        'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
+                     'do_next(); isa_mode ^= 1; jump(address)',
+    },
+    'ldr': {
+        'fields': [
+            ['LDR', '011011'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'mips_ldr(rt, base, offset)',
     },
     'li': {
         'alias_of': [['addiu', 'rt,$zero,offset']],

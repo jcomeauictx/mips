@@ -418,6 +418,10 @@ REFERENCE = {
             ['7', 'reserved'],
         ],
     },
+    '.set': {
+        'type': 'assembler directive',
+        'action': 'logging.debug("Nothing to do for %r", mnemonic)',
+    },
     'abs.s': {
         'fields': [
             ['COP1', '010001'],
@@ -466,6 +470,30 @@ REFERENCE = {
         'args': 'rd,rs,rt',
         'emulation': 'rd = rs + rt',
     },
+    'addi': {
+        'fields': [
+            ['ADDI', '001000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs + immediate',
+    },
+    'addiu': {
+        'fields': [
+            ['ADDIU', '001001'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs + immediate',
+    },
+    'b': {
+        'alias_of': [['beq', '$zero,$zero,offset']],
+        'args': 'offset',
+    },
     'beq': {
         'fields': [
             ['BEQ', '000100'],
@@ -476,6 +504,18 @@ REFERENCE = {
         'args': 'rs,rt,offset',
         'emulation': 'if rs == rt: address = (offset << 2) + pc; '
                      'do_next(); jump(address)',
+    },
+    'beqz': {
+        'alias_of': [['beq', 'rs,$zero,offset']],
+        'args': 'rs,offset',
+    },
+    'li': {
+        'alias_of': [['addiu', 'rt,$zero,offset']],
+        'args': 'rt,offset',
+    },
+    'nop': {
+        'alias_of': [['sll', '$zero,$zero,0']],
+        'args': '',
     },
     'sll': {
         'fields': [
@@ -488,22 +528,6 @@ REFERENCE = {
         ],
         'args': 'rd,rt,sa',
         'emulation': 'rd = rt << sa',
-    },
-    'nop': {
-        'alias_of': [['sll', '$zero,$zero,0']],
-        'args': '',
-    },
-    'b': {
-        'alias_of': [['beq', '$zero,$zero,offset']],
-        'args': 'offset',
-    },
-    'beqz': {
-        'alias_of': [['beq', 'rs,$zero,offset']],
-        'args': 'rs,offset'
-    },
-    '.set': {
-        'type': 'assembler directive',
-        'action': 'logging.debug("Nothing to do for %r", mnemonic)',
     },
 }
 

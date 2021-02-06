@@ -12,7 +12,7 @@ SIDEBYSIDE ?= -y  # set to empty string for normal diff
 export
 check: 0.img
 %.img: %.asm mips.py
-	python $(QUIET) mips.py assemble $< > $@tmp
+	-python $(QUIET) mips.py assemble $< > $@tmp
 	if [ -s $@tmp ]; then \
 		mv $@tmp $@; \
 	else \

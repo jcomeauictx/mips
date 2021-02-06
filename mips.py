@@ -387,7 +387,9 @@ REFERENCE = {
     # for disassembly. Ideally we will come up with a format that suits
     # both purposes well, and possibly emulation too.
     # from https://s3-eu-west-1.amazonaws.com/downloads-mips/documents/
-    # MD00086-2B-MIPS32BIS-AFP-05.04.pdf starting page 45
+    # MD00086-2B-MIPS32BIS-AFP-05.04.pdf starting page 45, and
+    # https://www.cs.cmu.edu/afs/cs/academic/class/15740-f97/public/doc/
+    # mips-isa.pdf starting page A-28.
     'fmt': {  # 5-bit field for floating point instructions
         # from http://hades.mech.northwestern.edu/images/a/af/
         # MIPS32_Architecture_Volume_I-A_Introduction.pdf, table 7.20
@@ -471,11 +473,28 @@ REFERENCE = {
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
         'args': 'rs,rt,offset',
-        'emulation': 'if rs == rt: jump(offset << 2 + pc)',
+        'emulation': 'if rs == rt: address = (offset << 2) + pc; '
+                     'do_next(); jump(address)',
+    },
+    'sll': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['sa', 'nnnnn'],
+            ['SLL', '00000'],
+        ],
+        'args': 'rd,rt,sa',
+        'emulation': 'rd = rt << sa',
+    },
+    'nop': {
+        'alias_of': [['sll', '$zero,$zero,0']],
+        'args': '',
     },
     'b': {
         'alias_of': [['beq', '$zero,$zero,offset']],
-        'args': 'offset'
+        'args': 'offset',
     },
     'beqz': {
         'alias_of': [['beq', 'rs,$zero,offset']],
@@ -581,7 +600,7 @@ def assemble(filespec):
     # assembler leaves a hint at the end of a comment when it turns
     # a machine instruction into a macro/pseudoop. we use these to
     # create identical images to original from unedited disassemblies.
-    linepattern += r"(?:#.*?(?:[(]from '(?P<previous>[a-z0-9.]+)'[)])?)?\s*$"
+    linepattern += r"(?:#.*?(?:[(]from '(?P<was>[a-z0-9.]+)'[)])?)?\s*$"
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
     # first pass, just build labels
@@ -596,8 +615,12 @@ def assemble(filespec):
             else:
                 raise ValueError('No match for regex %r to line %r' %
                                  (linepattern, line))
-            instruction = assemble_instruction(loop, labels,
-                                               **match.groupdict())
+            #logging.debug('match: %s', match.groupdict())
+            instruction = assemble_instruction(
+                loop, 
+                labels,
+                **{key: (value or '') for key, value
+                    in match.groupdict().items()})
             if instruction is not None:
                 if loop == 1:
                     outfile.write(struct.pack('<L', instruction))
@@ -712,8 +735,7 @@ def shorten(hashtable):
             pass
     return hashtable
 
-def assemble_instruction(loop, labels, mnemonic='', label='', args='',
-        previous=''):
+def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
@@ -726,7 +748,7 @@ def assemble_instruction(loop, labels, mnemonic='', label='', args='',
                 instruction <<= len(value)
                 if value.isdigit():
                     instruction |= int(value, 2)
-                else:
+                else:  # typically 'nnnnn'
                     arg = args.pop(0)
                     if arg[0].isdigit():
                         instruction |= eval(args[0])
@@ -747,9 +769,9 @@ def assemble_instruction(loop, labels, mnemonic='', label='', args='',
         elif REFERENCE[mnemonic].get('alias_of') is not None:
             aliases = REFERENCE[mnemonic]['alias_of']
             logging.debug('dict(aliases): %s', dict(aliases))
-            if previous in dict(aliases):
-                args = dict(aliases)[previous]
-                mnemonic = previous
+            if was in dict(aliases):
+                args = dict(aliases)[was]
+                mnemonic = was
             else:
                 mnemonic, args = aliases[0]
             return assemble_instruction(loop, labels, mnemonic,

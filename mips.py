@@ -842,8 +842,8 @@ def buildargs(provided, expected):
     '''
     build a dict of expected args to those provided
     '''
-    given = re.compile(r',\s*').split(provided)
-    wanted = expected.split(',')
+    given = re.compile(r'[,()]\s*').split(provided)
+    wanted = re.compile(r'[,()]\s*').split(expected)
     if len(given) != len(wanted):
         raise ValueError('Args expected: %s, provided: %s' % (wanted, given))
     return OrderedDict(zip(wanted, given))
@@ -857,7 +857,7 @@ def rebuildargs(args, pseudoop_args, newargs):
     '$zero,$zero,s209c' must be provided to assemble_instruction,
     which will match the expected 'rs,rt,offset'.
     '''
-    argslist = [re.compile(r',\s*').split(string)
+    argslist = [re.compile(r'[,()]\s*').split(string)
                 for string in args, pseudoop_args, newargs]
     if len(argslist[0]) != len(argslist[1]):
         raise ValueError('Length mismatch: %s' % argslist[:2])

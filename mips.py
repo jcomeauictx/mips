@@ -422,6 +422,14 @@ REFERENCE = {
         'type': 'assembler directive',
         'action': 'logging.debug("Nothing to do for %r", mnemonic)',
     },
+    '.word': {
+        'type': 'assembler directive',
+        'fields': [
+            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'immediate',
+        'emulation': 'raise Exception("0x%x not executable code", immediate)',
+    },
     'abs.s': {
         'fields': [
             ['COP1', '010001'],
@@ -508,6 +516,15 @@ REFERENCE = {
     'beqz': {
         'alias_of': [['beq', 'rs,$zero,offset']],
         'args': 'rs,offset',
+    },
+    'c0': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'immediate',
+        'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
     },
     'li': {
         'alias_of': [['addiu', 'rt,$zero,offset']],

@@ -529,6 +529,10 @@ REFERENCE = {
         'alias_of': [['beq', '$zero,$zero,offset']],
         'args': 'offset',
     },
+    'bal': {
+        'alias_of': [['bgezal', '$zero,offset']],
+        'args': 'offset',
+    },
     'beq': {
         'fields': [
             ['BEQ', '000100'],
@@ -543,6 +547,17 @@ REFERENCE = {
     'beqz': {
         'alias_of': [['beq', 'rs,$zero,offset']],
         'args': 'rs,offset',
+    },
+    'bgezal': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'nnnnn'],
+            ['BGEZAL', '10001'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rs,offset',
+        'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
+                     'do_next(); jump(address)',
     },
     'c0': {
         'fields': [
@@ -644,6 +659,26 @@ REFERENCE = {
         'alias_of': [['addiu', 'rt,$zero,offset']],
         'args': 'rt,offset',
     },
+    'lui': {
+        'fields': [
+            ['LUI', '001111'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,immediate',
+        'emulation': 'rt.value = sign_extend(immediate << 16)',
+    },
+    'lw': {
+        'fields': [
+            ['LW', '100011'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'rt.value = mips_lw(offset, base)',
+    },
     'move': {
         'alias_of': [
             ['addu', 'rd,rs,$zero'],
@@ -656,6 +691,18 @@ REFERENCE = {
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
+    },
+    'or': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['OR', '100101'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value | rt.value',
     },
     'ori': {
         'fields': [
@@ -688,6 +735,18 @@ REFERENCE = {
         ],
         'args': 'rd,rt,sa',
         'emulation': 'rd = rt << sa',
+    },
+    'subu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['SUBU', '100011'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value - rt.value',
     },
     'tge': {
         'fields': [
@@ -841,6 +900,7 @@ def assemble(filespec):
                 elif label is not None:
                     LABELS[label] = offset
                 offset += 4
+                logging.debug('offset now: 0x%x', offset)
 
 def process(loop, index, chunk):
     '''

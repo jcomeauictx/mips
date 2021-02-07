@@ -1,6 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 '''
 Tiny replacement for Heffner/Collake FMK
+
+Using Python3 for native lzma support
 '''
 import sys, os, subprocess, logging
 
@@ -12,7 +14,8 @@ def split(filespec, outdir=None):
     '''
     binwalk = subprocess.check_output(['/usr/bin/binwalk', filespec])
     logging.debug('binwalk output: %s', binwalk)
-    pieces = [lineinfo(line) for line in binwalk.splitlines()[3:] if len(line)]
+    pieces = [lineinfo(line.decode()) for line in binwalk.splitlines()[3:]
+              if len(line)]
     warning = False
     if not pieces:
         raise ValueError('File %s was not recognized by binwalk' % filespec)

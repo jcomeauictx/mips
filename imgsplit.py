@@ -1,10 +1,11 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -OO
 '''
 Tiny replacement for Heffner/Collake FMK
 
 Using Python3 for native lzma support
 '''
 import sys, os, subprocess, logging, lzma, gzip, zlib
+from socket import ntohl
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -32,7 +33,7 @@ def split(filespec, outdir=None):
     logging.debug('outdir: %s, filespec: %s', outdir, filespec)
     dirname = os.path.join(outdir, os.path.basename(filespec) + '.pieces')
     if warning:
-        logging.warn('Output goes to %s', dirname)
+        logging.warning('Output goes to %s', dirname)
     os.mkdir(dirname)  # raises OSError if already exists
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
@@ -40,15 +41,23 @@ def split(filespec, outdir=None):
     logging.debug('pieces: %s', pieces)
     for index in range(len(pieces) - 1):
         offset, description = pieces[index]
-        size = int(pieces[index + 1][0])
+        size = int(pieces[index + 1][0], 16)
         with open(os.path.join(dirname, offset + '.raw'), 'wb') as outfile:
-            outfile.write(filedata[int(offset):size])
+            outfile.write(filedata[int(offset, 16):size])
         with open(os.path.join(dirname, offset + '.info'), 'w') as outfile:
-            outfile.write(description)
+            print(description, file=outfile)
         if description.startswith(tuple(DECOMPRESSOR)):
-            decompressed = decompress(description, filedata[int(offset):size])
+            decompressed = decompress(
+                description, filedata[int(offset, 16):size])
             with open(os.path.join(dirname, offset + '.dat'), 'wb') as outfile:
                 outfile.write(decompressed)
+        elif False and description.startswith('TRX firmware header'):
+            trx_header = description.split()
+            crc32 = trx_header[trx_header.index('CRC32:') + 1].rstrip(',')
+            crc32_check = zlib.crc32(filedata[12:], ntohl(0x2083b83d))
+            if int(crc32, 16) != crc32_check:
+                raise ValueError('Nonmatching CRCs 0x%x != %s' %
+                                 (crc32_check, crc32))
 
 def lineinfo(line):
     '''
@@ -61,7 +70,7 @@ def lineinfo(line):
         raise ValueError('Line %s expected to have 3 elements' % repr(line))
     if int(decimal) != int(hexadecimal, 16):
         raise ValueError('Bad offset: %s != %s' % (decimal, hexadecimal))
-    return decimal, info
+    return hexadecimal, info
 
 def decompress(compression, data):
     '''

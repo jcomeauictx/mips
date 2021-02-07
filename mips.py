@@ -615,6 +615,18 @@ REFERENCE = {
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
+    'jalr': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['', '00000'],
+            ['rd', 'nnnnn'],
+            ['', '00000'],
+            ['JALR', '001001'],
+        ],
+        'args': 'rd,rs',
+        'emulation': 'rd.value = pc + 4; do_next(); jump(rs.value)',
+    },
     'jalx': {
         'fields': [
             ['JALX', '011101'],

@@ -60,7 +60,7 @@ CRCTABLE = [ # CRC polynomial 0xedb88320
 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d]
 
-def crc32(trximage):
+def trx_crc32(trximage):
     with open(trximage, 'rb') as infile:
         trxdata = infile.read()
     magic, size, crc32, flags, version, offsets = get_header(trxdata)
@@ -70,9 +70,15 @@ def crc32(trximage):
     logging.debug('flags: 0x%x', flags)
     logging.debug('version: %d', version)
     logging.debug('offsets: %s', tuple(map(hex, offsets)))
+    # skip magic, size, and crc32
+    return calc_crc32(trxdata[12:size])
+
+def calc_crc32(data):
+    logging.debug('Calculating CRC32 on block of %d (0x%x) bytes',
+                  len(data), len(data))
     crc = 0xffffffff
-    for index in range(12, size - 12):  # skip magic, size, and crc
-        lookup = (crc ^ ord(trxdata[index])) & 0xff
+    for index in range(len(data)):
+        lookup = (crc ^ ord(data[index])) & 0xff
         crc = (crc >> 8) ^ CRCTABLE[lookup]
     return crc ^ 0xffffffff
 
@@ -86,4 +92,4 @@ def get_header(trxdata):
     return magic, size, crc32, flags, version, offsets
 
 if __name__ == '__main__':
-    print('0x%x' % crc32(sys.argv[1]))
+    print('0x%x' % trx_crc32(sys.argv[1]))

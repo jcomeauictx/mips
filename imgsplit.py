@@ -51,13 +51,16 @@ def split(filespec, outdir=None):
                 description, filedata[int(offset, 16):size])
             with open(os.path.join(dirname, offset + '.dat'), 'wb') as outfile:
                 outfile.write(decompressed)
-        elif False and description.startswith('TRX firmware header'):
+        elif description.startswith('TRX firmware header'):
             trx_header = description.split()
             crc32 = trx_header[trx_header.index('CRC32:') + 1].rstrip(',')
-            crc32_check = zlib.crc32(filedata[12:], ntohl(0x2083b83d))
-            if int(crc32, 16) != crc32_check:
+            trxsize = int(trx_header[trx_header.index('size:') + 1].rstrip(','))
+            logging.debug('calculating CRC32 on %d (0x%x) bytes of data',
+                          len(filedata[12:trxsize]), len(filedata[12:trxsize]))
+            crc32_check = zlib.crc32(filedata[12:trxsize])
+            if int(crc32, 16) != crc32_check ^ 0xffffffff:
                 raise ValueError('Nonmatching CRCs 0x%x != %s' %
-                                 (crc32_check, crc32))
+                                 (crc32_check, crc32.lower()))
 
 def lineinfo(line):
     '''

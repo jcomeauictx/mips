@@ -514,6 +514,18 @@ REFERENCE = {
         'args': 'rd,rs,rt',
         'emulation': 'rd.value = rs.value + rt.value',
     },
+    'and': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['AND', '100100'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value & rt.value',
+    },
     'andi': {
         'fields': [
             ['ANDI', '001100'],
@@ -745,7 +757,19 @@ REFERENCE = {
             ['SLL', '00000'],
         ],
         'args': 'rd,rt,sa',
-        'emulation': 'rd = rt << sa',
+        'emulation': 'rd.value = rt.value << sa',
+    },
+    'srl': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['sa', 'nnnnn'],
+            ['SRL', '00010'],
+        ],
+        'args': 'rd,rt,sa',
+        'emulation': 'rd.value = rt.value >> sa',
     },
     'subu': {
         'fields': [

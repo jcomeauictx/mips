@@ -4,9 +4,16 @@ Tiny replacement for Heffner/Collake FMK
 
 Using Python3 for native lzma support
 '''
-import sys, os, subprocess, logging
+import sys, os, subprocess, logging, lzma, gzip, zlib
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
+
+
+DECOMPRESSOR = {
+    'LZMA compressed data': 'lzma',
+    'gzip compressed data': 'gzip',
+    'Zlib compressed data': 'zlib',
+}
 
 def split(filespec, outdir=None):
     '''
@@ -34,10 +41,14 @@ def split(filespec, outdir=None):
     for index in range(len(pieces) - 1):
         offset, description = pieces[index]
         size = int(pieces[index + 1][0])
-        with open(os.path.join(dirname, offset + '.dat'), 'wb') as outfile:
+        with open(os.path.join(dirname, offset + '.raw'), 'wb') as outfile:
             outfile.write(filedata[int(offset):size])
         with open(os.path.join(dirname, offset + '.info'), 'w') as outfile:
             outfile.write(description)
+        if description.startswith(tuple(DECOMPRESSOR)):
+            decompressed = decompress(description, filedata[int(offset):size])
+            with open(os.path.join(dirname, offset + '.dat'), 'wb') as outfile:
+                outfile.write(decompressed)
 
 def lineinfo(line):
     '''
@@ -51,6 +62,14 @@ def lineinfo(line):
     if int(decimal) != int(hexadecimal, 16):
         raise ValueError('Bad offset: %s != %s' % (decimal, hexadecimal))
     return decimal, info
+
+def decompress(compression, data):
+    '''
+    Return decompressed data for specified compression method
+    '''
+    prefix = compression.split(',')[0]
+    module = DECOMPRESSOR[prefix]
+    return eval(module).decompress(data)
 
 if __name__ == '__main__':
     split(*sys.argv[1:])

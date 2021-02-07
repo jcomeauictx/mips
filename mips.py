@@ -11,8 +11,12 @@ MATCH_OBJDUMP_DISASSEMBLE = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLE'))
 # labels will cause objdump -D output and mips disassemble output to differ
 # same if instructions with bad args are turned into .word 0xNNNNNNNN
 USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLE
+INTCTLVS = os.getenv('MIPS_INTCTLVS', '00100')  # IntCtlVS
+VECTORS = os.getenv('VECTORS', 32)  # 64 on 64 bit machines (?)
 logging.warn('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
              AGGRESSIVE_WORDING)
+
+LABELS = {}  # filled in by init()
 
 REGISTER = [
     '$' + registername for registername in [
@@ -567,6 +571,16 @@ REFERENCE = {
         'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
                      'do_next(); isa_mode ^= 1; jump(address)',
     },
+    'ldl': {
+        'fields': [
+            ['LDL', '011010'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'mips_ldl(rt, base, offset)',
+    },
     'ldr': {
         'fields': [
             ['LDR', '011011'],
@@ -584,6 +598,16 @@ REFERENCE = {
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
+    },
+    'ori': {
+        'fields': [
+            ['ORI', '001101'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,rs,immediate',
+        'emulation': 'rt = rs | immediate',
     },
     'sll': {
         'fields': [
@@ -687,11 +711,10 @@ def disassemble(filespec):
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
         # store labels of b, j, etc. instruction targets, to print later
-    labels = {0: 'start'} if USE_LABELS else {}
     for loop in [0, 1]:
         for index in range(0, len(filedata), 4):
             chunk = filedata[index:index + 4]
-            process(loop, index, chunk, labels)
+            process(loop, index, chunk)
 
 def assemble(filespec):
     '''
@@ -707,7 +730,6 @@ def assemble(filespec):
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
     # first pass, just build labels
-    labels = {}
     for loop in range(2):
         offset = 0
         for line in filedata:
@@ -721,23 +743,22 @@ def assemble(filespec):
             #logging.debug('match: %s', match.groupdict())
             instruction = assemble_instruction(
                 loop, 
-                labels,
                 **{key: (value or '') for key, value
                     in match.groupdict().items()})
             if instruction is not None:
                 if loop == 1:
                     outfile.write(struct.pack('<L', instruction))
                 elif label is not None:
-                    labels[label] = offset
+                    LABELS[label] = offset
                 offset += 4
 
-def process(loop, index, chunk, labels):
+def process(loop, index, chunk):
     '''
     build labels dict in first loop, output assembly language in second
     '''
     instruction = struct.unpack('<L', chunk)[0]
     logging.debug('chunk: %r, instruction: 0x%08x', chunk, instruction)
-    label = labels.get(index, '')
+    label = LABELS.get(index, '')
     label += ':' if label else ''
     comment = ''
     opcode = instruction >> 26  # high 6 bits
@@ -787,7 +808,7 @@ def process(loop, index, chunk, labels):
     offset = index + 4 + (immediate << 2)
     # don't use labels until we've ascertained that output is like objdump
     if USE_LABELS:
-        destination = labels.get(offset, '0x%x' % offset)
+        destination = LABELS.get(offset, '0x%x' % offset)
     else:
         destination = '0x%x' % offset
     if mnemonic in CONVERSION:
@@ -799,9 +820,9 @@ def process(loop, index, chunk, labels):
             else:
                 logging.debug('eval %r failed in %s', condition,
                               shorten(locals()))
-    if USE_LABELS and labeled and offset not in labels:
-        labels[offset] = 's%x' % offset
-        #logging.debug('labels: %s', labels)
+    if USE_LABELS and labeled and offset not in LABELS:
+        LABELS[offset] = 's%x' % offset
+        #logging.debug('LABELS: %s', LABELS)
     pattern = PATTERN[style]
     line = pattern % locals()
     if loop == 1:
@@ -824,6 +845,14 @@ def init():
     for listing in REGISTER, ALTREG, FLOATREG:
         hashtable = zip(listing, range(len(listing)))
         REGISTER_REFERENCE.update(hashtable)
+    if USE_LABELS:
+        LABELS[0] = 'start'
+        # see //s3-eu-west-1.amazonaws.com/downloads-mips/I7200/
+        #  I7200+product+launch/MIPS_I7200_Programmers_Guide_01_20_MD01232.pdf
+        # table 44, but note that the 'general equation' below it is wrong.
+        vectorlength = int(INTCTLVS, 2) * 0x20
+        for index in range(VECTORS):
+            LABELS['intvec%d' % index] = (index * vectorlength) + 0x200
 
 def shorten(hashtable):
     '''
@@ -867,7 +896,7 @@ def rebuildargs(args, pseudoop_args, newargs):
             argslist[2][index] = argslist[0][argslist[1].index(arg)]
     return ','.join(argslist[2])
 
-def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
+def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
@@ -885,8 +914,8 @@ def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
                     arg = argsdict[name]
                     if arg[0].isdigit():
                         instruction |= eval(args[0])
-                    elif arg in labels:
-                        instruction |= labels[arg]
+                    elif arg in LABELS:
+                        instruction |= LABELS[arg]
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
@@ -908,7 +937,7 @@ def assemble_instruction(loop, labels, mnemonic='', label='', args='', was=''):
                 mnemonic = was
             else:
                 mnemonic, newargs = aliases[0]
-            return assemble_instruction(loop, labels, mnemonic, label,
+            return assemble_instruction(loop, mnemonic, label,
                                         rebuildargs(args, expected, newargs),
                                         None)
         else:

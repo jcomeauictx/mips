@@ -624,7 +624,7 @@ REFERENCE = {
             ['', '00000'],
             ['JALR', '001001'],
         ],
-        'args': 'rd,rs',
+        'args': 'rd="$ra",rs',
         'emulation': 'rd.value = pc + 4; do_next(); jump(rs.value)',
     },
     'jalx': {
@@ -1040,6 +1040,14 @@ def buildargs(provided, expected):
     '''
     given = re.compile(r'[,()]\s*').split(provided)
     wanted = re.compile(r'[,()]\s*').split(expected)
+    # insert any default args where needed
+    # this only works left-to-right, if a different order is needed,
+    # priority will need to be specified and used.
+    while len(given) < len(wanted):
+        for index in range(len(wanted)):
+            item = wanted[index].split('=')
+            if len(item) == 2:
+                given.insert(index, item[1])
     if len(given) != len(wanted):
         raise ValueError('Args expected: %s, provided: %s' % (wanted, given))
     return OrderedDict(zip(wanted, given))

@@ -541,6 +541,33 @@ REFERENCE = {
         'args': 'immediate',
         'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
     },
+    'c1': {
+        'fields': [
+            ['COP1', '010001'],
+            ['CO', '1'],
+            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'immediate',
+        'emulation': 'logging.debug("ignoring c1 0x%x", immediate)',
+    },
+    'c2': {
+        'fields': [
+            ['COP2', '010010'],
+            ['CO', '1'],
+            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'immediate',
+        'emulation': 'logging.debug("ignoring c2 0x%x", immediate)',
+    },
+    'c3': {
+        'fields': [
+            ['COP3', '010011'],
+            ['CO', '1'],
+            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'immediate',
+        'emulation': 'logging.debug("ignoring c3 0x%x", immediate)',
+    },
     'daddi': {
         'fields': [
             ['DADDI', '011000'],
@@ -620,6 +647,28 @@ REFERENCE = {
         ],
         'args': 'rd,rt,sa',
         'emulation': 'rd = rt << sa',
+    },
+    'tge': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TGE', '110000'],
+        ],
+        'args': 'rs,rt,code',
+        'emulation': 'if rs > rt: mips_trap()',
+    },
+    'tltu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TLTU', '110011'],
+        ],
+        'args': 'rs,rt,code',
+        'emulation': 'if mips_unsigned(rs) < mips_unsigned(rt): mips_trap()',
     },
     'xori': {
         'fields': [

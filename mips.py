@@ -503,6 +503,18 @@ REFERENCE = {
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
+    'addu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['ADDU', '100001'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value + rt.value',
+    },
     'andi': {
         'fields': [
             ['ANDI', '001100'],
@@ -598,6 +610,16 @@ REFERENCE = {
         'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
                      'do_next(); isa_mode ^= 1; jump(address)',
     },
+    'lb': {
+        'fields': [
+            ['LB', '100000'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
+    },
     'ldl': {
         'fields': [
             ['LDL', '011010'],
@@ -622,6 +644,15 @@ REFERENCE = {
         'alias_of': [['addiu', 'rt,$zero,offset']],
         'args': 'rt,offset',
     },
+    'move': {
+        'alias_of': [
+            ['addu', 'rd,rs,$zero'],
+            ['daddu', 'rd,rs,$zero'],
+            ['or', 'rd,rs,$zero'],
+        ],
+        'args': 'rd,rs',
+        'emulation': 'rd.value = rs.value',
+    },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
@@ -635,6 +666,16 @@ REFERENCE = {
         ],
         'args': 'rt,rs,immediate',
         'emulation': 'rt = rs | immediate',
+    },
+    'sd': {
+        'fields': [
+            ['SD', '111111'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'mips_store(offset + contents(base), contents(rt))',
     },
     'sll': {
         'fields': [

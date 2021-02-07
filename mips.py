@@ -7,10 +7,10 @@ from collections import OrderedDict
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
-MATCH_OBJDUMP_DISASSEMBLE = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLE'))
+MATCH_OBJDUMP_DISASSEMBLY = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLY'))
 # labels will cause objdump -D output and mips disassemble output to differ
 # same if instructions with bad args are turned into .word 0xNNNNNNNN
-USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLE
+USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLY
 INTCTLVS = os.getenv('MIPS_INTCTLVS', '00100')  # IntCtlVS
 VECTORS = os.getenv('VECTORS', 32)  # 64 on 64 bit machines (?)
 logging.warn('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
@@ -30,7 +30,7 @@ REGISTER = [
         'k0', 'k1',
         'gp',  # global area pointer, base of global data segment
         'sp',  # stack pointer
-        's8',  # frame pointer (but fp not output by objdump)
+        'fp',  # frame pointer
         'ra',  # return address
     ]
 ]
@@ -229,9 +229,8 @@ SPECIAL = [
     ['srav', 'shiftv', None, 'amount == 0', None, 7],
     ['jr', 'jumpr', True, 'target == dest == amount == 0', True, 8],
     ['jalr', 'jumpr2', True, 'target == amount == 0', True, 9],
-    # objdump disassembly always returns just the word for movz and movn
-    #['movz', 'arithlog', None, 'amount == 0', None, 10],
-    #['movn', 'arithlog', None, 'amount == 0', None, 11],
+    ['movz', 'arithlog', None, 'amount == 0', None, 10],
+    ['movn', 'arithlog', None, 'amount == 0', None, 11],
     ['syscall', 'syscall', False, 'True', False, 12],
     ['break', 'simple', False, 'True', False, 13],
     ['sync', 'simple', False, 'source == target == dest == 0', False, 15],
@@ -818,8 +817,7 @@ CONVERSION = {
     'ori': [['source == 0', ['li', 'loadx', False, 'True', True]]],  # or dli
     'c0': [
         ['longimmediate >> 6 == 0 and function == 0b011111',
-         #['deret', 'simple', False, 'True', None]],  # objdump has no deret
-         ['c0', 'coprocessor', False, 'True', False]],
+         ['deret', 'simple', False, 'True', None]],
         ['longimmediate == 0x2',
          ['tlbwi', 'simple', False, 'True', None]],
         ['longimmediate == 0x6',
@@ -840,11 +838,8 @@ CONVERSION = {
     'sub': [['source == 0', ['neg', 'arithlogz', None, 'True', None]]],
     'dmult': [['source == 0', ['dmult', 'arithlogz', None, 'True', None]]],
     'dmultu': [['source == 0', ['dmultu', 'arithlogz', None, 'True', None]]],
-    # objdump disassembly returns .word for sel != 0
-    #'mtc0': [['sel != 0', ['mtc0', 'coproc_move3', None, 'True', None]]],
-    #'mfc0': [['sel != 0', ['mfc0', 'coproc_move3', None, 'True', None]]],
-    'mtc0': [['sel != 0', WORD]],
-    'mfc0': [['sel != 0', WORD]],
+    'mtc0': [['sel != 0', ['mtc0', 'coproc_move3', None, 'True', None]]],
+    'mfc0': [['sel != 0', ['mfc0', 'coproc_move3', None, 'True', None]]],
     'jalr': [['dest == 31', ['jalr', 'jumpr', True, 'True', True]]],
     # objdump sync becomes .word if sync type set in amount field
     'sync': [['amount != 0', WORD]],
@@ -1003,6 +998,16 @@ def init():
         vectorlength = int(INTCTLVS, 2) * 0x20
         for index in range(VECTORS):
             LABELS['intvec%d' % index] = (index * vectorlength) + 0x200
+    if MATCH_OBJDUMP_DISASSEMBLY:
+        # objdump disassembly returns .word for sel != 0
+        CONVERSION['mtc0'] = [['sel != 0', WORD]]
+        CONVERSION['mfc0'] = [['sel != 0', WORD]]
+        # objdump disassembly always returns just the .word for movz and movn
+        CONVERSION['movz'] = [['True', WORD]]
+        CONVERSION['movn'] = [['True', WORD]]
+        # objdump has no 'deret'
+        CONVERSION['c0'][0][1] = ['c0', 'coprocessor', False, 'True', False]
+        REGISTER[REGISTER.index('$fp')] = '$s8'
 
 def shorten(hashtable):
     '''

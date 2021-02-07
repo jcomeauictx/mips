@@ -18,30 +18,30 @@ DECOMPRESSOR = {
 
 def split(filespec, outdir=None):
     '''
-    Run binwalk on the file and extract the various pieces
+    Run binwalk on the file and extract the various parts
     '''
     binwalk = subprocess.check_output(['/usr/bin/binwalk', filespec])
     logging.debug('binwalk output: %s', binwalk)
-    pieces = [lineinfo(line.decode()) for line in binwalk.splitlines()[3:]
+    parts = [lineinfo(line.decode()) for line in binwalk.splitlines()[3:]
               if len(line)]
     warning = False
-    if not pieces:
+    if not parts:
         raise ValueError('File %s was not recognized by binwalk' % filespec)
     if outdir is None:
         outdir = os.path.dirname(filespec)
         warning = True  # may be unexpected, so let user know
     logging.debug('outdir: %s, filespec: %s', outdir, filespec)
-    dirname = os.path.join(outdir, os.path.basename(filespec) + '.pieces')
+    dirname = os.path.join(outdir, os.path.basename(filespec) + '.parts')
     if warning:
         logging.warning('Output goes to %s', dirname)
     os.mkdir(dirname)  # raises OSError if already exists
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
-    pieces.append([str(len(filedata))])
-    logging.debug('pieces: %s', pieces)
-    for index in range(len(pieces) - 1):
-        offset, description = pieces[index]
-        size = int(pieces[index + 1][0], 16)
+    parts.append([str(len(filedata))])
+    logging.debug('parts: %s', parts)
+    for index in range(len(parts) - 1):
+        offset, description = parts[index]
+        size = int(parts[index + 1][0], 16)
         with open(os.path.join(dirname, offset + '.raw'), 'wb') as outfile:
             outfile.write(filedata[int(offset, 16):size])
         with open(os.path.join(dirname, offset + '.info'), 'w') as outfile:

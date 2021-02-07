@@ -52,5 +52,7 @@ debug:
 	diff $< $@
 edit: mips.py Makefile
 	$(EDITOR) $+
+%.dat.parts: imgsplit.py %.dat
+	./$+
 .FORCE:
 .PRECIOUS: %.asm

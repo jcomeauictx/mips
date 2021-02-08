@@ -1120,8 +1120,19 @@ REFERENCE = {
             ['code', 'nnnnnnnnnn'],
             ['TGE', '110000'],
         ],
-        'args': ['rs,rt,code'],
-        'emulation': 'if rs > rt: mips_trap()',
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
+        'emulation': 'if mips_signed(rs) > mips_signed(rt): mips_trap(code)',
+    },
+    'tgeu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TGEU', '110001'],
+        ],
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
+        'emulation': 'if rs > rt: mips_trap(code)',
     },
     'tlbwi': {
         'fields': [
@@ -1443,7 +1454,10 @@ def buildargs(provided, expected):
     # priority will need to be specified and used.
     while len(given) < len(desired):
         index += 1
-        desired = re.compile(ARGSEP).split(expected[index][0])
+        try:
+            desired = re.compile(ARGSEP).split(expected[index][0])
+        except IndexError:
+            raise(IndexError('No index [%d][0] in %s' % (index, expected)))
         logging.debug('buildargs calling rebuildargs: %s', expected[index])
         provided = rebuildargs(provided, *expected[index])
         given = re.compile(ARGSEP).split(provided)

@@ -595,6 +595,16 @@ REFERENCE = {
         'args': ['rs,offset'],
         'emulation': 'if rs.value() >= 0: mips_jump(offset, likely=True)',
     },
+    'bgezl': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['BGEZL', '00011'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs >= 0: mips_jump(offset, likely=True)',
+    },
     'bgtz': {
         'fields': [
             ['BGTZ', '000111'],
@@ -605,6 +615,16 @@ REFERENCE = {
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) > 0: '
                      'do_next(); mips_jump(offset)',
+    },
+    'bgtzl': {
+        'fields': [
+            ['BGTZL', '010111'],
+            ['rs', 'bbbbb'],
+            ['0', '00000'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs > 0: mips_jump(offset, likely=True)'
     },
     'blez': {
         'fields': [
@@ -617,6 +637,16 @@ REFERENCE = {
         'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
                      'do_next(); mips_jump(offset)',
     },
+    'blezl': {
+        'fields': [
+            ['BLEZ', '000110'],
+            ['rs', 'bbbbb'],
+            ['0', '00000'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs < 0: mips_jump(offset)',
+    },
     'bltz': {
         'fields': [
             ['REGIMM', '000001'],
@@ -627,6 +657,16 @@ REFERENCE = {
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
                      'do_next(); mips_jump(offset)',
+    },
+    'bltzl': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['BLTZ', '00010'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs < 0: mips_jump(offset, likely=True)',
     },
     'bne': {
         'fields': [
@@ -848,6 +888,16 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
     },
+    'lh': {
+        'fields': [
+            ['LB', '100001'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_load(rt, base, offset, "h")',
+    },
     'll': {
         'fields': [
             ['LL', '110000'],
@@ -931,6 +981,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base)',
+    },
+    'lwl': {
+        'fields': [
+            ['LWL', '100010'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_lw(offset, base, "left")',
     },
     'mfc0': {
         'fields': [
@@ -1031,6 +1091,17 @@ REFERENCE = {
         'args': ['rs'],
         'emulation': 'mips_mtlo(rs.value)',
     },
+    'mult': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['0', '0000000000'],
+            ['MULT', '011000'],
+        ],
+        'args': ['rs, rt'],
+        'emulation': 'mips_mult(rs.value, rt.value)',
+    },
     'multu': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1044,6 +1115,10 @@ REFERENCE = {
     },
     'neg': {
         'alias_of': [['sub', 'rd,$zero,rt']],
+        'args': 'rd,rt',
+    },
+    'negu': {
+        'alias_of': [['subu', 'rd,$zero,rt']],
         'args': 'rd,rt',
     },
     'nop': {
@@ -1103,6 +1178,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset + contents(base), contents(rt))',
+    },
+    'sh': {
+        'fields': [
+            ['SH', '101001'],
+            ['base', 'bbbbb'],
+            ['rt','bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(rt, offset, base, "h")',
     },
     'sll': {
         'fields': [
@@ -1352,6 +1437,16 @@ REFERENCE = {
         ],
         'args': ['rs,rt'],
         'emulation': 'if rs.value != rt.value: mips_trap(code)',
+    },
+    'wait': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['code', 'bbbbbbbbbbbbbbbbbbb'],
+            ['WAIT', '100000'],
+        ],
+        'args': ['code'],
+        'emulation': 'mips_wait(code)',
     },
     'xor': {
         'fields': [

@@ -430,7 +430,7 @@ REFERENCE = {
     '.word': {
         'type': 'assembler directive',
         'fields': [
-            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
         'emulation': 'raise Exception("0x%x not executable code", immediate)',
@@ -440,8 +440,8 @@ REFERENCE = {
             ['COP1', '010001'],
             ['fmt', '10000'],  # fmt for single is 16, 0x10
             ['0', '00000'],
-            ['fs', 'nnnnn'],
-            ['fd', 'nnnnn'],
+            ['fs', 'bbbbb'],
+            ['fd', 'bbbbb'],
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
@@ -452,8 +452,8 @@ REFERENCE = {
             ['COP1', '010001'],
             ['fmt', '10001'],  # fmt for double is 17, 0x11
             ['0', '00000'],
-            ['fs', 'nnnnn'],
-            ['fd', 'nnnnn'],
+            ['fs', 'bbbbb'],
+            ['fd', 'bbbbb'],
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
@@ -464,8 +464,8 @@ REFERENCE = {
             ['COP1', '10001'],
             ['fmt', '10110'],  # fmt for paired-single is 22, 0x16
             ['0', '00000'],
-            ['fs', 'nnnnn'],
-            ['fd', 'nnnnn'],
+            ['fs', 'bbbbb'],
+            ['fd', 'bbbbb'],
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
@@ -474,9 +474,9 @@ REFERENCE = {
     'add': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['ADD', '100000'],
         ],
@@ -486,9 +486,9 @@ REFERENCE = {
     'addi': {
         'fields': [
             ['ADDI', '001000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs + immediate',
@@ -496,9 +496,9 @@ REFERENCE = {
     'addiu': {
         'fields': [
             ['ADDIU', '001001'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
@@ -507,9 +507,9 @@ REFERENCE = {
     'addu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['ADDU', '100001'],
         ],
@@ -519,9 +519,9 @@ REFERENCE = {
     'and': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['AND', '100100'],
         ],
@@ -531,9 +531,9 @@ REFERENCE = {
     'andi': {
         'fields': [
             ['ANDI', '001100'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs & immediate',
@@ -549,9 +549,9 @@ REFERENCE = {
     'beq': {
         'fields': [
             ['BEQ', '000100'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
         'emulation': 'if rs == rt: address = (offset << 2) + pc; '
@@ -560,9 +560,9 @@ REFERENCE = {
     'beql': {
         'fields': [
             ['BEQ', '010100'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
         'emulation': 'if rs == rt: mips_branch(offset, likely=True)'
@@ -574,9 +574,9 @@ REFERENCE = {
     'bgezal': {
         'fields': [
             ['REGIMM', '000001'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['BGEZAL', '10001'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
         'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
@@ -585,9 +585,9 @@ REFERENCE = {
     'bgtz': {
         'fields': [
             ['BGTZ', '000111'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['0', '00000'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) > 0: '
@@ -596,9 +596,9 @@ REFERENCE = {
     'blez': {
         'fields': [
             ['BLEZ', '000110'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['0', '00000'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
@@ -607,9 +607,9 @@ REFERENCE = {
     'bltz': {
         'fields': [
             ['REGIMM', '000001'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['BLTZ', '00000'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
@@ -618,9 +618,9 @@ REFERENCE = {
     'bne': {
         'fields': [
             ['BNE', '000101'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
         'emulation': 'if rs.value != rt.value: address = (offset << 2) + pc; '
@@ -634,7 +634,7 @@ REFERENCE = {
         'fields': [
             ['COP0', '010000'],
             ['CO', '1'],
-            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
@@ -643,7 +643,7 @@ REFERENCE = {
         'fields': [
             ['COP1', '010001'],
             ['CO', '1'],
-            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c1 0x%x", immediate)',
@@ -652,7 +652,7 @@ REFERENCE = {
         'fields': [
             ['COP2', '010010'],
             ['CO', '1'],
-            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c2 0x%x", immediate)',
@@ -661,7 +661,7 @@ REFERENCE = {
         'fields': [
             ['COP3', '010011'],
             ['CO', '1'],
-            ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c3 0x%x", immediate)',
@@ -669,9 +669,9 @@ REFERENCE = {
     'cache': {
         'fields': [
             ['CACHE', '101111'],
-            ['base', 'nnnnn'],
-            ['op', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['op', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['op,offset(base)'],
         'emulation': 'mips_cache(op, base, offset)',
@@ -679,9 +679,9 @@ REFERENCE = {
     'daddi': {
         'fields': [
             ['DADDI', '011000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'pushbits(32); rt = rs + immediate; popbits()',
@@ -689,9 +689,9 @@ REFERENCE = {
     'daddiu': {
         'fields': [
             ['DADDI', '011001'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
@@ -710,8 +710,8 @@ REFERENCE = {
     'div': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
             ['0', '0000000000'],
             ['DIV', '011010'],
         ],
@@ -722,9 +722,9 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
-            ['sa', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
             ['DSLL', '111000'],
         ],
         'args': ['rd,rt,sa'],
@@ -733,9 +733,9 @@ REFERENCE = {
     'dsub': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['DSUB', '101110'],
         ],
@@ -755,7 +755,7 @@ REFERENCE = {
     'j': {
         'fields': [
             ['J', '000010'],
-            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
         'emulation': 'mips_jump(target)',
@@ -763,7 +763,7 @@ REFERENCE = {
     'jal': {
         'fields': [
             ['JAL', '000011'],
-            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
         'emulation': 'mips_jump(target)',
@@ -771,9 +771,9 @@ REFERENCE = {
     'jalr': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['', '00000'],
-            ['rd', 'nnnnn'],
+            ['rd', 'bbbbb'],
             ['', '00000'],
             ['JALR', '001001'],
         ],
@@ -783,7 +783,7 @@ REFERENCE = {
     'jalx': {
         'fields': [
             ['JALX', '011101'],
-            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
+            ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
         'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
@@ -792,9 +792,9 @@ REFERENCE = {
     'lb': {
         'fields': [
             ['LB', '100000'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
@@ -802,9 +802,9 @@ REFERENCE = {
     'll': {
         'fields': [
             ['LL', '110000'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_load(base, offset)',
@@ -812,7 +812,7 @@ REFERENCE = {
     'jr': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['', '000000000000000'],
             ['JR', '001000'],
         ],
@@ -822,9 +822,9 @@ REFERENCE = {
     'lbu': {
         'fields': [
             ['LBU', '100100'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_load(base, offset, "b", signed=False)',
@@ -832,9 +832,9 @@ REFERENCE = {
     'ldl': {
         'fields': [
             ['LDL', '011010'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_ldl(rt, base, offset)',
@@ -842,9 +842,9 @@ REFERENCE = {
     'ldr': {
         'fields': [
             ['LDR', '011011'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_ldr(rt, base, offset)',
@@ -857,8 +857,8 @@ REFERENCE = {
         'fields': [
             ['LUI', '001111'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,immediate'],
         'emulation': 'rt.value = sign_extend(immediate << 16)',
@@ -866,9 +866,9 @@ REFERENCE = {
     'lw': {
         'fields': [
             ['LW', '100011'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base)',
@@ -877,10 +877,10 @@ REFERENCE = {
         'fields': [
             ['COP0', '010000'],
             ['MF', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000000'],
-            ['sel', 'nnn'],
+            ['sel', 'bbb'],
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
         'emulation': 'rt.value = mips_mfc(0, rd, sel)',
@@ -889,7 +889,7 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '0000000000'],
-            ['rd', 'nnnnn'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['MFHI', '010000'],
         ],
@@ -900,7 +900,7 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '0000000000'],
-            ['rd', 'nnnnn'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['MFLO', '010010'],
         ],
@@ -919,9 +919,9 @@ REFERENCE = {
     'movz': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['MOVZ', '001010'],
         ],
@@ -932,10 +932,10 @@ REFERENCE = {
         'fields': [
             ['COP0', '010000'],
             ['MT', '00100'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000000'],
-            ['sel', 'nnn'],
+            ['sel', 'bbb'],
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
         'emulation': 'mips_mtc(0, rd, sel, rt.value)',
@@ -943,7 +943,7 @@ REFERENCE = {
     'mthi': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['0', '000000000000000'],
             ['MTHI', '010001'],
         ],
@@ -953,7 +953,7 @@ REFERENCE = {
     'mtlo': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
+            ['rs', 'bbbbb'],
             ['0', '000000000000000'],
             ['MTLO', '010011'],
         ],
@@ -963,8 +963,8 @@ REFERENCE = {
     'multu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
             ['0', '0000000000'],
             ['MULTU', '011001'],
         ],
@@ -982,9 +982,9 @@ REFERENCE = {
     'nor': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['NOR', '100111'],
         ],
@@ -994,9 +994,9 @@ REFERENCE = {
     'or': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['OR', '100101'],
         ],
@@ -1006,9 +1006,9 @@ REFERENCE = {
     'ori': {
         'fields': [
             ['ORI', '001101'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs | immediate',
@@ -1016,9 +1016,9 @@ REFERENCE = {
     'sd': {
         'fields': [
             ['SD', '111111'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset + contents(base), contents(rt))',
@@ -1027,9 +1027,9 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
-            ['sa', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
             ['SLL', '000000'],
         ],
         'args': ['rd,rt,sa'],
@@ -1039,9 +1039,9 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
-            ['sa', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
             ['SLLV', '000100'],
         ],
         'args': ['rd,rt,sa'],
@@ -1050,9 +1050,9 @@ REFERENCE = {
     'slt': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['SLT', '101010'],
         ],
@@ -1063,9 +1063,9 @@ REFERENCE = {
     'slti': {
         'fields': [
             ['SLTI', '001010'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt.value = mips_signed(rs.value, rs.size) < '
@@ -1074,9 +1074,9 @@ REFERENCE = {
     'sltiu': {
         'fields': [
             ['SLTIU', '001011'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt.value = rs.value < immediate',
@@ -1084,9 +1084,9 @@ REFERENCE = {
     'sltu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['SLTU', '101011'],
         ],
@@ -1097,9 +1097,9 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
-            ['sa', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
             ['SRA', '000011'],
         ],
         'args': ['rd,rt,sa'],
@@ -1109,9 +1109,9 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '00000'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
-            ['sa', 'nnnnn'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
             ['SRL', '000010'],
         ],
         'args': ['rd,rt,sa'],
@@ -1120,9 +1120,9 @@ REFERENCE = {
     'sub': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['SUB', '100010'],
         ],
@@ -1132,9 +1132,9 @@ REFERENCE = {
     'subu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['rd', 'nnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
             ['0', '00000'],
             ['SUBU', '100011'],
         ],
@@ -1144,9 +1144,9 @@ REFERENCE = {
     'sw': {
         'fields': [
             ['SW', '101011'],
-            ['base', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['offset', 'nnnnnnnnnnnnnnnn'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_sw(offset, base, rt.value)',
@@ -1155,7 +1155,7 @@ REFERENCE = {
         'fields': [
             ['SPECIAL', '000000'],
             ['0', '000000000000000'],
-            ['stype', 'nnnnn'],
+            ['stype', 'bbbbb'],
             ['SYNC', '001111'],
         ],
         'args': ['stype', ['', '0']],
@@ -1163,7 +1163,7 @@ REFERENCE = {
     'syscall': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['code', 'nnnnnnnnnnnnnnnnnnnn'],
+            ['code', 'bbbbbbbbbbbbbbbbbbbb'],
             ['SYSCALL', '001100'],
         ],
         'args': ['code', ['', '0']],
@@ -1172,9 +1172,9 @@ REFERENCE = {
     'teq': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TEQ', '110100'],
         ],
         'args': ['rs,rt'],
@@ -1183,9 +1183,9 @@ REFERENCE = {
     'tge': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TGE', '110000'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
@@ -1194,9 +1194,9 @@ REFERENCE = {
     'tgeu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TGEU', '110001'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
@@ -1225,9 +1225,9 @@ REFERENCE = {
     'tlt': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TLT', '110010'],
         ],
         'args': ['rs,rt,code'],
@@ -1237,9 +1237,9 @@ REFERENCE = {
     'tltu': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TLTU', '110011'],
         ],
         'args': ['rs,rt,code'],
@@ -1248,9 +1248,9 @@ REFERENCE = {
     'tne': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['code', 'nnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['code', 'bbbbbbbbbb'],
             ['TNE', '110110'],
         ],
         'args': ['rs,rt'],
@@ -1259,9 +1259,9 @@ REFERENCE = {
     'xori': {
         'fields': [
             ['XORI', '001110'],
-            ['rs', 'nnnnn'],
-            ['rt', 'nnnnn'],
-            ['immediate', 'nnnnnnnnnnnnnnnn'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs ^ immediate',
@@ -1570,7 +1570,7 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                 instruction <<= len(value)
                 if value.isdigit():
                     instruction |= int(value, 2)
-                else:  # typically 'nnnnn'
+                else:  # typically 'bbbbb'
                     try:
                         arg = argsdict[name]
                     except KeyError:

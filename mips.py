@@ -644,6 +644,24 @@ REFERENCE = {
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
+    'deret': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['0', '0000000000000000000'],
+            ['DERET', '011111'],
+        ],
+        'args': [''],
+        'emulation': 'mips_deret()',
+    },
+    'j': {
+        'fields': [
+            ['J', '000010'],
+            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['target'],
+        'emulation': 'mips_jump(target)',
+    },
     'jalr': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -879,6 +897,15 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_sw(offset, base, rt.value)',
+    },
+    'sync': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '000000000000000'],
+            ['stype', 'nnnnn'],
+            ['SYNC', '001111'],
+        ],
+        'args': ['stype', ['', '0']],
     },
     'syscall': {
         'fields': [
@@ -1227,7 +1254,7 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                         arg = argsdict[name]
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
-                    if arg[0].isdigit():
+                    if arg[:1].isdigit():
                         instruction |= eval(args[0])
                     elif arg in LABELS:
                         instruction |= LABELS[arg]

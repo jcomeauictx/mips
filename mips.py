@@ -122,6 +122,8 @@ PATTERN = {
     'cvt': LABEL + MNEMONIC + ARGS['cvt'] + COMMENT,
 }
 
+ARGSEP = r'[,()]\s*'
+
 INSTRUCTION = [
     # mnemonic, print pattern, save branch label, condition, signed, index
     # 'condition' is an expression to be `eval`d, and if false, '.word'
@@ -430,7 +432,7 @@ REFERENCE = {
         'fields': [
             ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'immediate',
+        'args': ['immediate'],
         'emulation': 'raise Exception("0x%x not executable code", immediate)',
     },
     'abs.s': {
@@ -442,7 +444,7 @@ REFERENCE = {
             ['fd', 'nnnnn'],
             ['ABS', '000101'],
         ],
-        'args': 'fd,fs',
+        'args': ['fd,fs'],
         'emulation': 'fd = abs(fs)'
     },
     'abs.d': {
@@ -454,7 +456,7 @@ REFERENCE = {
             ['fd', 'nnnnn'],
             ['ABS', '000101'],
         ],
-        'args': 'fd,fs',
+        'args': ['fd,fs'],
         'emulation': 'fd = abs(fs)'
     },
     'abs.ps': {
@@ -466,7 +468,7 @@ REFERENCE = {
             ['fd', 'nnnnn'],
             ['ABS', '000101'],
         ],
-        'args': 'fd,fs',
+        'args': ['fd,fs'],
         'emulation': 'fd = abs(fs)'
     },
     'add': {
@@ -478,7 +480,7 @@ REFERENCE = {
             ['0', '00000'],
             ['ADD', '100000'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd = rs + rt',
     },
     'addi': {
@@ -488,7 +490,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs + immediate',
     },
     'addiu': {
@@ -498,7 +500,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
@@ -511,7 +513,7 @@ REFERENCE = {
             ['0', '00000'],
             ['ADDU', '100001'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value + rt.value',
     },
     'and': {
@@ -523,7 +525,7 @@ REFERENCE = {
             ['0', '00000'],
             ['AND', '100100'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value & rt.value',
     },
     'andi': {
@@ -533,7 +535,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs & immediate',
     },
     'b': {
@@ -551,7 +553,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rs,rt,offset',
+        'args': ['rs,rt,offset'],
         'emulation': 'if rs == rt: address = (offset << 2) + pc; '
                      'do_next(); jump(address)',
     },
@@ -566,7 +568,7 @@ REFERENCE = {
             ['BGEZAL', '10001'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rs,offset',
+        'args': ['rs,offset'],
         'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
                      'do_next(); mips_jump(address)',
     },
@@ -577,7 +579,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rs,rt,offset',
+        'args': ['rs,rt,offset'],
         'emulation': 'if rs.value != rt.value: address = (offset << 2) + pc; '
                      'do_next(); mips_jump(address)',
     },
@@ -591,7 +593,7 @@ REFERENCE = {
             ['CO', '1'],
             ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'immediate',
+        'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
     },
     'c1': {
@@ -600,7 +602,7 @@ REFERENCE = {
             ['CO', '1'],
             ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'immediate',
+        'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c1 0x%x", immediate)',
     },
     'c2': {
@@ -609,7 +611,7 @@ REFERENCE = {
             ['CO', '1'],
             ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'immediate',
+        'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c2 0x%x", immediate)',
     },
     'c3': {
@@ -618,7 +620,7 @@ REFERENCE = {
             ['CO', '1'],
             ['immediate', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'immediate',
+        'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c3 0x%x", immediate)',
     },
     'daddi': {
@@ -628,7 +630,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'pushbits(32); rt = rs + immediate; popbits()',
     },
     'daddiu': {
@@ -638,7 +640,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'disable(MipsOverflow); rt = rs + immediate'
                      'enable(MipsOverflow)',
     },
@@ -651,7 +653,7 @@ REFERENCE = {
             ['', '00000'],
             ['JALR', '001001'],
         ],
-        'args': 'rd="$ra",rs',
+        'args': ['rd,rs', ['rs', '$ra,rs']],
         'emulation': 'rd.value = pc + 4; do_next(); jump(rs.value)',
     },
     'jalx': {
@@ -659,7 +661,7 @@ REFERENCE = {
             ['JALX', '011101'],
             ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
-        'args': 'target',
+        'args': ['target'],
         'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
                      'do_next(); isa_mode ^= 1; jump(address)',
     },
@@ -670,7 +672,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
     },
     'jr': {
@@ -680,7 +682,7 @@ REFERENCE = {
             ['', '000000000000000'],
             ['JR', '001000'],
         ],
-        'args': 'rs',
+        'args': ['rs'],
         'emulation': 'mips_jump(rs.value)',
     },
     'ldl': {
@@ -690,7 +692,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'mips_ldl(rt, base, offset)',
     },
     'ldr': {
@@ -700,7 +702,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'mips_ldr(rt, base, offset)',
     },
     'li': {
@@ -714,7 +716,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,immediate',
+        'args': ['rt,immediate'],
         'emulation': 'rt.value = sign_extend(immediate << 16)',
     },
     'lw': {
@@ -724,7 +726,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base)',
     },
     'mfc0': {
@@ -736,7 +738,7 @@ REFERENCE = {
             ['0', '00000000'],
             ['sel', 'nnn'],
         ],
-        'args': 'rt,rd,sel=0',
+        'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
         'emulation': 'rt.value = mips_mfc(0, rd, sel)',
     },
     'move': {
@@ -761,7 +763,7 @@ REFERENCE = {
             ['0', '00000'],
             ['OR', '100101'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value | rt.value',
     },
     'ori': {
@@ -771,7 +773,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs | immediate',
     },
     'sd': {
@@ -781,7 +783,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset + contents(base), contents(rt))',
     },
     'sll': {
@@ -793,7 +795,7 @@ REFERENCE = {
             ['sa', 'nnnnn'],
             ['SLL', '00000'],
         ],
-        'args': 'rd,rt,sa',
+        'args': ['rd,rt,sa'],
         'emulation': 'rd.value = rt.value << sa',
     },
     'slt': {
@@ -805,7 +807,7 @@ REFERENCE = {
             ['0', '00000'],
             ['SLT', '101010'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value < rt.value',
     },
     'srl': {
@@ -817,7 +819,7 @@ REFERENCE = {
             ['sa', 'nnnnn'],
             ['SRL', '00010'],
         ],
-        'args': 'rd,rt,sa',
+        'args': ['rd,rt,sa'],
         'emulation': 'rd.value = rt.value >> sa',
     },
     'sub': {
@@ -829,7 +831,7 @@ REFERENCE = {
             ['0', '00000'],
             ['SUB', '100010'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value - rt.value',
     },
     'subu': {
@@ -841,7 +843,7 @@ REFERENCE = {
             ['0', '00000'],
             ['SUBU', '100011'],
         ],
-        'args': 'rd,rs,rt',
+        'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value - rt.value',
     },
     'sw': {
@@ -851,8 +853,17 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['offset', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,offset(base)',
+        'args': ['rt,offset(base)'],
         'emulation': 'mips_sw(offset, base, rt.value)',
+    },
+    'syscall': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['code', 'nnnnnnnnnnnnnnnnnnnn'],
+            ['SYSCALL', '001100'],
+        ],
+        'args': ['code', ['', '0']],
+        'emulation': 'mips_syscall()',
     },
     'tge': {
         'fields': [
@@ -862,7 +873,7 @@ REFERENCE = {
             ['code', 'nnnnnnnnnn'],
             ['TGE', '110000'],
         ],
-        'args': 'rs,rt,code',
+        'args': ['rs,rt,code'],
         'emulation': 'if rs > rt: mips_trap()',
     },
     'tltu': {
@@ -873,7 +884,7 @@ REFERENCE = {
             ['code', 'nnnnnnnnnn'],
             ['TLTU', '110011'],
         ],
-        'args': 'rs,rt,code',
+        'args': ['rs,rt,code'],
         'emulation': 'if mips_unsigned(rs) < mips_unsigned(rt): mips_trap()',
     },
     'xori': {
@@ -883,7 +894,7 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['immediate', 'nnnnnnnnnnnnnnnn'],
         ],
-        'args': 'rt,rs,immediate',
+        'args': ['rt,rs,immediate'],
         'emulation': 'rt = rs ^ immediate',
     },
 }
@@ -1133,18 +1144,21 @@ def buildargs(provided, expected):
     '''
     build a dict of expected args to those provided
     '''
-    given = re.compile(r'[,()]\s*').split(provided)
-    wanted = re.compile(r'[,()]\s*').split(expected)
+    index = 0
+    given = re.compile(ARGSEP).split(provided)
+    wanted = re.compile(ARGSEP).split(expected[index])
+    desired = list(wanted)
     # insert any default args where needed
     # this only works left-to-right, if a different order is needed,
     # priority will need to be specified and used.
-    while len(given) < len(wanted):
-        for index in range(len(wanted)):
-            item = wanted[index].split('=')
-            if len(item) == 2:
-                given.insert(index, item[1])
-    if len(given) != len(wanted):
-        raise ValueError('Args expected: %s, provided: %s' % (wanted, given))
+    while len(given) < len(desired):
+        index += 1
+        desired = re.compile(ARGSEP).split(expected[index][0])
+        logging.debug('buildargs calling rebuildargs: %s', expected[index])
+        provided = rebuildargs(provided, *expected[index])
+        given = re.compile(ARGSEP).split(provided)
+    return dict(zip(wanted, given))
+    
     return OrderedDict(zip(wanted, given))
 
 def rebuildargs(args, pseudoop_args, newargs):
@@ -1155,8 +1169,12 @@ def rebuildargs(args, pseudoop_args, newargs):
     'beq $zero,$zero,offset'. so if 'offset' is 's209c',
     '$zero,$zero,s209c' must be provided to assemble_instruction,
     which will match the expected 'rs,rt,offset'.
+    
+    >>> rebuildargs('0x3456', 'offset', 'rs,rt,offset')
+    'rs,rt,0x3456'
     '''
-    argslist = [re.compile(r'[,()]\s*').split(string)
+    logging.debug('rebuildargs args: %s', locals())
+    argslist = [re.compile(ARGSEP).split(string)
                 for string in args, pseudoop_args, newargs]
     if len(argslist[0]) != len(argslist[1]):
         raise ValueError('Length mismatch: %s' % argslist[:2])
@@ -1181,7 +1199,10 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                 if value.isdigit():
                     instruction |= int(value, 2)
                 else:  # typically 'nnnnn'
-                    arg = argsdict[name]
+                    try:
+                        arg = argsdict[name]
+                    except KeyError:
+                        raise KeyError('%r not found in %s' % (name, argsdict))
                     if arg[0].isdigit():
                         instruction |= eval(args[0])
                     elif arg in LABELS:
@@ -1201,12 +1222,16 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
         elif reference.get('alias_of') is not None:
             aliases = reference['alias_of']
             expected = reference['args']
+            logging.debug('expected args of aliased parent: %r', expected)
             logging.debug('dict(aliases): %s', dict(aliases))
             if was in dict(aliases):
                 newargs = dict(aliases)[was]
                 mnemonic = was
+                logging.debug('found args %s from de-aliased %r', newargs, was)
             else:
                 mnemonic, newargs = aliases[0]
+                logging.debug('newargs from default %s', newargs)
+            logging.debug('assemble_instruction calling itself with new args')
             return assemble_instruction(loop, mnemonic, label,
                                         rebuildargs(args, expected, newargs),
                                         None)

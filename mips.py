@@ -654,6 +654,16 @@ REFERENCE = {
         'args': [''],
         'emulation': 'mips_deret()',
     },
+    'eret': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['0', '0000000000000000000'],
+            ['ERET', '011000'],
+        ],
+        'args': [''],
+        'emulation': 'mips_eret()',
+    },
     'j': {
         'fields': [
             ['J', '000010'],
@@ -758,6 +768,28 @@ REFERENCE = {
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
         'emulation': 'rt.value = mips_mfc(0, rd, sel)',
+    },
+    'mfhi': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '0000000000'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['MFHI', '010000'],
+        ],
+        'args': ['rd'],
+        'emulation': 'rd.value = hi.value',
+    },
+    'mflo': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '0000000000'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['MFLO', '010010'],
+        ],
+        'args': ['rd'],
+        'emulation': 'rd.value = lo.value',
     },
     'move': {
         'alias_of': [

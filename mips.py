@@ -568,7 +568,22 @@ REFERENCE = {
         ],
         'args': 'rs,offset',
         'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
-                     'do_next(); jump(address)',
+                     'do_next(); mips_jump(address)',
+    },
+    'bne': {
+        'fields': [
+            ['BNE', '000101'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rs,rt,offset',
+        'emulation': 'if rs.value != rt.value: address = (offset << 2) + pc; '
+                     'do_next(); mips_jump(address)',
+    },
+    'bnez': {
+        'alias_of': [['bne', 'rs,$zero,offset']],
+        'args': 'rs,offset',
     },
     'c0': {
         'fields': [
@@ -658,6 +673,16 @@ REFERENCE = {
         'args': 'rt,offset(base)',
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
     },
+    'jr': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['', '000000000000000'],
+            ['JR', '001000'],
+        ],
+        'args': 'rs',
+        'emulation': 'mips_jump(rs.value)',
+    },
     'ldl': {
         'fields': [
             ['LDL', '011010'],
@@ -701,6 +726,18 @@ REFERENCE = {
         ],
         'args': 'rt,offset(base)',
         'emulation': 'rt.value = mips_lw(offset, base)',
+    },
+    'mfc0': {
+        'fields': [
+            ['COP0', '010000'],
+            ['MF', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000000'],
+            ['sel', 'nnn'],
+        ],
+        'args': 'rt,rd,sel=0',
+        'emulation': 'rt.value = mips_mfc(0, rd, sel)',
     },
     'move': {
         'alias_of': [
@@ -759,6 +796,18 @@ REFERENCE = {
         'args': 'rd,rt,sa',
         'emulation': 'rd.value = rt.value << sa',
     },
+    'slt': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['SLT', '101010'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value < rt.value',
+    },
     'srl': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -771,6 +820,18 @@ REFERENCE = {
         'args': 'rd,rt,sa',
         'emulation': 'rd.value = rt.value >> sa',
     },
+    'sub': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['SUB', '100010'],
+        ],
+        'args': 'rd,rs,rt',
+        'emulation': 'rd.value = rs.value - rt.value',
+    },
     'subu': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -782,6 +843,16 @@ REFERENCE = {
         ],
         'args': 'rd,rs,rt',
         'emulation': 'rd.value = rs.value - rt.value',
+    },
+    'sw': {
+        'fields': [
+            ['SW', '101011'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': 'rt,offset(base)',
+        'emulation': 'mips_sw(offset, base, rt.value)',
     },
     'tge': {
         'fields': [

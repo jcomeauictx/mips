@@ -623,6 +623,16 @@ REFERENCE = {
         'args': ['immediate'],
         'emulation': 'logging.debug("ignoring c3 0x%x", immediate)',
     },
+    'cache': {
+        'fields': [
+            ['CACHE', '101111'],
+            ['base', 'nnnnn'],
+            ['op', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['op,offset(base)'],
+        'emulation': 'mips_cache(op, base, offset)',
+    },
     'daddi': {
         'fields': [
             ['DADDI', '011000'],
@@ -667,6 +677,14 @@ REFERENCE = {
     'j': {
         'fields': [
             ['J', '000010'],
+            ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['target'],
+        'emulation': 'mips_jump(target)',
+    },
+    'jal': {
+        'fields': [
+            ['JAL', '000011'],
             ['target', 'nnnnnnnnnnnnnnnnnnnnnnnnnn'],
         ],
         'args': ['target'],
@@ -842,6 +860,17 @@ REFERENCE = {
         'args': ['rs'],
         'emulation': 'mips_mtlo(rs.value)',
     },
+    'multu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['0', '0000000000'],
+            ['MULTU', '011001'],
+        ],
+        'args': ['rs, rt'],
+        'emulation': 'mips_mult(rs.value, rt.value, ignore_overflow=True)',
+    },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
@@ -897,10 +926,22 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['rd', 'nnnnn'],
             ['sa', 'nnnnn'],
-            ['SLL', '00000'],
+            ['SLL', '000000'],
         ],
         'args': ['rd,rt,sa'],
         'emulation': 'rd.value = rt.value << sa',
+    },
+    'sllv': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['sa', 'nnnnn'],
+            ['SLLV', '000100'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt.value << rs.value & 0b11111',
     },
     'slt': {
         'fields': [
@@ -914,6 +955,18 @@ REFERENCE = {
         'args': ['rd,rs,rt'],
         'emulation': 'rd.value = rs.value < rt.value',
     },
+    'sra': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['sa', 'nnnnn'],
+            ['SRA', '000011'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = mips_sra(rt.value, sa)',
+    },
     'srl': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -921,10 +974,10 @@ REFERENCE = {
             ['rt', 'nnnnn'],
             ['rd', 'nnnnn'],
             ['sa', 'nnnnn'],
-            ['SRL', '00010'],
+            ['SRL', '000010'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt.value >> sa',
+        'emulation': 'rd.value = mips_srl(rt.value, sa)',
     },
     'sub': {
         'fields': [
@@ -988,6 +1041,26 @@ REFERENCE = {
         ],
         'args': ['rs,rt,code'],
         'emulation': 'if rs > rt: mips_trap()',
+    },
+    'tlbwi': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['0', '0000000000000000000'],
+            ['TLBWI', '000010'],
+        ],
+        'args': [''],
+        'emulation': 'mips_tlbwi()',
+    },
+    'tlbwr': {
+        'fields': [
+            ['COP0', '010000'],
+            ['CO', '1'],
+            ['0', '0000000000000000000'],
+            ['TLBWR', '000110'],
+        ],
+        'args': [''],
+        'emulation': 'mips_tlbwr()',
     },
     'tltu': {
         'fields': [

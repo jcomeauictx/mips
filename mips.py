@@ -1090,6 +1090,17 @@ REFERENCE = {
         'args': ['code', ['', '0']],
         'emulation': 'mips_syscall()',
     },
+    'teq': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TEQ', '110100'],
+        ],
+        'args': ['rs,rt'],
+        'emulation': 'if rs.value == rt.value: mips_trap(code)',
+    },
     'tge': {
         'fields': [
             ['SPECIAL', '000000'],

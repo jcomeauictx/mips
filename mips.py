@@ -557,6 +557,16 @@ REFERENCE = {
         'emulation': 'if rs == rt: address = (offset << 2) + pc; '
                      'do_next(); jump(address)',
     },
+    'beql': {
+        'fields': [
+            ['BEQ', '010100'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rs,rt,offset'],
+        'emulation': 'if rs == rt: mips_branch(offset, likely=True)'
+    },
     'beqz': {
         'alias_of': [['beq', 'rs,$zero,offset']],
         'args': 'rs,offset',
@@ -809,6 +819,16 @@ REFERENCE = {
         'args': ['rs'],
         'emulation': 'mips_jump(rs.value)',
     },
+    'lbu': {
+        'fields': [
+            ['LBU', '100100'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_load(base, offset, "b", signed=False)',
+    },
     'ldl': {
         'fields': [
             ['LDL', '011010'],
@@ -895,6 +915,18 @@ REFERENCE = {
         ],
         'args': 'rd,rs',
         'emulation': 'rd.value = rs.value',
+    },
+    'movz': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['MOVZ', '001010'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'if rt == 0: rd.value = rs',
     },
     'mtc0': {
         'fields': [
@@ -1048,6 +1080,18 @@ REFERENCE = {
         ],
         'args': ['rt,rs,immediate'],
         'emulation': 'rt.value = rs.value < immediate',
+    },
+    'sltu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['SLTU', '101011'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd.value = rs < rt',
     },
     'sra': {
         'fields': [

@@ -1132,6 +1132,17 @@ REFERENCE = {
         'args': ['rs,rt,code'],
         'emulation': 'if mips_unsigned(rs) < mips_unsigned(rt): mips_trap()',
     },
+    'tne': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TNE', '110110'],
+        ],
+        'args': ['rs,rt'],
+        'emulation': 'if rs.value != rt.value: mips_trap(code)',
+    },
     'xori': {
         'fields': [
             ['XORI', '001110'],

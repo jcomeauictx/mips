@@ -750,9 +750,33 @@ REFERENCE = {
         'args': 'rd,rs',
         'emulation': 'rd.value = rs.value',
     },
+    'mtc0': {
+        'fields': [
+            ['COP0', '010000'],
+            ['MT', '00100'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000000'],
+            ['sel', 'nnn'],
+        ],
+        'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
+        'emulation': 'mips_mtc(0, rd, sel, rt.value)',
+    },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
+    },
+    'nor': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['NOR', '100111'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd.value = (rs.value | rt.value) ^ -1',
     },
     'or': {
         'fields': [

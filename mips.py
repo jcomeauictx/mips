@@ -703,6 +703,16 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
     },
+    'll': {
+        'fields': [
+            ['LL', '110000'],
+            ['base', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_load(base, offset)',
+    },
     'jr': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -811,6 +821,26 @@ REFERENCE = {
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
         'emulation': 'mips_mtc(0, rd, sel, rt.value)',
+    },
+    'mthi': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['0', '000000000000000'],
+            ['MTHI', '010001'],
+        ],
+        'args': ['rs'],
+        'emulation': 'mips_mthi(rs.value)',
+    },
+    'mtlo': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['0', '000000000000000'],
+            ['MTLO', '010011'],
+        ],
+        'args': ['rs'],
+        'emulation': 'mips_mtlo(rs.value)',
     },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],

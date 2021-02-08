@@ -1143,6 +1143,18 @@ REFERENCE = {
         'args': [''],
         'emulation': 'mips_tlbwr()',
     },
+    'tlt': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['code', 'nnnnnnnnnn'],
+            ['TLT', '110010'],
+        ],
+        'args': ['rs,rt,code'],
+        'emulation': 'if mips_signed(rs.value, rs.size) < '
+                     'mips_signed(rt.value, rt.size): mips_trap()',
+    },
     'tltu': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1152,7 +1164,7 @@ REFERENCE = {
             ['TLTU', '110011'],
         ],
         'args': ['rs,rt,code'],
-        'emulation': 'if mips_unsigned(rs) < mips_unsigned(rt): mips_trap()',
+        'emulation': 'if rs.value < rt.value: mips_trap()',
     },
     'tne': {
         'fields': [

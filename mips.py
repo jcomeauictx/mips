@@ -572,6 +572,28 @@ REFERENCE = {
         'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
                      'do_next(); mips_jump(address)',
     },
+    'blez': {
+        'fields': [
+            ['BLEZ', '000110'],
+            ['rs', 'nnnnn'],
+            ['0', '00000'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
+                     'do_next(); mips_jump(offset)',
+    },
+    'bltz': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'nnnnn'],
+            ['BLTZ', '00000'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
+                     'do_next(); mips_jump(offset)',
+    },
     'bne': {
         'fields': [
             ['BNE', '000101'],
@@ -663,6 +685,17 @@ REFERENCE = {
         ],
         'args': [''],
         'emulation': 'mips_deret()',
+    },
+    'div': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['0', '0000000000'],
+            ['DIV', '011010'],
+        ],
+        'args': ['rs,rt'],
+        'emulation': 'mips_div(rs.value, rt.value)',
     },
     'eret': {
         'fields': [
@@ -871,6 +904,10 @@ REFERENCE = {
         'args': ['rs, rt'],
         'emulation': 'mips_mult(rs.value, rt.value, ignore_overflow=True)',
     },
+    'neg': {
+        'alias_of': [['sub', 'rd,$zero,rt']],
+        'args': 'rd,rt',
+    },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
         'args': '',
@@ -953,7 +990,29 @@ REFERENCE = {
             ['SLT', '101010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value < rt.value',
+        'emulation': 'rd.value = mips_signed(rs.value, rs.size) < '
+                     'mips_signed(rt.value, rt.size)',
+    },
+    'slti': {
+        'fields': [
+            ['SLTI', '001010'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rt,rs,immediate'],
+        'emulation': 'rt.value = mips_signed(rs.value, rs.size) < '
+                     'mips_signed(immediate, 16)',
+    },
+    'sltiu': {
+        'fields': [
+            ['SLTIU', '001011'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['immediate', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rt,rs,immediate'],
+        'emulation': 'rt.value = rs.value < immediate',
     },
     'sra': {
         'fields': [

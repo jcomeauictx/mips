@@ -708,6 +708,18 @@ REFERENCE = {
         'args': ['rs,rt'],
         'emulation': 'mips_div(rs.value, rt.value)',
     },
+    'dsub': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['DSUB', '101110'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd.value = mips_sub(rs, rt)',
+    },
     'eret': {
         'fields': [
             ['COP0', '010000'],

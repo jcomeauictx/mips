@@ -708,6 +708,18 @@ REFERENCE = {
         'args': ['rs,rt'],
         'emulation': 'mips_div(rs.value, rt.value)',
     },
+    'dsll': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['sa', 'nnnnn'],
+            ['DSLL', '111000'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt << sa',
+    },
     'dsub': {
         'fields': [
             ['SPECIAL', '000000'],

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python -OO
 '''
 Intelligently disassemble and reassemble MIPS binaries
 '''
@@ -571,6 +571,17 @@ REFERENCE = {
         'args': ['rs,offset'],
         'emulation': 'if rs.value() >= 0: address = (offset << 2) + pc; '
                      'do_next(); mips_jump(address)',
+    },
+    'bgtz': {
+        'fields': [
+            ['BGTZ', '000111'],
+            ['rs', 'nnnnn'],
+            ['0', '00000'],
+            ['offset', 'nnnnnnnnnnnnnnnn'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if mips_signed(rs.value, rs.size) > 0: '
+                     'do_next(); mips_jump(offset)',
     },
     'blez': {
         'fields': [

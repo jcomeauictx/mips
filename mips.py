@@ -571,6 +571,10 @@ REFERENCE = {
         'alias_of': [['beq', 'rs,$zero,offset']],
         'args': 'rs,offset',
     },
+    'beqzl': {
+        'alias_of': [['beql', 'rs,$zero,offset']],
+        'args': 'rs,offset',
+    },
     'bgezal': {
         'fields': [
             ['REGIMM', '000001'],
@@ -626,8 +630,23 @@ REFERENCE = {
         'emulation': 'if rs.value != rt.value: address = (offset << 2) + pc; '
                      'do_next(); mips_jump(address)',
     },
+    'bnel': {
+        'fields': [
+            ['BNEL', '010101'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,rt,offset'],
+        'emulation': 'if rs.value != rt.value: '
+                     'mips_jump(offset, likely=True)',
+    },
     'bnez': {
         'alias_of': [['bne', 'rs,$zero,offset']],
+        'args': 'rs,offset',
+    },
+    'bnezl': {
+        'alias_of': [['bnel', 'rs,$zero,offset']],
         'args': 'rs,offset',
     },
     'c0': {
@@ -915,6 +934,18 @@ REFERENCE = {
         ],
         'args': 'rd,rs',
         'emulation': 'rd.value = rs.value',
+    },
+    'movn': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['MOVN', '001011'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'if rt != 0: rd.value = rs',
     },
     'movz': {
         'fields': [

@@ -2050,6 +2050,7 @@ def assemble(filespec):
     '''
     primitive assembler
     '''
+    outfile = None
     linepattern = r'^(?:(?P<label>[a-z0-9.]+):)?\s*'  # match label
     linepattern += r'(?:(?P<mnemonic>[a-z0-9.]+)\s+)?'  # match mnemonic
     linepattern += r'(?:(?P<args>[a-z0-9$()._,-]+)?\s*)?'  # match args
@@ -2061,6 +2062,8 @@ def assemble(filespec):
         filedata = infile.read().splitlines()
     # first pass, just build labels
     for loop in range(2):
+        if loop == 1:
+            outfile = sys.stdout
         offset = 0
         for line in filedata:
             label = None
@@ -2076,7 +2079,7 @@ def assemble(filespec):
                 **{key: (value or '') for key, value
                     in match.groupdict().items()})
             if instruction is not None:
-                if loop == 1:
+                if outfile is not None:
                     outfile.write(struct.pack('<L', instruction))
                 elif label is not None:
                     LABELS[label] = offset

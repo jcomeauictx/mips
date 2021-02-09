@@ -1802,7 +1802,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbb'],
             ['TEQ', '110100'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if rs.value == rt.value: mips_trap(code)',
     },
     'teqi': {
@@ -1930,7 +1930,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbb'],
             ['TNE', '110110'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if rs.value != rt.value: mips_trap(code)',
     },
     'wait': {
@@ -2080,8 +2080,12 @@ def assemble(filespec):
                     in match.groupdict().items()})
             if instruction is not None:
                 if outfile is not None:
+                    logging.debug('assembled instruction: 0x%0x8', instruction)
                     outfile.write(struct.pack('<L', instruction))
-                elif label is not None:
+                elif label:
+                    if label in LABELS:
+                        raise ValueError('Label %r already in LABELS as %r' %
+                                         (label, LABELS[label]))
                     LABELS[label] = offset
                 offset += 4
                 logging.debug('offset now: 0x%x', offset)

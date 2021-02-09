@@ -838,7 +838,7 @@ REFERENCE = {
             ['0', '00000'],
             ['DADDU', '101101'],
         ],
-        'args': ['rt,rs,immediate'],
+        'args': ['rd,rt,rs'],
         'emulation': 'disable(MipsOverflow); rd = rs + rt; '
                      'enable(MipsOverflow)',
     },

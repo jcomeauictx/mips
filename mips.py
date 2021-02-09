@@ -593,6 +593,16 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
+        'emulation': 'if rs.value() >= 0: mips_jump(offset)',
+    },
+    'bgezall': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['BGEZAL', '10011'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
         'emulation': 'if rs.value() >= 0: mips_jump(offset, likely=True)',
     },
     'bgezl': {
@@ -657,6 +667,26 @@ REFERENCE = {
         'args': ['rs,offset'],
         'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
                      'do_next(); mips_jump(offset)',
+    },
+    'bltzal': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['BLTZALL', '10000'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs < 0: mips_jump(offset)',
+    },
+    'bltzall': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['BLTZALL', '10010'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,offset'],
+        'emulation': 'if rs < 0: mips_jump(offset, likely=True)',
     },
     'bltzl': {
         'fields': [
@@ -1051,6 +1081,26 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
     },
+    'ldc1': {
+        'fields': [
+            ['LDC1', '110101'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_load(1, rt, base, offset)',
+    },
+    'ldc2': {
+        'fields': [
+            ['LDC2', '110110'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_load(2, rt, base, offset)',
+    },
     'lh': {
         'fields': [
             ['LB', '100001'],
@@ -1362,6 +1412,26 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset + contents(base), contents(rt))',
     },
+    'sdl': {
+        'fields': [
+            ['SDL', '101100'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(offset, base, rt, "d", "left")',
+    },
+    'sdr': {
+        'fields': [
+            ['SDR', '101101'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(offset, base, rt, "d", "right")',
+    },
     'sh': {
         'fields': [
             ['SH', '101001'],
@@ -1577,6 +1647,16 @@ REFERENCE = {
         'args': ['rs,rt'],
         'emulation': 'if rs.value == rt.value: mips_trap(code)',
     },
+    'teqi': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['TEQI', '01100'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,immediate'],
+        'emulation': 'if rs == immediate: mips_trap(code)',
+    },
     'tge': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1641,6 +1721,27 @@ REFERENCE = {
         'args': ['rs,rt,code'],
         'emulation': 'if mips_signed(rs.value, rs.size) < '
                      'mips_signed(rt.value, rt.size): mips_trap()',
+    },
+    'tlti': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['TLTI', '01010'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,immediate'],
+        'emulation': 'if rs < sign_extend(immediate): mips_trap()',
+    },
+    'tltiu': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['TLTIU', '01011'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,immediate'],
+        'emulation': 'if rs.uvalue < unsigned(sign_extend(immediate)):'
+        ' mips_trap()',
     },
     'tltu': {
         'fields': [

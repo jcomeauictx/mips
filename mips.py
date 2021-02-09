@@ -754,6 +754,30 @@ REFERENCE = {
         'args': ['op,offset(base)'],
         'emulation': 'mips_cache(op, base, offset)',
     },
+    'cvt.s.d': {
+        'fields': [
+            ['COP1', '010001'],
+            ['fmt', '10001'],  # 'D', doubleword
+            ['0', '00000'],
+            ['fs', 'bbbbb'],
+            ['fd', 'bbbbb'],
+            ['CVT.S', '100000'],
+        ],
+        'args': ['fd,fs'],
+        'emulation': 'mips_cvt("s", "d", fs, fd)',
+    },
+    'dadd': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DADD', '101100'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd = rs + rt',
+    },
     'daddi': {
         'fields': [
             ['DADDI', '011000'],
@@ -766,14 +790,49 @@ REFERENCE = {
     },
     'daddiu': {
         'fields': [
-            ['DADDI', '011001'],
+            ['DADDIU', '011001'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'disable(MipsOverflow); rt = rs + immediate'
+        'emulation': 'disable(MipsOverflow); rt = rs + immediate; '
                      'enable(MipsOverflow)',
+    },
+    'daddu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DADDU', '101101'],
+        ],
+        'args': ['rt,rs,immediate'],
+        'emulation': 'disable(MipsOverflow); rd = rs + rt; '
+                     'enable(MipsOverflow)',
+    },
+    'ddiv': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['0', '0000000000'],
+            ['DDIV', '011110'],
+        ],
+        'args': ['rs,rt'],
+        'emulation': 'mips_div(rs, rt, bits=64)',
+    },
+    'ddivu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['0', '0000000000'],
+            ['DDIV', '011111'],
+        ],
+        'args': ['rs,rt'],
+        'emulation': 'mips_div(rs, rt, bits=64, signed=False)',
     },
     'deret': {
         'fields': [
@@ -807,6 +866,10 @@ REFERENCE = {
         'args': ['rs,rt'],
         'emulation': 'mips_div(rs, rt, unsigned=True)',
     },
+    'dneg': {
+        'alias_of': [['dsub', 'rd,$zero,rt']],
+        'args': 'rd,rt',
+    },
     'dsll': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -818,6 +881,66 @@ REFERENCE = {
         ],
         'args': ['rd,rt,sa'],
         'emulation': 'rd.value = rt << sa',
+    },
+    'dsll32': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSLL32', '111100'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt << (sa + 32)',
+    },
+    'dsllv': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSLLV', '010100'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt.value << rs.value & 0b11111',
+    },
+    'dsra': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSRA', '111011'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt >> sa',
+    },
+    'dsra32': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSRA32', '111111'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.value = rt >> (sa + 32)',
+    },
+    'dsrl': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSRL', '111010'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.uvalue = rt.uvalue >> sa',
     },
     'dsub': {
         'fields': [
@@ -991,6 +1114,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base, "left")',
+    },
+    'lwr': {
+        'fields': [
+            ['LWR', '100110'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_lw(offset, base, "right")',
     },
     'mfc0': {
         'fields': [
@@ -1271,6 +1404,18 @@ REFERENCE = {
         'args': ['rd,rt,sa'],
         'emulation': 'rd.value = mips_sra(rt.value, sa)',
     },
+    'srav': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['SRAV', '000111'],
+        ],
+        'args': ['rd,rt,rs'],
+        'emulation': 'rd.value = rt >> rs',
+    },
     'srl': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1332,6 +1477,26 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_sw(offset, base, rt.value)',
+    },
+    'swl': {
+        'fields': [
+            ['SWL', '101010'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(rt, offset, base, "w", "left")',
+    },
+    'swr': {
+        'fields': [
+            ['SWR', '101110'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(rt, offset, base, "w", "right")',
     },
     'sync': {
         'fields': [

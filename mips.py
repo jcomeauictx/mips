@@ -896,6 +896,28 @@ REFERENCE = {
         'args': ['rs,rt'],
         'emulation': 'mips_div(rs, rt, unsigned=True)',
     },
+    'dmult': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['0', '0000000000'],
+            ['DMULT', '011100'],
+        ],
+        'args': ['rs, rt'],
+        'emulation': 'mips_mult(rs, rt, bits=64)',
+    },
+    'dmultu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['0', '0000000000'],
+            ['DMULTU', '011101'],
+        ],
+        'args': ['rs, rt'],
+        'emulation': 'mips_mult(rs, rt, bits=64, signed=False)',
+    },
     'dneg': {
         'alias_of': [['dsub', 'rd,$zero,rt']],
         'args': 'rd,rt',
@@ -988,6 +1010,18 @@ REFERENCE = {
         'args': ['rd,rt,sa'],
         'emulation': 'rd.uvalue = rt.uvalue >> sa',
     },
+    'dsrl32': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['0', '00000'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['sa', 'bbbbb'],
+            ['DSRL', '111110'],
+        ],
+        'args': ['rd,rt,sa'],
+        'emulation': 'rd.uvalue = rt.uvalue >> (sa + 32)',
+    },
     'dsrlv': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1023,6 +1057,10 @@ REFERENCE = {
         ],
         'args': ['rd,rs,rt'],
         'emulation': 'rd.value = mips_sub(rs, rt, overflow=False)',
+    },
+    'ehb': {
+        'alias_of': [['sll', 'rd,rt,3']],
+        'args': '',
     },
     'eret': {
         'fields': [
@@ -1080,6 +1118,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
+    },
+    'ld': {
+        'fields': [
+            ['LD', '110111'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_load(base, offset, "d")',
     },
     'ldc1': {
         'fields': [
@@ -1254,6 +1302,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base, "right")',
+    },
+    'lwu': {
+        'fields': [
+            ['LWU', '100111'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.uvalue = mips_load(offset, base)',
     },
     'mfc0': {
         'fields': [
@@ -1431,6 +1489,26 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset, base, value, "b")',
+    },
+    'sc': {
+        'fields': [
+            ['SC', '111000'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(rt, base, offset, atomic=True)'
+    },
+    'scd': {
+        'fields': [
+            ['SC', '111100'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_store(rt, base, offset, "d", atomic=True)'
     },
     'sd': {
         'fields': [
@@ -1748,6 +1826,16 @@ REFERENCE = {
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if mips_signed(rs) > mips_signed(rt): mips_trap(code)',
     },
+    'tgei': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['TGEI', '01000'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,immediate'],
+        'emulation': 'if rs.value >= sign_extend(immediate): mips_trap()',
+    },
     'tgeiu': {
         'fields': [
             ['REGIMM', '000001'],
@@ -1798,7 +1886,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbb'],
             ['TLT', '110010'],
         ],
-        'args': ['rs,rt,code'],
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if mips_signed(rs.value, rs.size) < '
                      'mips_signed(rt.value, rt.size): mips_trap()',
     },

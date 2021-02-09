@@ -870,6 +870,10 @@ REFERENCE = {
         'alias_of': [['dsub', 'rd,$zero,rt']],
         'args': 'rd,rt',
     },
+    'dnegu': {
+        'alias_of': [['dsubu', 'rd,$zero,rt']],
+        'args': 'rd,rt',
+    },
     'dsll': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -930,6 +934,18 @@ REFERENCE = {
         'args': ['rd,rt,sa'],
         'emulation': 'rd.value = rt >> (sa + 32)',
     },
+    'dsrav': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DSRAV', '010111'],
+        ],
+        'args': ['rd,rt,rs'],
+        'emulation': 'rd.value = rt >> rs',
+    },
     'dsrl': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -942,6 +958,18 @@ REFERENCE = {
         'args': ['rd,rt,sa'],
         'emulation': 'rd.uvalue = rt.uvalue >> sa',
     },
+    'dsrlv': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DSRLV', '010110'],
+        ],
+        'args': ['rd,rt,rs'],
+        'emulation': 'rd.uvalue = rt.uvalue >> (rs & 0b11111)',
+    },
     'dsub': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -953,6 +981,18 @@ REFERENCE = {
         ],
         'args': ['rd,rs,rt'],
         'emulation': 'rd.value = mips_sub(rs, rt)',
+    },
+    'dsubu': {
+        'fields': [
+            ['SPECIAL', '000000'],
+            ['rs', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DSUB', '101111'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd.value = mips_sub(rs, rt, overflow=False)',
     },
     'eret': {
         'fields': [
@@ -1030,6 +1070,16 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_load(base, offset)',
+    },
+    'lld': {
+        'fields': [
+            ['LLD', '110100'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'rt.value = mips_load(base, offset, bits=64)',
     },
     'jr': {
         'fields': [
@@ -1538,6 +1588,17 @@ REFERENCE = {
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if mips_signed(rs) > mips_signed(rt): mips_trap(code)',
     },
+    'tgeiu': {
+        'fields': [
+            ['REGIMM', '000001'],
+            ['rs', 'bbbbb'],
+            ['TGEIU', '01001'],
+            ['immediate', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rs,immediate'],
+        'emulation': 'if rs.uvalue >= unsigned(sign_extend(immediate)): '
+                     'mips_trap(0)',
+    },
     'tgeu': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -1589,7 +1650,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbb'],
             ['TLTU', '110011'],
         ],
-        'args': ['rs,rt,code'],
+        'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
         'emulation': 'if rs.value < rt.value: mips_trap()',
     },
     'tne': {
@@ -1886,6 +1947,7 @@ def buildargs(provided, expected):
     given = re.compile(ARGSEP).split(provided)
     wanted = re.compile(ARGSEP).split(expected[index])
     desired = list(wanted)
+    logging.debug('buildargs: given: %s, wanted: %s', given, wanted)
     # insert any default args where needed
     # this only works left-to-right, if a different order is needed,
     # priority will need to be specified and used.
@@ -1898,6 +1960,7 @@ def buildargs(provided, expected):
         logging.debug('buildargs calling rebuildargs: %s', expected[index])
         provided = rebuildargs(provided, *expected[index])
         given = re.compile(ARGSEP).split(provided)
+        logging.debug('buildargs loop: given: %s, wanted: %s', given, wanted)
     return dict(zip(wanted, given))
     
     return OrderedDict(zip(wanted, given))
@@ -1910,19 +1973,22 @@ def rebuildargs(args, pseudoop_args, newargs):
     'beq $zero,$zero,offset'. so if 'offset' is 's209c',
     '$zero,$zero,s209c' must be provided to assemble_instruction,
     which will match the expected 'rs,rt,offset'.
-    
     >>> rebuildargs('0x3456', 'offset', 'rs,rt,offset')
     'rs,rt,0x3456'
+    >>> rebuildargs('', '', '0,0')
+    '0,0'
     '''
     logging.debug('rebuildargs args: %s', locals())
     argslist = [re.compile(ARGSEP).split(string)
                 for string in args, pseudoop_args, newargs]
+    logging.debug('argslist before rebuild: %s', argslist)
     if len(argslist[0]) != len(argslist[1]):
         raise ValueError('Length mismatch: %s' % argslist[:2])
     for index in range(len(argslist[2])):
         arg = argslist[2][index]
         if arg in argslist[1]:
             argslist[2][index] = argslist[0][argslist[1].index(arg)]
+    logging.debug('argslist after rebuild: %s', argslist)
     return ','.join(argslist[2])
 
 def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
@@ -1945,7 +2011,8 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
                     if arg[:1].isdigit():
-                        instruction |= eval(args[0])
+                        logging.debug('attempting to read %s as number', arg)
+                        instruction |= eval(arg)
                     elif arg in LABELS:
                         instruction |= LABELS[arg]
                     else:

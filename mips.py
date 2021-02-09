@@ -1205,6 +1205,36 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'rt.value = mips_lw(offset, base)',
     },
+    'lwc1': {
+        'fields': [
+            ['LWC1', '110001'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_load(1, rt, offset, base, "w")',
+    },
+    'lwc2': {
+        'fields': [
+            ['LWC2', '110010'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_load(2, rt, offset, base, "w")',
+    },
+    'lwc3': {
+        'fields': [
+            ['LWC3', '110011'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_load(3, rt, offset, base, "w")',
+    },
     'lwl': {
         'fields': [
             ['LWL', '100010'],
@@ -1412,6 +1442,26 @@ REFERENCE = {
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(offset + contents(base), contents(rt))',
     },
+    'sdc1': {
+        'fields': [
+            ['SDC1', '111101'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_store(1, rt, offset, base, rt, "d")',
+    },
+    'sdc2': {
+        'fields': [
+            ['SDC2', '111110'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_store(2, rt, offset, base, rt, "d")',
+    },
     'sdl': {
         'fields': [
             ['SDL', '101100'],
@@ -1597,6 +1647,36 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_sw(offset, base, rt.value)',
+    },
+    'swc1': {
+        'fields': [
+            ['SWC1', '111001'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_store(1, offset, base, rt)',
+    },
+    'swc2': {
+        'fields': [
+            ['SWC2', '111010'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_store(2, offset, base, rt)',
+    },
+    'swc3': {
+        'fields': [
+            ['SWC3', '111011'],
+            ['base', 'bbbbb'],
+            ['rt', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
+        ],
+        'args': ['rt,offset(base)'],
+        'emulation': 'mips_coprocessor_store(3, offset, base, rt)',
     },
     'swl': {
         'fields': [

@@ -2036,7 +2036,6 @@ def disassemble(filespec):
     '''
     primitive disassembler
     '''
-    init()
     print '.set noat'  # get rid of warnings for using $at register
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
@@ -2044,7 +2043,7 @@ def disassemble(filespec):
     for loop in [0, 1]:
         for index in range(0, len(filedata), 4):
             chunk = filedata[index:index + 4]
-            process(loop, index, chunk)
+            disassemble_chunk(loop, index, chunk)
 
 def assemble(filespec):
     '''
@@ -2064,6 +2063,7 @@ def assemble(filespec):
     for loop in range(2):
         if loop == 1:
             outfile = sys.stdout
+            logging.debug('labels at start of 2nd pass: %s', LABELS)
         offset = 0
         for line in filedata:
             label = None
@@ -2090,7 +2090,7 @@ def assemble(filespec):
                 offset += 4
                 logging.debug('offset now: 0x%x', offset)
 
-def process(loop, index, chunk):
+def disassemble_chunk(loop, index, chunk):
     '''
     build labels dict in first loop, output assembly language in second
     '''
@@ -2190,7 +2190,9 @@ def init():
         # table 44, but note that the 'general equation' below it is wrong.
         vectorlength = int(INTCTLVS, 2) * 0x20
         for index in range(VECTORS):
-            LABELS['intvec%d' % index] = (index * vectorlength) + 0x200
+            # add vector labels for disassembly only.
+            # it's up to the assembly coder to put them into the code.
+            LABELS[(index * vectorlength) + 0x200] = 'intvec%d' % index
     if MATCH_OBJDUMP_DISASSEMBLY:
         # objdump disassembly returns .word for sel != 0
         CONVERSION['mtc0'] = [['sel != 0', WORD]]
@@ -2200,6 +2202,7 @@ def init():
         CONVERSION['movn'] = [['True', WORD]]
         # objdump has no 'deret'
         CONVERSION['c0'][0][1] = ['c0', 'coprocessor', False, 'True', False]
+        # objdump doesn't show register $s8 as frame pointer
         REGISTER[REGISTER.index('$fp')] = '$s8'
 
 def shorten(hashtable):
@@ -2274,10 +2277,13 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
     logging.debug('processing: %s', locals())
     instruction = 0
     reference = REFERENCE.get(mnemonic)
+    zero = ('$zero','$0','$f0')
     if reference:
         if {'fields', 'args'}.issubset(reference.keys()):
             argsdict = buildargs(args, reference['args'])
             for name, value in reference['fields']:
+                logging.debug('assemble_instruction: name %r, value %r',
+                              name, value)
                 instruction <<= len(value)
                 if value.isdigit():
                     instruction |= int(value, 2)
@@ -2287,19 +2293,33 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
                     if arg[:1].isdigit():
-                        logging.debug('attempting to read %s as number', arg)
+                        logging.debug('before merging number %r: 0x%x',
+                                      arg, instruction)
                         instruction |= eval(arg)
+                        logging.debug('after merging number %r: 0x%x',
+                                      arg, instruction)
                     elif arg in LABELS:
+                        logging.debug('before merging label %r (0x%x): 0x%x',
+                                      label, LABELS.get(label), instruction)
                         instruction |= LABELS[arg]
+                        logging.debug('after merging label %r (0x%x): 0x%x',
+                                      label, LABELS.get(label), instruction)
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
                             arg = arg.replace(arg[arg.index('_') - 1], '%d')
+                            logging.debug('coregister: %s', arg)
                         if arg in REGISTER_REFERENCE:
+                            logging.debug('before %r: 0x%x', arg, instruction)
                             instruction |= REGISTER_REFERENCE[arg]
+                            logging.debug('after %r: 0x%x', arg, instruction)
                         elif loop == 0:
                             instruction = 'pending label list completion'
                             break
+                        else:
+                            logging.error('%r not in REGISTER_REFERENCE %s',
+                                          arg, REGISTER_REFERENCE)
+                            raise ValueError('Cannot process arg %r' % arg)
         elif reference.get('action') is not None:
             exec(reference['action'])
             instruction = None
@@ -2326,4 +2346,5 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
     return instruction
 
 if __name__ == '__main__':
+    init()
     eval(sys.argv[1])(*sys.argv[2:])

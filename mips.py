@@ -2284,7 +2284,9 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
             for name, value in reference['fields']:
                 logging.debug('assemble_instruction: name %r, value %r',
                               name, value)
-                instruction <<= len(value)
+                fieldlength = len(value)
+                instruction <<= fieldlength
+                maskbits = (1 << fieldlength) - 1
                 if value.isdigit():
                     instruction |= int(value, 2)
                 else:  # typically 'bbbbb'
@@ -2292,10 +2294,10 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                         arg = argsdict[name]
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
-                    if arg[:1].isdigit():
+                    if arg[:1].startswith(tuple('-0123456789')):
                         logging.debug('before merging number %r: 0x%x',
                                       arg, instruction)
-                        instruction |= eval(arg)
+                        instruction |= (eval(arg) & maskbits)
                         logging.debug('after merging number %r: 0x%x',
                                       arg, instruction)
                     elif arg in LABELS:

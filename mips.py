@@ -1784,6 +1784,7 @@ REFERENCE = {
             ['SYNC', '001111'],
         ],
         'args': ['stype', ['', '0']],
+        'emulation': 'mips_sync(stype)',
     },
     'syscall': {
         'fields': [
@@ -2027,8 +2028,6 @@ CONVERSION = {
     'mtc0': [['sel != 0', ['mtc0', 'coproc_move3', None, 'True', None]]],
     'mfc0': [['sel != 0', ['mfc0', 'coproc_move3', None, 'True', None]]],
     'jalr': [['dest == 31', ['jalr', 'jumpr', True, 'True', True]]],
-    # objdump sync becomes .word if sync type set in amount field
-    'sync': [['amount != 0', WORD]],
     'syscall': [['longcode == 0', ['syscall', 'simple', None, 'True', None]]],
 }
 
@@ -2063,7 +2062,10 @@ def assemble(filespec):
     for loop in range(2):
         if loop == 1:
             outfile = sys.stdout
+            debug = logging.debug
             logging.debug('labels at start of 2nd pass: %s', LABELS)
+        else:
+            debug = lambda *args, **kwargs: None
         offset = 0
         for line in filedata:
             label = None
@@ -2080,7 +2082,7 @@ def assemble(filespec):
                     in match.groupdict().items()})
             if instruction is not None:
                 if outfile is not None:
-                    logging.debug('assembled instruction: 0x%0x8', instruction)
+                    debug('assembled instruction: 0x%0x8', instruction)
                     outfile.write(struct.pack('<L', instruction))
                 elif label:
                     if label in LABELS:
@@ -2088,7 +2090,7 @@ def assemble(filespec):
                                          (label, LABELS[label]))
                     LABELS[label] = offset
                 offset += 4
-                logging.debug('offset now: 0x%x', offset)
+                debug('offset now: 0x%x', offset)
 
 def disassemble_chunk(loop, index, chunk):
     '''
@@ -2194,6 +2196,8 @@ def init():
             # it's up to the assembly coder to put them into the code.
             LABELS[(index * vectorlength) + 0x200] = 'intvec%d' % index
     if MATCH_OBJDUMP_DISASSEMBLY:
+        # objdump sync becomes .word if sync type set in amount field
+        CONVERSION['sync'] = [['amount != 0', WORD]],
         # objdump disassembly returns .word for sel != 0
         CONVERSION['mtc0'] = [['sel != 0', WORD]]
         CONVERSION['mfc0'] = [['sel != 0', WORD]]

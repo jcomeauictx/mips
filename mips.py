@@ -461,7 +461,7 @@ REFERENCE = {
     },
     'abs.ps': {
         'fields': [
-            ['COP1', '10001'],
+            ['COP1', '010001'],
             ['fmt', '10110'],  # fmt for paired-single is 22, 0x16
             ['0', '00000'],
             ['fs', 'bbbbb'],
@@ -1507,7 +1507,7 @@ REFERENCE = {
             ['SC', '111000'],
             ['base', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['offset', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(rt, base, offset, atomic=True)'
@@ -1517,7 +1517,7 @@ REFERENCE = {
             ['SC', '111100'],
             ['base', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['offset', 'bbbbb'],
+            ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
         'emulation': 'mips_store(rt, base, offset, "d", atomic=True)'
@@ -2188,6 +2188,9 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
 def init():
     '''
     Fill in some missing info in global structures
+    
+    Also make some "corrections" to match objdump disassembly,
+    and catch some errors in entering instruction parameters
     '''
     for listing, size in ([INSTRUCTION, 64], [REGIMM, 32], [SPECIAL, 64],
             [COP0, 32], [COP1, 32], [COP2, 32], [COP3, 32]):
@@ -2236,7 +2239,15 @@ def init():
     for listing in REGISTER, ALTREG, FLOATREG:
         hashtable = zip(listing, range(len(listing)))
         REGISTER_REFERENCE.update(hashtable)
-
+    for key, item in REFERENCE.items():
+        if 'fields' in item:
+            length = 0
+            for name, value in item['fields']:
+                length += len(value)
+            if length != 32:
+                raise ValueError(
+                    'REFERENCE[%r] fields are incorrect: %d != 32' %
+                    (key, length))
 def shorten(hashtable):
     '''
     Get rid of anything huge in locals(), for debugging purposes

@@ -2042,7 +2042,7 @@ def disassemble(filespec):
     for loop in [0, 1]:
         for index in range(0, len(filedata), 4):
             chunk = filedata[index:index + 4]
-            disassemble_chunk(loop, index, chunk)
+            disassemble_chunk(loop, index, chunk, len(filedata))
 
 def assemble(filespec):
     '''
@@ -2092,7 +2092,7 @@ def assemble(filespec):
                 offset += 4
                 debug('offset now: 0x%x', offset)
 
-def disassemble_chunk(loop, index, chunk):
+def disassemble_chunk(loop, index, chunk, maxoffset):
     '''
     build labels dict in first loop, output assembly language in second
     '''
@@ -2160,7 +2160,7 @@ def disassemble_chunk(loop, index, chunk):
             else:
                 logging.debug('eval %r failed in %s', condition,
                               shorten(locals()))
-    if USE_LABELS and labeled and offset not in LABELS:
+    if USE_LABELS and labeled and offset not in LABELS and offset <= maxoffset:
         LABELS[offset] = 's%x' % offset
         #logging.debug('LABELS: %s', LABELS)
     pattern = PATTERN[style]

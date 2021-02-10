@@ -1230,7 +1230,7 @@ REFERENCE = {
         'emulation': 'rt.uvalue = mips_load(offset, base, "h")',
     },
     'li': {
-        'alias_of': [['addiu', 'rt,$zero,offset']],
+        'alias_of': [['addiu', 'rt,$zero,offset'], ['ori', 'rt,$zero,offset']],
         'args': 'rt,offset',
     },
     'lui': {

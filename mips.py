@@ -2145,6 +2145,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
         mnemonic, style, labeled, condition, signed = WORD
     if signed and not style.endswith('x'):
         immediate = ctypes.c_short(immediate).value
+    # the jump offset is immediate * 4 added to the *following* instruction
     offset = index + 4 + (immediate << 2)
     # don't use labels until we've ascertained that output is like objdump
     if USE_LABELS:
@@ -2284,6 +2285,16 @@ def argsplit(args):
     except TypeError:
         return []
 
+def smart_mask(number, name, argsdict, maskbits):
+    '''
+    Calculate branch targets/offsets differently
+    '''
+    if number < 0:
+        number = (1 << 32) - number  # two's complement
+    if name  == 'offset' and not 'base' in argsdict:
+        number = (number - 4) >> 2
+    return number & maskbits
+
 def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
     '''
     Assemble an instruction given the assembly source line
@@ -2300,7 +2311,7 @@ def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
                               name, value)
                 fieldlength = len(value)
                 instruction <<= fieldlength
-                maskbits = (1 << fieldlength) - 1
+                mask = (1 << fieldlength) - 1
                 if value.isdigit():
                     instruction |= int(value, 2)
                 else:  # typically 'bbbbb'
@@ -2309,15 +2320,17 @@ def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
                     if arg[:1].startswith(tuple('-0123456789')):
+                        number = eval(arg)
                         logging.debug('before merging number %r: 0x%x',
                                       arg, instruction)
-                        instruction |= (eval(arg) & maskbits)
+                        instruction |= smart_mask(number, name, argsdict, mask)
                         logging.debug('after merging number %r: 0x%x',
                                       arg, instruction)
                     elif arg in LABELS:
                         logging.debug('before merging label %r (0x%x): 0x%x',
                                       label, LABELS.get(label), instruction)
-                        instruction |= LABELS[arg]
+                        instruction |= smart_mask(LABELS[arg], name, argsdict,
+                                                  mask)
                         logging.debug('after merging label %r (0x%x): 0x%x',
                                       label, LABELS.get(label), instruction)
                     else:

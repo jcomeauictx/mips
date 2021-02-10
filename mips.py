@@ -953,13 +953,13 @@ REFERENCE = {
     'dsllv': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['0', '00000'],
+            ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
             ['rd', 'bbbbb'],
-            ['sa', 'bbbbb'],
+            ['0', '00000'],
             ['DSLLV', '010100'],
         ],
-        'args': ['rd,rt,sa'],
+        'args': ['rd,rt,rs'],
         'emulation': 'rd.value = rt.value << rs.value & 0b11111',
     },
     'dsra': {
@@ -1585,13 +1585,13 @@ REFERENCE = {
     'sllv': {
         'fields': [
             ['SPECIAL', '000000'],
-            ['0', '00000'],
+            ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
             ['rd', 'bbbbb'],
-            ['sa', 'bbbbb'],
+            ['0', '00000'],
             ['SLLV', '000100'],
         ],
-        'args': ['rd,rt,sa'],
+        'args': ['rd,rt,rs'],
         'emulation': 'rd.value = rt.value << rs.value & 0b11111',
     },
     'slt': {

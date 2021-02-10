@@ -1059,7 +1059,7 @@ REFERENCE = {
         'emulation': 'rd.value = mips_sub(rs, rt, overflow=False)',
     },
     'ehb': {
-        'alias_of': [['sll', 'rd,rt,3']],
+        'alias_of': [['sll', '$zero,$zero,3']],
         'args': None,
     },
     'eret': {
@@ -1689,7 +1689,7 @@ REFERENCE = {
         'emulation': 'rd.value = mips_srl(rt, rs)',
     },
     'ssnop': {
-        'alias_of': [['sll', 'rd,rt,1']],
+        'alias_of': [['sll', '$zero,$zero,1']],
         'args': None,
     },
     'sub': {

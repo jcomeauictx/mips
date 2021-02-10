@@ -2079,10 +2079,10 @@ def assemble(filespec):
             instruction = assemble_instruction(
                 loop, 
                 **{key: value for key, value
-                    in match.groupdict().items()})
+                    in match.groupdict().items() if key != 'label'})
             if instruction is not None:
                 if outfile is not None:
-                    debug('assembled instruction: 0x%0x8', instruction)
+                    debug('assembled instruction: 0x%08x', instruction)
                     outfile.write(struct.pack('<L', instruction))
                 elif label:
                     if label in LABELS:
@@ -2289,13 +2289,19 @@ def smart_mask(number, name, argsdict, maskbits):
     '''
     Calculate branch targets/offsets differently
     '''
+    logging.debug('smart_mask(%s, %r, %s, %r)',
+                  hex(number), name, argsdict, maskbits)
     if number < 0:
-        number = (1 << 32) - number  # two's complement
+        number = (1 << 32) + number  # two's complement
+        logging.debug('negative number now 0x%x', number)
     if name  == 'offset' and not 'base' in argsdict:
         number = (number - 4) >> 2
+        logging.debug('branch offset now 0x%x', number)
+    number = number & maskbits
+    logging.debug('number after mask operation: 0x%x', number)
     return number & maskbits
 
-def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
+def assemble_instruction(loop, mnemonic=None, args=None, was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
@@ -2328,11 +2334,11 @@ def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
                                       arg, instruction)
                     elif arg in LABELS:
                         logging.debug('before merging label %r (0x%x): 0x%x',
-                                      label, LABELS.get(label), instruction)
+                                      arg, LABELS.get(arg), instruction)
                         instruction |= smart_mask(LABELS[arg], name, argsdict,
                                                   mask)
                         logging.debug('after merging label %r (0x%x): 0x%x',
-                                      label, LABELS.get(label), instruction)
+                                      arg, LABELS.get(arg), instruction)
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
@@ -2367,7 +2373,7 @@ def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
                 mnemonic, newargs = aliases[0]
                 logging.debug('newargs from default %s', newargs)
             logging.debug('assemble_instruction calling itself with new args')
-            return assemble_instruction(loop, mnemonic, label,
+            return assemble_instruction(loop, mnemonic,
                                         rebuildargs(args, expected, newargs),
                                         None)
         else:

@@ -735,7 +735,7 @@ REFERENCE = {
             ['codelo', 'bbbbbbbbbb'],
             ['BREAK', '001101'],
         ],
-        'args': ['codehi,codelo', ['', '0,0']],
+        'args': ['codehi,codelo', [None, '0,0']],
         'emulation': 'mips_break()',
     },
     'c0': {
@@ -871,7 +871,7 @@ REFERENCE = {
             ['0', '0000000000000000000'],
             ['DERET', '011111'],
         ],
-        'args': [''],
+        'args': [None],
         'emulation': 'mips_deret()',
     },
     'div': {
@@ -1060,7 +1060,7 @@ REFERENCE = {
     },
     'ehb': {
         'alias_of': [['sll', 'rd,rt,3']],
-        'args': '',
+        'args': None,
     },
     'eret': {
         'fields': [
@@ -1069,7 +1069,7 @@ REFERENCE = {
             ['0', '0000000000000000000'],
             ['ERET', '011000'],
         ],
-        'args': [''],
+        'args': [None],
         'emulation': 'mips_eret()',
     },
     'j': {
@@ -1444,7 +1444,7 @@ REFERENCE = {
     },
     'nop': {
         'alias_of': [['sll', '$zero,$zero,0']],
-        'args': '',
+        'args': None,
     },
     'nor': {
         'fields': [
@@ -1690,7 +1690,7 @@ REFERENCE = {
     },
     'ssnop': {
         'alias_of': [['sll', 'rd,rt,1']],
-        'args': '',
+        'args': None,
     },
     'sub': {
         'fields': [
@@ -1783,7 +1783,7 @@ REFERENCE = {
             ['stype', 'bbbbb'],
             ['SYNC', '001111'],
         ],
-        'args': ['stype', ['', '0']],
+        'args': ['stype', [None, '0']],
         'emulation': 'mips_sync(stype)',
     },
     'syscall': {
@@ -1792,7 +1792,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbbbbbbbbbbbb'],
             ['SYSCALL', '001100'],
         ],
-        'args': ['code', ['', '0']],
+        'args': ['code', [None, '0']],
         'emulation': 'mips_syscall()',
     },
     'teq': {
@@ -1866,7 +1866,7 @@ REFERENCE = {
             ['0', '0000000000000000000'],
             ['TLBWI', '000010'],
         ],
-        'args': [''],
+        'args': [None],
         'emulation': 'mips_tlbwi()',
     },
     'tlbwr': {
@@ -1876,7 +1876,7 @@ REFERENCE = {
             ['0', '0000000000000000000'],
             ['TLBWR', '000110'],
         ],
-        'args': [''],
+        'args': [None],
         'emulation': 'mips_tlbwr()',
     },
     'tlt': {
@@ -1941,7 +1941,7 @@ REFERENCE = {
             ['code', 'bbbbbbbbbbbbbbbbbbb'],
             ['WAIT', '100000'],
         ],
-        'args': ['code'],
+        'args': ['code', [None, '0']],
         'emulation': 'mips_wait(code)',
     },
     'xor': {
@@ -2078,7 +2078,7 @@ def assemble(filespec):
             #logging.debug('match: %s', match.groupdict())
             instruction = assemble_instruction(
                 loop, 
-                **{key: (value or '') for key, value
+                **{key: value for key, value
                     in match.groupdict().items()})
             if instruction is not None:
                 if outfile is not None:
@@ -2227,8 +2227,8 @@ def buildargs(provided, expected):
     build a dict of expected args to those provided
     '''
     index = 0
-    given = re.compile(ARGSEP).split(provided)
-    wanted = re.compile(ARGSEP).split(expected[index])
+    given = argsplit(provided)
+    wanted = argsplit(expected[index])
     desired = list(wanted)
     logging.debug('buildargs: given: %s, wanted: %s', given, wanted)
     # insert any default args where needed
@@ -2237,12 +2237,12 @@ def buildargs(provided, expected):
     while len(given) < len(desired):
         index += 1
         try:
-            desired = re.compile(ARGSEP).split(expected[index][0])
+            desired = argsplit(expected[index][0])
         except IndexError:
             raise(IndexError('No index [%d][0] in %s' % (index, expected)))
         logging.debug('buildargs calling rebuildargs: %s', expected[index])
         provided = rebuildargs(provided, *expected[index])
-        given = re.compile(ARGSEP).split(provided)
+        given = argsplit(provided)
         logging.debug('buildargs loop: given: %s, wanted: %s', given, wanted)
     return dict(zip(wanted, given))
     
@@ -2262,8 +2262,7 @@ def rebuildargs(args, pseudoop_args, newargs):
     '0,0'
     '''
     logging.debug('rebuildargs args: %s', locals())
-    argslist = [re.compile(ARGSEP).split(string)
-                for string in args, pseudoop_args, newargs]
+    argslist = [argsplit(string) for string in args, pseudoop_args, newargs]
     logging.debug('argslist before rebuild: %s', argslist)
     if len(argslist[0]) != len(argslist[1]):
         raise ValueError('Length mismatch: %s' % argslist[:2])
@@ -2274,7 +2273,18 @@ def rebuildargs(args, pseudoop_args, newargs):
     logging.debug('argslist after rebuild: %s', argslist)
     return ','.join(argslist[2])
 
-def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
+def argsplit(args):
+    '''
+    split string using ARGSEP.
+
+    special case for None, return empty list
+    '''
+    try:
+        return re.compile(ARGSEP).split(args)
+    except TypeError:
+        return []
+
+def assemble_instruction(loop, mnemonic=None, label='', args=None, was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
@@ -2313,8 +2323,10 @@ def assemble_instruction(loop, mnemonic='', label='', args='', was=''):
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
-                            arg = arg.replace(arg[arg.index('_') - 1], '%d')
-                            logging.debug('coregister: %s', arg)
+                            logging.debug('coregister before replacement: %r',
+                                          arg)
+                            arg = arg.replace(arg[arg.index('_') - 1], '%d', 1)
+                            logging.debug('coregister after: %s', arg)
                         if arg in REGISTER_REFERENCE:
                             logging.debug('before %r: 0x%x', arg, instruction)
                             instruction |= REGISTER_REFERENCE[arg]

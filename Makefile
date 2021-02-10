@@ -26,12 +26,12 @@ debug:
 	$(MAKE) QUIET= check
 %.xxd: %.dat
 	xxd -a $< $@
-%.diff: %.dis %.asm
+%.asmdiff: %.dis %.asm
 	diff $(SIDEBYSIDE) -w \
 	 <(sed -e 's/^[^\t .]\S\+//' -e 's/#.*$$//' $<) \
 	 <(sed -e 's/^[^\t .]\S\+//' -e 's/#.*$$//' $(word 2, $+))
-%.bindiff: %.out
-	diff %.dat %.out
+%.bindiff: %.dat %.img
+	diff $(SIDEBYSIDE) <(xxd $<) <(xxd $(word 2,$+))
 %.disout: %.dis
 	mips-linux-gnu-as -mips4 -o $@ $<
 %.asmout: %.asm

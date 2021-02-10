@@ -2077,7 +2077,7 @@ def assemble(filespec):
                                  (linepattern, line))
             #logging.debug('match: %s', match.groupdict())
             instruction = assemble_instruction(
-                loop, 
+                loop, offset,
                 **{key: value for key, value
                     in match.groupdict().items() if key != 'label'})
             if instruction is not None:
@@ -2285,7 +2285,7 @@ def argsplit(args):
     except TypeError:
         return []
 
-def smart_mask(number, name, argsdict, maskbits):
+def smart_mask(number, name, offset, argsdict, maskbits):
     '''
     Calculate branch targets/offsets differently
     '''
@@ -2295,13 +2295,13 @@ def smart_mask(number, name, argsdict, maskbits):
         number = (1 << 32) + number  # two's complement
         logging.debug('negative number now 0x%x', number)
     if name  == 'offset' and not 'base' in argsdict:
-        number = (number - 4) >> 2
+        number = (number - offset - 4) >> 2
         logging.debug('branch offset now 0x%x', number)
     number = number & maskbits
     logging.debug('number after mask operation: 0x%x', number)
     return number & maskbits
 
-def assemble_instruction(loop, mnemonic=None, args=None, was=''):
+def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
     '''
     Assemble an instruction given the assembly source line
     '''
@@ -2329,14 +2329,15 @@ def assemble_instruction(loop, mnemonic=None, args=None, was=''):
                         number = eval(arg)
                         logging.debug('before merging number %r: 0x%x',
                                       arg, instruction)
-                        instruction |= smart_mask(number, name, argsdict, mask)
+                        instruction |= smart_mask(number, name, offset,
+                                                  argsdict, mask)
                         logging.debug('after merging number %r: 0x%x',
                                       arg, instruction)
                     elif arg in LABELS:
                         logging.debug('before merging label %r (0x%x): 0x%x',
                                       arg, LABELS.get(arg), instruction)
-                        instruction |= smart_mask(LABELS[arg], name, argsdict,
-                                                  mask)
+                        instruction |= smart_mask(LABELS[arg], name, offset,
+                                                  argsdict, mask)
                         logging.debug('after merging label %r (0x%x): 0x%x',
                                       arg, LABELS.get(arg), instruction)
                     else:
@@ -2373,7 +2374,7 @@ def assemble_instruction(loop, mnemonic=None, args=None, was=''):
                 mnemonic, newargs = aliases[0]
                 logging.debug('newargs from default %s', newargs)
             logging.debug('assemble_instruction calling itself with new args')
-            return assemble_instruction(loop, mnemonic,
+            return assemble_instruction(loop, offset, mnemonic,
                                         rebuildargs(args, expected, newargs),
                                         None)
         else:

@@ -2301,6 +2301,9 @@ def smart_mask(number, name, offset, argsdict, maskbits):
     if name  == 'offset' and not 'base' in argsdict:
         number = (number - offset - 4) >> 2
         logging.debug('branch offset now 0x%x', number)
+    elif name == 'target':
+        number >>= 2  # jump targets are *not* PC-relative
+        logging.debug('jump target now 0x%x', number)
     number = number & maskbits
     logging.debug('number after mask operation: 0x%x', number)
     return number & maskbits

@@ -1103,7 +1103,7 @@ REFERENCE = {
     'jalx': {
         'fields': [
             ['JALX', '011101'],
-            ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
+            ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
         'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
@@ -2153,14 +2153,18 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     else:
         destination = '0x%x' % offset
     if mnemonic in CONVERSION:
-        for condition, result in CONVERSION[mnemonic]:
-            if eval(condition):
-                comment += ' (from %r)' % mnemonic
-                mnemonic, style, labeled, condition, signed = result
-                break
-            else:
-                logging.debug('eval %r failed in %s', condition,
-                              shorten(locals()))
+        try:
+            for condition, result in CONVERSION[mnemonic]:
+                if eval(condition):
+                    comment += ' (from %r)' % mnemonic
+                    mnemonic, style, labeled, condition, signed = result
+                    break
+                else:
+                    logging.debug('eval %r failed in %s', condition,
+                                  shorten(locals()))
+        except ValueError:
+            raise ValueError('CONVERSION[%r] improperly formatted: %s' %
+                             (mnemonic, CONVERSION[mnemonic]))
     if USE_LABELS and labeled and offset not in LABELS and offset <= maxoffset:
         LABELS[offset] = 's%x' % offset
         #logging.debug('LABELS: %s', LABELS)
@@ -2198,7 +2202,7 @@ def init():
             LABELS[(index * vectorlength) + 0x200] = 'intvec%d' % index
     if MATCH_OBJDUMP_DISASSEMBLY:
         # objdump sync becomes .word if sync type set in amount field
-        CONVERSION['sync'] = [['amount != 0', WORD]],
+        CONVERSION['sync'] = [['amount != 0', WORD]]
         # objdump disassembly returns .word for sel != 0
         CONVERSION['mtc0'] = [['sel != 0', WORD]]
         CONVERSION['mfc0'] = [['sel != 0', WORD]]

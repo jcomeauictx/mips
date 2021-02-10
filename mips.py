@@ -83,6 +83,7 @@ ARGS = {
     'tC': '\t%(rt)s,%(coregister)s',
     'tC$': '\t%(rt)s,%(coregister)s,0x%(sel)x',
     'S': '\t0x%(longcode)x',
+    'sync': '\t0x%(amount)x',
 }
 COMMENT = '\t# %(index)x: %(chunk)r %(comment)s'
 
@@ -120,6 +121,7 @@ PATTERN = {
     'break': LABEL + MNEMONIC + ARGS['cc'] + COMMENT,
     'syscall': LABEL + MNEMONIC + ARGS['S'] + COMMENT,
     'cvt': LABEL + MNEMONIC + ARGS['cvt'] + COMMENT,
+    'sync': LABEL + MNEMONIC + ARGS['sync'] + COMMENT,
 }
 
 ARGSEP = r'[,()]\s*'
@@ -235,7 +237,7 @@ SPECIAL = [
     ['movn', 'arithlog', None, 'amount == 0', None, 11],
     ['syscall', 'syscall', False, 'True', False, 12],
     ['break', 'simple', False, 'True', False, 13],
-    ['sync', 'simple', False, 'source == target == dest == 0', False, 15],
+    ['sync', 'sync', False, 'source == target == dest == 0', False, 15],
     ['mfhi', 'movefrom', False, 'source == target == amount == 0', False, 16],
     ['mthi', 'moveto', False, 'target == dest == amount == 0', False, 17],
     ['mflo', 'movefrom', False, 'source == target == amount == 0', False, 18],
@@ -2212,7 +2214,12 @@ def init():
             # it's up to the assembly coder to put them into the code.
             LABELS[(index * vectorlength) + 0x200] = 'intvec%d' % index
     if MATCH_OBJDUMP_DISASSEMBLY:
-        # objdump sync becomes .word if sync type set in amount field
+        # objdump sync becomes .word if stype set in amount field, and
+        # simple "sync" if amount is zero
+        CONVERSION['sync'] = [[
+            'amount == 0',
+            ['sync', 'simple', False, 'True', False],
+        ]]
         CONVERSION['sync'] = [['amount != 0', WORD]]
         # objdump disassembly returns .word for sel != 0
         CONVERSION['mtc0'] = [['sel != 0', WORD]]

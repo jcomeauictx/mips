@@ -245,12 +245,12 @@ SPECIAL = [
     ['dsrav', 'arithlog', False, 'amount == 0', True, 23],
     ['mult', 'divmult', None, 'dest == amount == 0', None, 24],
     ['multu', 'divmult', None, 'dest == amount == 0', None, 25],
-    ['div', 'arithlog', False, 'dest == amount == 0', True, 26],
-    ['divu', 'arithlog', False, 'dest == amount == 0', True, 27],
+    ['div', 'divmult', False, 'dest == amount == 0', True, 26],
+    ['divu', 'divmult', False, 'dest == amount == 0', True, 27],
     ['dmult', 'arithlog', False, 'dest == amount == 0', True, 28],
     ['dmultu', 'arithlog', False, 'dest == amount == 0', True, 29],
-    ['ddiv', 'arithlog', False, 'dest == amount == 0', True, 30],
-    ['ddivu', 'arithlog', False, 'dest == amount == 0', True, 31],
+    ['ddiv', 'divmult', False, 'dest == amount == 0', True, 30],
+    ['ddivu', 'divmult', False, 'dest == amount == 0', True, 31],
     ['add', 'arithlog', False, 'amount == 0', True, 32],
     ['addu', 'arithlog', False, 'amount == 0', True, 33],
     ['sub', 'arithlog', False, 'amount == 0', True, 34],
@@ -843,25 +843,31 @@ REFERENCE = {
                      'enable(MipsOverflow)',
     },
     'ddiv': {
+        # obdjump incorrectly dumps ddiv as arithlog
         'fields': [
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['0', '0000000000'],
+            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
             ['DDIV', '011110'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
         'emulation': 'mips_div(rs, rt, bits=64)',
     },
     'ddivu': {
+        # obdjump incorrectly dumps ddivu as arithlog
         'fields': [
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['0', '0000000000'],
-            ['DDIV', '011111'],
+            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
+            ['DDIVU', '011111'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
         'emulation': 'mips_div(rs, rt, bits=64, signed=False)',
     },
     'deret': {
@@ -875,25 +881,31 @@ REFERENCE = {
         'emulation': 'mips_deret()',
     },
     'div': {
+        # obdjump incorrectly dumps ddiv as arithlog
         'fields': [
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['0', '0000000000'],
+            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
             ['DIV', '011010'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
         'emulation': 'mips_div(rs, rt)',
     },
     'divu': {
+        # obdjump incorrectly dumps ddiv as arithlog
         'fields': [
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            ['0', '0000000000'],
+            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            ['rd', 'bbbbb'],
+            ['0', '00000'],
             ['DIVU', '011011'],
         ],
-        'args': ['rs,rt'],
+        'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
         'emulation': 'mips_div(rs, rt, unsigned=True)',
     },
     'dmult': {
@@ -2186,10 +2198,6 @@ def init():
                 listing.insert(listing.index(item), WORD)
         while len(listing) < size:
             listing.append(WORD)
-    REGISTER_REFERENCE.update({value: key for key, value in COREGISTER.items()})
-    for listing in REGISTER, ALTREG, FLOATREG:
-        hashtable = zip(listing, range(len(listing)))
-        REGISTER_REFERENCE.update(hashtable)
     if USE_LABELS:
         LABELS[0] = 'start'
         # see //s3-eu-west-1.amazonaws.com/downloads-mips/I7200/
@@ -2212,7 +2220,22 @@ def init():
         # objdump has no 'deret'
         CONVERSION['c0'][0][1] = ['c0', 'coprocessor', False, 'True', False]
         # objdump doesn't show register $s8 as frame pointer
+        REGISTER_REFERENCE['$fp'] = REGISTER.index('$fp')
         REGISTER[REGISTER.index('$fp')] = '$s8'
+        # objdump dumps div, ddiv, divu, and ddivu as arithlog
+        for item in SPECIAL:
+            if item[0] in ('div', 'divu', 'ddiv', 'ddivu'):
+                logging.warn('Making %r incorrectly dump as "arithlog"'
+                             ' to match objdump disassembly',
+                             item[0])
+                item[1] = 'arithlog'
+    else:
+        # need to be able to interpret register $s8 when assembling
+        REGISTER_REFERENCE['$s8'] = REGISTER.index('$fp')
+    REGISTER_REFERENCE.update({value: key for key, value in COREGISTER.items()})
+    for listing in REGISTER, ALTREG, FLOATREG:
+        hashtable = zip(listing, range(len(listing)))
+        REGISTER_REFERENCE.update(hashtable)
 
 def shorten(hashtable):
     '''

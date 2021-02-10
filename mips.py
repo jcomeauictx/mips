@@ -649,7 +649,7 @@ REFERENCE = {
     },
     'blezl': {
         'fields': [
-            ['BLEZ', '000110'],
+            ['BLEZL', '010110'],
             ['rs', 'bbbbb'],
             ['0', '00000'],
             ['offset', 'bbbbbbbbbbbbbbbb'],
@@ -838,7 +838,7 @@ REFERENCE = {
             ['0', '00000'],
             ['DADDU', '101101'],
         ],
-        'args': ['rd,rt,rs'],
+        'args': ['rd,rs,rt'],
         'emulation': 'disable(MipsOverflow); rd = rs + rt; '
                      'enable(MipsOverflow)',
     },

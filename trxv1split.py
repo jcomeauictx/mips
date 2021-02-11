@@ -1,7 +1,8 @@
 #!/usr/bin/python3 -OO
 '''
-Tiny replacement for Heffner/Collake FMK
+Tiny replacement for Heffner/Collake FMK, just for TRX version 1 images
 
+Tested only with an older OpenWrt image.
 Using Python3 for native lzma support
 '''
 import sys, os, subprocess, logging, lzma, gzip, zlib

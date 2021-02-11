@@ -53,7 +53,7 @@ debug:
 edit: mips.py Makefile
 	$(EDITOR) $+
 %.dat.parts: trxv1split.py %.dat
-	./$< split $(word 2,$+)
+	python3 ./$< split $(word 2,$+)
 unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 %.unsquashed: % squashfs3le.py
 	python3 $(word 2, $+) unsquash $<

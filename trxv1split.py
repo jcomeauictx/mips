@@ -45,11 +45,11 @@ def split(filespec, outdir=None):
     logging.debug('parts: %s', parts)
     for index in range(len(parts) - 1):
         hexoffset, description = parts[index]
-        size = int(parts[index + 1][0], 16)
-        writefile(dirname, hexoffset, '.raw', 'wb', size, filedata, offsets)
+        end = int(parts[index + 1][0], 16)
+        writefile(dirname, hexoffset, '.raw', 'wb', end, filedata, offsets)
         writefile(dirname, hexoffset, '.info', 'w', 0, description, offsets)
         if description.startswith(tuple(DECOMPRESSOR)):
-            data = decompress(description, filedata, hexoffset, size)
+            data = decompress(description, filedata, hexoffset, end)
             writefile(dirname, hexoffset, '.dat', 'wb', 0, data, offsets)
         elif description.startswith('TRX firmware header'):
             trx_header = description.split()
@@ -80,26 +80,34 @@ def lineinfo(line):
         raise ValueError('Bad offset: %s != %s' % (decimal, hexadecimal))
     return '0x%08x' % int(decimal), info
 
-def decompress(compression, filedata, hexoffset, size):
-    '''
+def decompress(compression, filedata, hexoffset, end):
+    r'''
     Return decompressed data for specified compression method
+
+    >>> test = b'\x1f\x8b\x08\x009\xb7%`\x00\x03+I-.\x01\x00\x0c~'
+    >>> test += b'\x7f\xd8\x04\x00\x00\x00'
+    >>> decompress('gzip compressed data', test, '0x0', len(test))
+    b'test'
     '''
     prefix = compression.split(',')[0]
     module = DECOMPRESSOR[prefix]
     offset = int(hexoffset, 16)
-    return eval(module).decompress(filedata[offset:offset + size])
+    data = filedata[offset:end]
+    logging.debug('decompressing %d bytes of %s data from offset 0x%x: %r...',
+                  end - offset, module, offset, data[:16])
+    return eval(module).decompress(data)
 
-def writefile(dirname, hexoffset, extension, mode, size, filedata, offsets):
+def writefile(dirname, hexoffset, extension, mode, end, filedata, offsets):
     '''
     Write data to file, and optionally symlink it to a name
     '''
     basename = hexoffset  # use hexadecimal offset as the root name
     pathroot = os.path.join(dirname, basename)
     offset = int(hexoffset, 16)
-    if not size:  # no offset being used
+    if not end:  # no offsets being used
         data = filedata
     else:
-        data = filedata[offset:offset + size]
+        data = filedata[offset:end]
     with open(pathroot + extension, mode) as outfile:
         outfile.write(data)
     if offset in offsets:

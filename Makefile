@@ -56,6 +56,6 @@ edit: mips.py Makefile
 	./$+
 unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 %.unsquashed: % squashfs3.py
-	$(word 2, $+) unsquash $<
+	python3 $(word 2, $+) unsquash $<
 .FORCE:
 .PRECIOUS: %.asm

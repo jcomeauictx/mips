@@ -50,7 +50,14 @@ def split(filespec, outdir=None):
         writefile(dirname, hexoffset, '.info', 'w', 0, description, offsets)
         if description.startswith(tuple(DECOMPRESSOR)):
             data = decompress(description, filedata, hexoffset, end)
-            writefile(dirname, hexoffset, '.dat', 'wb', 0, data, offsets)
+            try:
+                text = data.decode()
+            except UnicodeDecodeError:
+                text = None
+            if text is None:
+                writefile(dirname, hexoffset, '.dat', 'wb', 0, data, offsets)
+            else:
+                writefile(dirname, hexoffset, '.txt', 'w', 0, text, offsets)
         elif description.startswith('TRX firmware header'):
             trx_header = description.split()
             crc32 = trx_header[trx_header.index('CRC32:') + 1].rstrip(',')

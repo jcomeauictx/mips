@@ -1,18 +1,23 @@
 #!/usr/bin/python3 -OO
 '''
-squash and unsquash version 3 squashfs filesystems
+squash and unsquash version 3 little-endian squashfs filesystems
 
-information from https://dr-emann.github.io/squashfs/
+information from //dr-emann.github.io/squashfs/
+and, for 3.0, //github.com/plougher/squashfs-tools/squashfs-tools/squashfs_fs.h,
+checkout tag 3.1
 '''
 import sys, os, struct, lzma, gzip, zlib, logging
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
-MAGIC = 'hsqs'
-HEADER_SPEC = [
-    ['magic', 4, None],
+MAGIC = 'hsqs'  # little-endian; big-endian would be seen as 'sqsh'
+HEADER_SPEC = [  # called struct squashfs_super_block in squashfs_fs.h
+    ['s_magic', 4, None],
     ['inodes', 4, '<L'],
-    ['mtime', 4, '<L'],
+    ['bytes_used_2', 4, '<L'],
+    ['uid_start_2', 4, '<L'],
+    ['guid_start_2', 4, '<L'],
+    ['inode_table_start_2', 4, '<L'],
 ]
 
 def unsquash(filespec):

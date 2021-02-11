@@ -55,7 +55,7 @@ edit: mips.py Makefile
 %.dat.parts: trxv1split.py %.dat
 	./$+
 unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
-%.unsquashed: % squashfs3.py
+%.unsquashed: % squashfs3le.py
 	python3 $(word 2, $+) unsquash $<
 .FORCE:
 .PRECIOUS: %.asm

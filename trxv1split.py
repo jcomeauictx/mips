@@ -2,7 +2,7 @@
 '''
 Tiny replacement for Heffner/Collake FMK, just for TRX version 1 images
 
-Tested only with an older OpenWrt image.
+Tested only with an older OpenWrt CFE partition image.
 Using Python3 for native lzma support
 '''
 import sys, os, subprocess, logging, lzma, gzip, zlib
@@ -74,7 +74,7 @@ def lineinfo(line):
         raise ValueError('Line %s expected to have 3 elements' % repr(line))
     if int(decimal) != int(hexadecimal, 16):
         raise ValueError('Bad offset: %s != %s' % (decimal, hexadecimal))
-    return hexadecimal, info
+    return '0x%08x' % int(decimal), info
 
 def decompress(compression, data):
     '''

@@ -85,4 +85,5 @@ def decompress(compression, data):
     return eval(module).decompress(data)
 
 if __name__ == '__main__':
-    split(*sys.argv[1:])
+    COMMAND = sys.argv[1]
+    eval(COMMAND)(*sys.argv[2:])

@@ -168,6 +168,7 @@ INSTRUCTION = [
     ['daddiu', 'arithlogi', False, 'True', True, 25],
     ['ldl', 'loadstore', True, 'True', True, 26],
     ['ldr', 'loadstore', True, 'True', True, 27],
+    ['SPECIAL2', 'arithlog', True, 'True', True, 28],
     ['jalx', 'jalx', True, 'True', True, 29],
     ['lb', 'loadstore', True, 'True', True, 32],
     ['lh', 'loadstore', True, 'True', True, 33],
@@ -281,6 +282,10 @@ SPECIAL = [
     ['dsra32', 'shift', False, 'source == 0', True, 63]
 ]
 
+SPECIAL2 = [
+    ['mul', 'arithlog', None, 'amount == 0', None, 2],
+]
+
 COP0 = [
     ['mfc0', 'coproc_move', False, 'mtzero == 0', False, 0],
     ['mtc0', 'coproc_move', False, 'mtzero == 0', False, 4],
@@ -383,6 +388,7 @@ COREGISTER = {
 
 INSTRUCTIONS = {
     'SPECIAL': SPECIAL,
+    'SPECIAL2': SPECIAL2,
     'REGIMM': REGIMM,
     'COP0': COP0,
     'COP1': COP1,
@@ -1426,6 +1432,18 @@ REFERENCE = {
         'args': ['rs'],
         'emulation': 'mips_mtlo(rs.value)',
     },
+    'mul': {
+        'fields': [
+            ['SPECIAL2', '011100'],
+            ['rs', 'nnnnn'],
+            ['rt', 'nnnnn'],
+            ['rd', 'nnnnn'],
+            ['0', '00000'],
+            ['MUL', '000010'],
+        ],
+        'args': ['rd,rs,rt'],
+        'emulation': 'rd.value = rs * rt',
+    },
     'mult': {
         'fields': [
             ['SPECIAL', '000000'],
@@ -2143,6 +2161,8 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     mtzero = instruction & 0b11111111000 # coprocessor moveto requires zero
     if mnemonic == 'SPECIAL':
         mnemonic, style, labeled, condition, signed = SPECIAL[function][:5]
+    if mnemonic == 'SPECIAL2':
+        mnemonic, style, labeled, condition, signed = SPECIAL2[function][:5]
     elif mnemonic == 'REGIMM':
         mnemonic, style, labeled, condition, signed = REGIMM[target][:5]
     elif mnemonic.startswith('COP'):
@@ -2195,7 +2215,7 @@ def init():
     and catch some errors in entering instruction parameters
     '''
     for listing, size in ([INSTRUCTION, 64], [REGIMM, 32], [SPECIAL, 64],
-            [COP0, 32], [COP1, 32], [COP2, 32], [COP3, 32]):
+            [SPECIAL2, 64], [COP0, 32], [COP1, 32], [COP2, 32], [COP3, 32]):
         for item in list(listing):
             while item[-1] != listing.index(item):
                 logging.debug('%s expected at %d, found at %d',

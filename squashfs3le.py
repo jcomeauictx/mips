@@ -23,6 +23,16 @@ HEADER_SPEC = [  # called struct squashfs_super_block in squashfs_fs.h
     ['s.minor', 2, '<H'],
     ['block_size_1', 2, '<H'],
     ['block_log', 2, '<H'],
+    ['flags', 1, 'B'],
+    ['no_uids', 1, 'B'],
+    # bad design idea to have an int on an unaligned boundary...
+    # would have been better to have an unused byte here and align mkfs_time
+    ['mkfs_time', 4, '<L'],  # filesystem creation or last modification
+    ['root_inode', 4, '<L'],  # C source has 'squashfs_inode_t'
+    ['block_size', 4, '<L'],
+    ['fragments', 4, '<L'],
+    ['fragment_table_start_2', 4, '<L'],
+    ['bytes_used', 8, '<Q'],
 ]
 
 def unsquash(filespec):

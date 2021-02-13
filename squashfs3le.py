@@ -18,6 +18,11 @@ HEADER_SPEC = [  # called struct squashfs_super_block in squashfs_fs.h
     ['uid_start_2', 4, '<L'],
     ['guid_start_2', 4, '<L'],
     ['inode_table_start_2', 4, '<L'],
+    ['directory_table_start_2', 4, '<L'],
+    ['s.major', 2, '<H'],
+    ['s.minor', 2, '<H'],
+    ['block_size_1', 2, '<H'],
+    ['block_log', 2, '<H'],
 ]
 
 def unsquash(filespec):

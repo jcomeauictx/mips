@@ -2525,8 +2525,11 @@ def emulate(filespec):
                                                      parts.group('was'))
         logging.info('executing: %s', emulation)
         locals().update(emulation[1])
+        index += 1
+        pc += 4
         exec(emulation[0])
-        raw_input('Continue> ')
+        raw_input('%s Continue> ' % Register.registers)
+        
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])

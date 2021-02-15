@@ -2374,6 +2374,8 @@ def smart_mask(number, name, offset, argsdict, maskbits):
 def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
     '''
     Assemble an instruction given the assembly source line
+
+    Return both the assembled instruction and the emulation info to emulator
     '''
     logging.debug('processing: %s', locals())
     instruction = 0
@@ -2382,6 +2384,8 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
     if reference:
         if {'fields', 'args'}.issubset(reference.keys()):
             argsdict = buildargs(args, reference['args'])
+            fieldsdict = {key: value for key, value in reference['fields']
+                          if re.compile('[A-Za-z_][A-Za-z0-9_]+').match(key)}
             for name, value in reference['fields']:
                 logging.debug('assemble_instruction: name %r, value %r',
                               name, value)
@@ -2429,7 +2433,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                           arg, REGISTER_REFERENCE)
                             raise ValueError('Cannot process arg %r' % arg)
         elif reference.get('action') is not None:
-            exec(reference['action'])
+            exec reference['action'] in globals(), locals()
             instruction = None
         elif reference.get('alias_of') is not None:
             aliases = reference['alias_of']
@@ -2449,7 +2453,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                         None)
         else:
             raise NotImplementedError('No action found for %s' % mnemonic)
-        return instruction, reference.get('emulation')
+        return instruction, (reference['emulation'], fieldsdict)
     else:
         raise NotImplementedError('%s not in REFERENCE' % mnemonic)
 
@@ -2459,30 +2463,21 @@ def emulate(filespec):
     '''
     with open(filespec) as infile:
         filedata = infile.read()
-    if '\x00' in filedata:
-        logging.debug('emulator running from binary')
-        binary = True
-        program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
-    else:
-        logging.debug('emulator "running" from assembly language')
-        binary = False
-        program = filedata.splitlines()
+    program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
     pc = 0x8c000000  # program counter on reset
     index = 0
-    if binary:
+    while True:
         instruction = disassemble_chunk(0, index, program[index], len(filedata))
-    else:
-        instruction = program[0]
-    logging.debug('executing %s', instruction)
-    parts = re.compile(LINEPATTERN).match(instruction)
-    if not parts:
-        raise NotImplementedError('No known way to execute %s', instruction)
-    executable, emulation = assemble_instruction(0, pc,
-                                                 parts.group('mnemonic'),
-                                                 parts.group('args'),
-                                                 parts.group('was'))
-    logging.info('executing: %s', emulation)
-    exec(emulation)
+        logging.debug('executing %s', instruction)
+        parts = re.compile(LINEPATTERN).match(instruction)
+        if not parts:
+            raise NotImplementedError('No known way to execute %s', instruction)
+        executable, emulation = assemble_instruction(0, pc,
+                                                     parts.group('mnemonic'),
+                                                     parts.group('args'),
+                                                     parts.group('was'))
+        logging.info('executing: %s', emulation)
+        exec(emulation)
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])

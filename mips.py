@@ -507,7 +507,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt = rs + immediate',
+        'emulation': 'rt.value = rs + immediate',
     },
     'addiu': {
         'fields': [
@@ -517,7 +517,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'disable(MipsOverflow); rt = rs + immediate'
+        'emulation': 'disable(MipsOverflow); rt.value = rs + immediate'
                      'enable(MipsOverflow)',
     },
     'addu': {
@@ -552,7 +552,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt = rs & immediate',
+        'emulation': 'rt.value = rs & immediate',
     },
     'b': {
         'alias_of': [['beq', '$zero,$zero,offset']],
@@ -832,7 +832,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'pushbits(32); rt = rs + immediate; popbits()',
+        'emulation': 'pushbits(32); rt.value = rs + immediate; popbits()',
     },
     'daddiu': {
         'fields': [
@@ -842,7 +842,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'disable(MipsOverflow); rt = rs + immediate; '
+        'emulation': 'disable(MipsOverflow); rt.value = rs + immediate; '
                      'enable(MipsOverflow)',
     },
     'daddu': {
@@ -1518,7 +1518,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt = rs | immediate',
+        'emulation': 'rt.value = rs | immediate',
     },
     'sb': {
         'fields': [
@@ -2004,7 +2004,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt = rs ^ immediate',
+        'emulation': 'rt.value = rs ^ immediate',
     },
 }
 
@@ -2070,6 +2070,44 @@ CONVERSION = {
     'jalr': [['dest == 31', ['jalr', 'jumpr', True, 'True', True]]],
     'syscall': [['longcode == 0', ['syscall', 'simple', None, 'True', None]]],
 }
+
+class Register(object):
+    '''
+    Represent a MIPS general register
+    '''
+    registers = {}
+    def __new__(cls, *args, **kwargs):
+        name = args[0]
+        if name in cls.registers:
+            logging.debug('returning already existing register %s', name)
+            return cls.registers[name]
+        else:
+            logging.debug('creating new Register(%s)', name)
+            return super(Register, cls).__new__(cls, *args, **kwargs)
+    def __init__(self, name, number=None, value=0): 
+        self.name = name
+        if number is None:
+            number = REGISTER_REFERENCE[name]
+        self.number = number
+        self.value = value
+        self.registers[name] = self
+        self.registers[number] = self
+
+    def __index__(self):
+        return self.value
+
+    def __int__(self):
+        return self.value
+
+    def __add__(self, other):
+        return self.value + int(other)
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<Register_%s(%d) value=%d>' % (self.name, self.number,
+                                               self.value)
 
 def disassemble(filespec):
     '''
@@ -2430,7 +2468,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                             logging.debug('coregister after: %s', arg)
                         if arg in REGISTER_REFERENCE:
                             if name in fieldsdict:
-                                fieldsdict[name] = arg.lstrip('$')
+                                fieldsdict[name] = Register(arg)
                             logging.debug('before %r: 0x%x', arg, instruction)
                             instruction |= REGISTER_REFERENCE[arg]
                             logging.debug('after %r: 0x%x', arg, instruction)
@@ -2486,6 +2524,8 @@ def emulate(filespec):
                                                      parts.group('args'),
                                                      parts.group('was'))
         logging.info('executing: %s', emulation)
+        locals().update(emulation[1])
+        exec(emulation[0])
         raw_input('Continue> ')
 if __name__ == '__main__':
     init()

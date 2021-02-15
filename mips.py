@@ -2430,7 +2430,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                             logging.debug('coregister after: %s', arg)
                         if arg in REGISTER_REFERENCE:
                             if name in fieldsdict:
-                                fieldsdict[name] = REGISTER_REFERENCE[arg]
+                                fieldsdict[name] = arg.lstrip('$')
                             logging.debug('before %r: 0x%x', arg, instruction)
                             instruction |= REGISTER_REFERENCE[arg]
                             logging.debug('after %r: 0x%x', arg, instruction)

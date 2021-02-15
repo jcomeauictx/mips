@@ -3,7 +3,7 @@
 Intelligently disassemble and reassemble MIPS binaries
 '''
 import sys, os, struct, ctypes, re, logging
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -507,7 +507,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = rs + immediate',
+        'emulation': ['rt.value = rs + immediate'],
     },
     'addiu': {
         'fields': [
@@ -517,8 +517,11 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'disable(MipsOverflow); rt.value = rs + immediate'
-                     'enable(MipsOverflow)',
+        'emulation': [
+            'disable(MipsOverflow)',
+            'rt.value = rs + immediate',
+            'enable(MipsOverflow)',
+        ],
     },
     'addu': {
         'fields': [
@@ -1764,7 +1767,10 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_sw(offset, base, rt.value)',
+        'emulation': [
+            'memory[offset + base] &= 0xffff0000',
+            'memory[offset + base] |= rt.value',
+        ],
     },
     'swc1': {
         'fields': [
@@ -2511,6 +2517,9 @@ def emulate(filespec):
     with open(filespec) as infile:
         filedata = infile.read()
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
+    memory = defaultdict(int)
+    memory.update({i * 4: struct.unpack('<L', program[i])[0]
+                   for i in range(len(program))})
     pc = 0x8c000000  # program counter on reset
     index = 0
     while True:
@@ -2527,7 +2536,8 @@ def emulate(filespec):
         locals().update(emulation[1])
         index += 1
         pc += 4
-        exec(emulation[0])
+        for code in emulation[0]:
+            exec(code, globals(), locals())
         raw_input('%s Continue> ' % Register.registers)
         
 if __name__ == '__main__':

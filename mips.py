@@ -2458,29 +2458,30 @@ def emulate(filespec):
     primitive MIPS emulator
     '''
     with open(filespec) as infile:
-        program = infile.read()
-    if '\x00' in program:
+        filedata = infile.read()
+    if '\x00' in filedata:
         logging.debug('emulator running from binary')
         binary = True
-        program = [program[i:i + 4] for i in range(0, len(program), 4]
+        program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
     else:
         logging.debug('emulator "running" from assembly language')
         binary = False
-        program = program.splitlines()
+        program = filedata.splitlines()
     pc = 0x8c000000  # program counter on reset
     index = 0
     if binary:
-        instruction = disassemble_chunk(program[index])
+        instruction = disassemble_chunk(0, index, program[index], len(filedata))
     else:
         instruction = program[0]
     logging.debug('executing %s', instruction)
-    parts = LINEPATTERN.match(instruction)
+    parts = re.compile(LINEPATTERN).match(instruction)
     if not parts:
         raise NotImplementedError('No known way to execute %s', instruction)
     executable, emulation = assemble_instruction(0, pc,
                                                  parts.group('mnemonic'),
                                                  parts.group('args'),
                                                  parts.group('was'))
+    logging.info('executing: %s', emulation)
     exec(emulation)
 if __name__ == '__main__':
     init()

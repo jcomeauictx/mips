@@ -2394,13 +2394,18 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                 mask = (1 << fieldlength) - 1
                 if value.isdigit():
                     instruction |= int(value, 2)
+                    if name in fieldsdict:
+                        fieldsdict[name] = int(value, 2)
                 else:  # typically 'bbbbb'
                     try:
                         arg = argsdict[name]
+                        fieldsdict[name] = arg
                     except KeyError:
                         raise KeyError('%r not found in %s' % (name, argsdict))
                     if arg[:1].startswith(tuple('-0123456789')):
                         number = eval(arg)
+                        if name in fieldsdict:
+                            fieldsdict[name] = number
                         logging.debug('before merging number %r: 0x%x',
                                       arg, instruction)
                         instruction |= smart_mask(number, name, offset,
@@ -2408,12 +2413,14 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                         logging.debug('after merging number %r: 0x%x',
                                       arg, instruction)
                     elif arg in LABELS:
+                        if name in fieldsdict:
+                            fieldsdict[name] = LABELS[arg]
                         logging.debug('before merging label %r (0x%x): 0x%x',
-                                      arg, LABELS.get(arg), instruction)
+                                      arg, LABELS[arg], instruction)
                         instruction |= smart_mask(LABELS[arg], name, offset,
                                                   argsdict, mask)
                         logging.debug('after merging label %r (0x%x): 0x%x',
-                                      arg, LABELS.get(arg), instruction)
+                                      arg, LABELS[arg], instruction)
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
@@ -2422,6 +2429,8 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                             arg = arg.replace(arg[arg.index('_') - 1], '%d', 1)
                             logging.debug('coregister after: %s', arg)
                         if arg in REGISTER_REFERENCE:
+                            if name in fieldsdict:
+                                fieldsdict[name] = REGISTER_REFERENCE[arg]
                             logging.debug('before %r: 0x%x', arg, instruction)
                             instruction |= REGISTER_REFERENCE[arg]
                             logging.debug('after %r: 0x%x', arg, instruction)
@@ -2477,7 +2486,7 @@ def emulate(filespec):
                                                      parts.group('args'),
                                                      parts.group('was'))
         logging.info('executing: %s', emulation)
-        exec(emulation)
+        raw_input('Continue> ')
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])

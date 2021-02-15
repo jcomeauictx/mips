@@ -1768,8 +1768,8 @@ REFERENCE = {
         ],
         'args': ['rt,offset(base)'],
         'emulation': [
-            'memory[offset + base] &= 0xffff0000',
-            'memory[offset + base] |= rt.value',
+            'memory[base + offset] &= 0xffff0000',
+            'memory[base + offset] |= rt.value',
         ],
     },
     'swc1': {
@@ -2532,13 +2532,13 @@ def emulate(filespec):
                                                      parts.group('mnemonic'),
                                                      parts.group('args'),
                                                      parts.group('was'))
-        logging.info('executing: %s', emulation)
         locals().update(emulation[1])
         index += 1
         pc += 4
         for code in emulation[0]:
+            logging.info('executing: %s', code)
+            raw_input('%s Continue> ' % Register.registers)
             exec(code, globals(), locals())
-        raw_input('%s Continue> ' % Register.registers)
         
 if __name__ == '__main__':
     init()

@@ -1,6 +1,6 @@
 #!/usr/bin/python3 -OO
 '''
-Tiny replacement for Heffner/Collake FMK, just for TRX version 1 images
+Tiny replacement for Heffner/Collake FMK, just for TRX version 1 LE MIPS images
 
 Tested only with an older OpenWrt CFE partition image.
 Using Python3 for native lzma support

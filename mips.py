@@ -45,6 +45,14 @@ FLOATREG = [
     '$f' + str(n) for n in range(32)
 ]
 
+# pattern for reading assembly language
+LINEPATTERN = r'^(?:(?P<label>[a-z0-9.]+):)?\s*'  # match label
+LINEPATTERN += r'(?:(?P<mnemonic>[a-z0-9.]+)\s+)?'  # match mnemonic
+LINEPATTERN += r'(?:(?P<args>[a-z0-9$()._,-]+)?\s*)?'  # match args
+# assembler leaves a hint at the end of a comment when it turns
+# a machine instruction into a macro/pseudoop. we use these to
+# create identical images to original from unedited disassemblies.
+LINEPATTERN += r"(?:#.*?(?:[(]from '(?P<was>[a-z0-9.]+)'[)])?)?\s*$"
 
 # patterns for assembly language output
 LABEL = '%(label)s'
@@ -2081,13 +2089,6 @@ def assemble(filespec):
     primitive assembler
     '''
     outfile = None
-    linepattern = r'^(?:(?P<label>[a-z0-9.]+):)?\s*'  # match label
-    linepattern += r'(?:(?P<mnemonic>[a-z0-9.]+)\s+)?'  # match mnemonic
-    linepattern += r'(?:(?P<args>[a-z0-9$()._,-]+)?\s*)?'  # match args
-    # assembler leaves a hint at the end of a comment when it turns
-    # a machine instruction into a macro/pseudoop. we use these to
-    # create identical images to original from unedited disassemblies.
-    linepattern += r"(?:#.*?(?:[(]from '(?P<was>[a-z0-9.]+)'[)])?)?\s*$"
     with open(filespec, 'r') as infile:
         filedata = infile.read().splitlines()
     # first pass, just build labels
@@ -2101,14 +2102,14 @@ def assemble(filespec):
         offset = 0
         for line in filedata:
             label = None
-            match = re.match(linepattern, line)
+            match = re.match(LINEPATTERN, line)
             if match:
                 label = match.group('label')
             else:
                 raise ValueError('No match for regex %r to line %r' %
-                                 (linepattern, line))
+                                 (LINEPATTERN, line))
             #logging.debug('match: %s', match.groupdict())
-            instruction = assemble_instruction(
+            instruction, emulation = assemble_instruction(
                 loop, offset,
                 **{key: value for key, value
                     in match.groupdict().items() if key != 'label'})
@@ -2206,6 +2207,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     line = pattern % locals()
     if loop == 1:
         print line
+    return line
 
 def init():
     '''
@@ -2447,10 +2449,39 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                         None)
         else:
             raise NotImplementedError('No action found for %s' % mnemonic)
+        return instruction, reference.get('emulation')
     else:
         raise NotImplementedError('%s not in REFERENCE' % mnemonic)
-    return instruction
 
+def emulate(filespec):
+    '''
+    primitive MIPS emulator
+    '''
+    with open(filespec) as infile:
+        program = infile.read()
+    if '\x00' in program:
+        logging.debug('emulator running from binary')
+        binary = True
+        program = [program[i:i + 4] for i in range(0, len(program), 4]
+    else:
+        logging.debug('emulator "running" from assembly language')
+        binary = False
+        program = program.splitlines()
+    pc = 0x8c000000  # program counter on reset
+    index = 0
+    if binary:
+        instruction = disassemble_chunk(program[index])
+    else:
+        instruction = program[0]
+    logging.debug('executing %s', instruction)
+    parts = LINEPATTERN.match(instruction)
+    if not parts:
+        raise NotImplementedError('No known way to execute %s', instruction)
+    executable, emulation = assemble_instruction(0, pc,
+                                                 parts.group('mnemonic'),
+                                                 parts.group('args'),
+                                                 parts.group('was'))
+    exec(emulation)
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])

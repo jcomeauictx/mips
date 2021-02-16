@@ -449,7 +449,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': 'raise Exception("0x%x not executable code", immediate)',
+        'emulation': ['raise Exception("0x%x not executable code", immediate)'],
     },
     'abs.s': {
         'fields': [
@@ -461,7 +461,7 @@ REFERENCE = {
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
-        'emulation': 'fd = abs(fs)'
+        'emulation': ['fd.value = abs(fs)'],
     },
     'abs.d': {
         'fields': [
@@ -473,7 +473,7 @@ REFERENCE = {
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
-        'emulation': 'fd = abs(fs)'
+        'emulation': ['fd.value = abs(fs)'],
     },
     'abs.ps': {
         'fields': [
@@ -485,7 +485,7 @@ REFERENCE = {
             ['ABS', '000101'],
         ],
         'args': ['fd,fs'],
-        'emulation': 'fd = abs(fs)'
+        'emulation': ['fd.value = abs(fs)'],
     },
     'add': {
         'fields': [
@@ -497,7 +497,7 @@ REFERENCE = {
             ['ADD', '100000'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd = rs + rt',
+        'emulation': ['rd.value = rs + rt'],
     },
     'addi': {
         'fields': [
@@ -533,7 +533,7 @@ REFERENCE = {
             ['ADDU', '100001'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value + rt.value',
+        'emulation': ['rd.value = rs + rt'],
     },
     'and': {
         'fields': [
@@ -545,7 +545,7 @@ REFERENCE = {
             ['AND', '100100'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value & rt.value',
+        'emulation': ['rd.value = rs & rt'],
     },
     'andi': {
         'fields': [
@@ -555,7 +555,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = rs & immediate',
+        'emulation': ['rt.value = rs & immediate'],
     },
     'b': {
         'alias_of': [['beq', '$zero,$zero,offset']],
@@ -573,8 +573,8 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
-        'emulation': 'if rs == rt: address = (offset << 2) + pc; '
-                     'do_next(); jump(address)',
+        'emulation': ['if rs == rt: address = (offset << 2) + pc; '
+                     'do_next(); jump(address)'],
     },
     'beql': {
         'fields': [
@@ -584,7 +584,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
-        'emulation': 'if rs == rt: mips_branch(offset, likely=True)'
+        'emulation': ['if rs == rt: mips_branch(offset, likely=True)'],
     },
     'beqz': {
         'alias_of': [['beq', 'rs,$zero,offset']],
@@ -602,7 +602,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs >= 0: mips_jump(offset)',
+        'emulation': ['if rs >= 0: mips_jump(offset)'],
     },
     'bgezal': {
         'fields': [
@@ -612,7 +612,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs.value() >= 0: mips_jump(offset)',
+        'emulation': ['if rs >= 0: mips_jump(offset)'],
     },
     'bgezall': {
         'fields': [
@@ -622,7 +622,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs.value() >= 0: mips_jump(offset, likely=True)',
+        'emulation': ['if rs >= 0: mips_jump(offset, likely=True)'],
     },
     'bgezl': {
         'fields': [
@@ -632,7 +632,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs >= 0: mips_jump(offset, likely=True)',
+        'emulation': ['if rs >= 0: mips_jump(offset, likely=True)'],
     },
     'bgtz': {
         'fields': [
@@ -642,8 +642,8 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if mips_signed(rs.value, rs.size) > 0: '
-                     'do_next(); mips_jump(offset)',
+        'emulation': ['if mips_signed(rs.value, rs.size) > 0: '
+                     'do_next(); mips_jump(offset)'],
     },
     'bgtzl': {
         'fields': [
@@ -653,7 +653,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs > 0: mips_jump(offset, likely=True)'
+        'emulation': ['if rs > 0: mips_jump(offset, likely=True)'],
     },
     'blez': {
         'fields': [
@@ -663,8 +663,8 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
-                     'do_next(); mips_jump(offset)',
+        'emulation': ['if mips_signed(rs.value, rs.size) < 0: '
+                     'do_next(); mips_jump(offset)'],
     },
     'blezl': {
         'fields': [
@@ -674,7 +674,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs < 0: mips_jump(offset)',
+        'emulation': ['if rs < 0: mips_jump(offset)'],
     },
     'bltz': {
         'fields': [
@@ -684,8 +684,8 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if mips_signed(rs.value, rs.size) < 0: '
-                     'do_next(); mips_jump(offset)',
+        'emulation': ['if mips_signed(rs.value, rs.size) < 0: '
+                     'do_next(); mips_jump(offset)'],
     },
     'bltzal': {
         'fields': [
@@ -695,7 +695,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs < 0: mips_jump(offset)',
+        'emulation': ['if rs < 0: mips_jump(offset)'],
     },
     'bltzall': {
         'fields': [
@@ -705,7 +705,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs < 0: mips_jump(offset, likely=True)',
+        'emulation': ['if rs < 0: mips_jump(offset, likely=True)'],
     },
     'bltzl': {
         'fields': [
@@ -715,7 +715,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,offset'],
-        'emulation': 'if rs < 0: mips_jump(offset, likely=True)',
+        'emulation': ['if rs < 0: mips_jump(offset, likely=True)'],
     },
     'bne': {
         'fields': [
@@ -725,8 +725,8 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
-        'emulation': 'if rs.value != rt.value: address = (offset << 2) + pc; '
-                     'do_next(); mips_jump(address)',
+        'emulation': ['if rs.value != rt.value: address = (offset << 2) + pc; '
+                     'do_next(); mips_jump(address)'],
     },
     'bnel': {
         'fields': [
@@ -736,8 +736,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,rt,offset'],
-        'emulation': 'if rs.value != rt.value: '
-                     'mips_jump(offset, likely=True)',
+        'emulation': ['if rs != rt: mips_jump(offset, likely=True)'],
     },
     'bnez': {
         'alias_of': [['bne', 'rs,$zero,offset']],
@@ -755,7 +754,7 @@ REFERENCE = {
             ['BREAK', '001101'],
         ],
         'args': ['codehi,codelo', [None, '0,0']],
-        'emulation': 'mips_break()',
+        'emulation': ['mips_break()'],
     },
     'c0': {
         'fields': [
@@ -764,7 +763,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': 'logging.debug("ignoring c0 0x%x", immediate)',
+        'emulation': ['logging.debug("ignoring c0 0x%x", immediate)'],
     },
     'c1': {
         'fields': [
@@ -773,7 +772,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': 'logging.debug("ignoring c1 0x%x", immediate)',
+        'emulation': ['logging.debug("ignoring c1 0x%x", immediate)'],
     },
     'c2': {
         'fields': [
@@ -782,7 +781,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': 'logging.debug("ignoring c2 0x%x", immediate)',
+        'emulation': ['logging.debug("ignoring c2 0x%x", immediate)'],
     },
     'c3': {
         'fields': [
@@ -791,7 +790,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': 'logging.debug("ignoring c3 0x%x", immediate)',
+        'emulation': ['logging.debug("ignoring c3 0x%x", immediate)'],
     },
     'cache': {
         'fields': [
@@ -801,7 +800,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['op,offset(base)'],
-        'emulation': 'mips_cache(op, base, offset)',
+        'emulation': ['mips_cache(op, base, offset)'],
     },
     'cvt.s.d': {
         'fields': [
@@ -813,7 +812,7 @@ REFERENCE = {
             ['CVT.S', '100000'],
         ],
         'args': ['fd,fs'],
-        'emulation': 'mips_cvt("s", "d", fs, fd)',
+        'emulation': ['mips_cvt("s", "d", fs, fd)'],
     },
     'dadd': {
         'fields': [
@@ -825,7 +824,7 @@ REFERENCE = {
             ['DADD', '101100'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd = rs + rt',
+        'emulation': ['rd.value = rs + rt'],
     },
     'daddi': {
         'fields': [
@@ -835,7 +834,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'pushbits(32); rt.value = rs + immediate; popbits()',
+        'emulation': ['pushbits(32); rt.value = rs + immediate; popbits()'],
     },
     'daddiu': {
         'fields': [
@@ -845,8 +844,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'disable(MipsOverflow); rt.value = rs + immediate; '
-                     'enable(MipsOverflow)',
+        'emulation': ['disable(MipsOverflow); rt.value = rs + immediate; '
+                     'enable(MipsOverflow)'],
     },
     'daddu': {
         'fields': [
@@ -858,8 +857,8 @@ REFERENCE = {
             ['DADDU', '101101'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'disable(MipsOverflow); rd = rs + rt; '
-                     'enable(MipsOverflow)',
+        'emulation': ['disable(MipsOverflow); rd = rs + rt; '
+                     'enable(MipsOverflow)'],
     },
     'ddiv': {
         # obdjump incorrectly dumps ddiv as arithlog
@@ -873,7 +872,7 @@ REFERENCE = {
             ['DDIV', '011110'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': 'mips_div(rs, rt, bits=64)',
+        'emulation': ['mips_div(rs, rt, bits=64)'],
     },
     'ddivu': {
         # obdjump incorrectly dumps ddivu as arithlog
@@ -887,7 +886,7 @@ REFERENCE = {
             ['DDIVU', '011111'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': 'mips_div(rs, rt, bits=64, signed=False)',
+        'emulation': ['mips_div(rs, rt, bits=64, signed=False)'],
     },
     'deret': {
         'fields': [
@@ -897,7 +896,7 @@ REFERENCE = {
             ['DERET', '011111'],
         ],
         'args': [None],
-        'emulation': 'mips_deret()',
+        'emulation': ['mips_deret()'],
     },
     'div': {
         # obdjump incorrectly dumps ddiv as arithlog
@@ -911,7 +910,7 @@ REFERENCE = {
             ['DIV', '011010'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': 'mips_div(rs, rt)',
+        'emulation': ['mips_div(rs, rt)'],
     },
     'divu': {
         # obdjump incorrectly dumps ddiv as arithlog
@@ -925,7 +924,7 @@ REFERENCE = {
             ['DIVU', '011011'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': 'mips_div(rs, rt, unsigned=True)',
+        'emulation': ['mips_div(rs, rt, unsigned=True)'],
     },
     'dmult': {
         'fields': [
@@ -936,7 +935,7 @@ REFERENCE = {
             ['DMULT', '011100'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs, rt, bits=64)',
+        'emulation': ['mips_mult(rs, rt, bits=64)'],
     },
     'dmultu': {
         'fields': [
@@ -947,7 +946,7 @@ REFERENCE = {
             ['DMULTU', '011101'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs, rt, bits=64, signed=False)',
+        'emulation': ['mips_mult(rs, rt, bits=64, signed=False)'],
     },
     'dneg': {
         'alias_of': [['dsub', 'rd,$zero,rt']],
@@ -967,7 +966,7 @@ REFERENCE = {
             ['DSLL', '111000'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt << sa',
+        'emulation': ['rd.value = rt << sa'],
     },
     'dsll32': {
         'fields': [
@@ -979,7 +978,7 @@ REFERENCE = {
             ['DSLL32', '111100'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt << (sa + 32)',
+        'emulation': ['rd.value = rt << (sa + 32)'],
     },
     'dsllv': {
         'fields': [
@@ -991,7 +990,7 @@ REFERENCE = {
             ['DSLLV', '010100'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.value = rt.value << rs.value & 0b11111',
+        'emulation': ['rd.value = rt << rs & 0b11111'],
     },
     'dsra': {
         'fields': [
@@ -1003,7 +1002,7 @@ REFERENCE = {
             ['DSRA', '111011'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt >> sa',
+        'emulation': ['rd.value = rt >> sa'],
     },
     'dsra32': {
         'fields': [
@@ -1015,7 +1014,7 @@ REFERENCE = {
             ['DSRA32', '111111'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt >> (sa + 32)',
+        'emulation': ['rd.value = rt >> (sa + 32)'],
     },
     'dsrav': {
         'fields': [
@@ -1027,7 +1026,7 @@ REFERENCE = {
             ['DSRAV', '010111'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.value = rt >> rs',
+        'emulation': ['rd.value = rt >> rs'],
     },
     'dsrl': {
         'fields': [
@@ -1039,7 +1038,7 @@ REFERENCE = {
             ['DSRL', '111010'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.uvalue = rt.uvalue >> sa',
+        'emulation': ['rd.uvalue = rt.uvalue >> sa'],
     },
     'dsrl32': {
         'fields': [
@@ -1051,7 +1050,7 @@ REFERENCE = {
             ['DSRL', '111110'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.uvalue = rt.uvalue >> (sa + 32)',
+        'emulation': ['rd.uvalue = rt.uvalue >> (sa + 32)'],
     },
     'dsrlv': {
         'fields': [
@@ -1063,7 +1062,7 @@ REFERENCE = {
             ['DSRLV', '010110'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.uvalue = rt.uvalue >> (rs & 0b11111)',
+        'emulation': ['rd.uvalue = rt.uvalue >> (rs & 0b11111)'],
     },
     'dsub': {
         'fields': [
@@ -1075,7 +1074,7 @@ REFERENCE = {
             ['DSUB', '101110'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_sub(rs, rt)',
+        'emulation': ['rd.value = mips_sub(rs, rt)'],
     },
     'dsubu': {
         'fields': [
@@ -1087,7 +1086,7 @@ REFERENCE = {
             ['DSUB', '101111'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_sub(rs, rt, overflow=False)',
+        'emulation': ['rd.value = mips_sub(rs, rt, overflow=False)'],
     },
     'ehb': {
         'alias_of': [['sll', '$zero,$zero,3']],
@@ -1101,7 +1100,7 @@ REFERENCE = {
             ['ERET', '011000'],
         ],
         'args': [None],
-        'emulation': 'mips_eret()',
+        'emulation': ['mips_eret()'],
     },
     'j': {
         'fields': [
@@ -1109,7 +1108,7 @@ REFERENCE = {
             ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
-        'emulation': 'mips_jump(target)',
+        'emulation': ['mips_jump(target)'],
     },
     'jal': {
         'fields': [
@@ -1117,7 +1116,7 @@ REFERENCE = {
             ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
-        'emulation': 'mips_jump(target)',
+        'emulation': ['mips_jump(target)'],
     },
     'jalr': {
         'fields': [
@@ -1129,7 +1128,7 @@ REFERENCE = {
             ['JALR', '001001'],
         ],
         'args': ['rd,rs', ['rs', '$ra,rs']],
-        'emulation': 'rd.value = pc + 4; do_next(); jump(rs.value)',
+        'emulation': ['rd.value = pc + 4; do_next(); jump(rs.value)'],
     },
     'jalx': {
         'fields': [
@@ -1137,8 +1136,8 @@ REFERENCE = {
             ['target', 'bbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['target'],
-        'emulation': 'ra = (pc + 2) | isa_mode; address = target << 2; '
-                     'do_next(); isa_mode ^= 1; jump(address)',
+        'emulation': ['ra = (pc + 2) | isa_mode; address = target << 2; '
+                     'do_next(); isa_mode ^= 1; jump(address)'],
     },
     'lb': {
         'fields': [
@@ -1148,7 +1147,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = sign_extend(byte_contents(base + offset))',
+        'emulation': ['rt.value = sign_extend(byte_contents(base + offset))'],
     },
     'ld': {
         'fields': [
@@ -1158,7 +1157,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_load(base, offset, "d")',
+        'emulation': ['rt.value = mips_load(base, offset, "d")'],
     },
     'ldc1': {
         'fields': [

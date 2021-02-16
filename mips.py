@@ -2,7 +2,7 @@
 '''
 Intelligently disassemble and reassemble MIPS binaries
 '''
-import sys, os, struct, ctypes, re, logging
+import sys, os, struct, ctypes, re, logging, pdb
 from collections import OrderedDict, defaultdict
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
@@ -1767,10 +1767,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': [
-            'memory[base + offset] &= 0xffff0000',
-            'memory[base + offset] |= rt.value',
-        ],
+        'emulation': ['memory[base + offset] = rt.value'],
     },
     'swc1': {
         'fields': [
@@ -2426,6 +2423,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
     reference = REFERENCE.get(mnemonic)
     zero = ('$zero','$0','$f0')
     if reference:
+        fieldsdict = {}
         if {'fields', 'args'}.issubset(reference.keys()):
             argsdict = buildargs(args, reference['args'])
             fieldsdict = {key: value for key, value in reference['fields']
@@ -2506,7 +2504,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                         None)
         else:
             raise NotImplementedError('No action found for %s' % mnemonic)
-        return instruction, (reference['emulation'], fieldsdict)
+        return instruction, (reference.get('emulation'), fieldsdict)
     else:
         raise NotImplementedError('%s not in REFERENCE' % mnemonic)
 
@@ -2522,6 +2520,9 @@ def emulate(filespec):
                    for i in range(len(program))})
     pc = 0x8c000000  # program counter on reset
     index = 0
+    state = OrderedDict()
+    for i in range(len(REGISTER)):
+        state[REGISTER[i]] = Register(REGISTER[i], i)
     while True:
         instruction = disassemble_chunk(0, index, program[index], len(filedata))
         logging.debug('executing %s', instruction)
@@ -2537,7 +2538,8 @@ def emulate(filespec):
         pc += 4
         for code in emulation[0]:
             logging.info('executing: %s', code)
-            raw_input('%s Continue> ' % Register.registers)
+            print >>sys.stderr, state
+            pdb.set_trace()
             exec(code, globals(), locals())
         
 if __name__ == '__main__':

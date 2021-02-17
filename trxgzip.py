@@ -1655,6 +1655,9 @@ def decompress(infilespec=None, outfilespec=None):
                                      locals().items()
                                      if not hasattr(value, '__len__') or
                                      0 < len(value) < 16})
+        if id1 != 0x1f or id2 != 0x8b:
+            raise ValueError('File magic %r is wrong for gzip!' %
+                             data[offset:offset + 2])
         logging.debug('remainder of file: %r', data[10:][:128])
         offset = len(data)
 

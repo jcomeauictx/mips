@@ -1623,6 +1623,18 @@ OS = [
     'Acorn RISCOS',
 ]  #  255 - unknown
 
+FLG = [
+    'FTEXT',
+    'FHCRC',
+    'FEXTRA',
+    'FNAME',
+    'FCOMMENT',
+]  # bits 5-7 reserved
+
+# build hashtable matching FLG values to names
+FLAGS = {key: 1 << FLG.index(key) for key in FLG}
+FLAGS.update({1 << FLG.index(key): key for key in FLG})
+
 def compress(infilespec=None, outfilespec=None):
     '''
     compress data to gzip specification
@@ -1695,7 +1707,110 @@ def decompress(infilespec=None, outfilespec=None):
                 compression += ', compression level unknown (%d)' % xfl
         logging.debug('compression method: %s', compression)
         logging.debug('remainder of file: %r', data[10:][:128])
+        if flg != 0:
+            raise NotImplementedError('Flags not yet implemented')
+        offset = 10
+        bit = 0
+        # start deflation of data
+        '''
+         Each block of compressed data begins with 3 header bits
+         containing the following data:
+
+            first bit       BFINAL
+            next 2 bits     BTYPE
+
+         Note that the header bits do not necessarily begin on a byte
+         boundary, since a block does not necessarily occupy an integral
+         number of bytes.
+
+         BFINAL is set if and only if this is the last block of the data
+         set.
+
+         BTYPE specifies how the data are compressed, as follows:
+
+            00 - no compression
+            01 - compressed with fixed Huffman codes
+            10 - compressed with dynamic Huffman codes
+            11 - reserved (error)
+
+         The only difference between the two compressed cases is how the
+         Huffman codes for the literal/length and distance alphabets are
+         defined.
+
+         In all cases, the decoding algorithm for the actual data is as
+         follows:
+
+            do
+               read block header from input stream.
+               if stored with no compression
+                  skip any remaining bits in current partially
+                     processed byte
+                  read LEN and NLEN (see next section)
+                  copy LEN bytes of data to output
+               otherwise
+                  if compressed with dynamic Huffman codes
+                     read representation of code trees (see
+                        subsection below)
+                  loop (until end of block code recognized)
+                     decode literal/length value from input stream
+                     if value < 256
+                        copy value (literal byte) to output stream
+                     otherwise
+                        if value = end of block (256)
+                           break from loop
+                        otherwise (value = 257..285)
+                           decode distance from input stream
+
+                           move backwards distance bytes in the output
+                           stream, and copy length bytes from this
+                           position to the output stream.
+                  end loop
+            while not last block
+
+         Note that a duplicated string reference may refer to a string
+         in a previous block; i.e., the backward distance may cross one
+         or more block boundaries.  However a distance cannot refer past
+         the beginning of the output stream.  (An application using a
+         preset dictionary might discard part of the output stream; a
+         distance can refer to that part of the output stream anyway)
+         Note also that the referenced string may overlap the current
+         position; for example, if the last 2 bytes decoded have values
+         X and Y, a string reference with <length = 5, distance = 2>
+         adds X,Y,X,Y,X to the output stream.
+
+         We now specify each compression method in turn.
+        '''
+        while True:
+            bfinal, bit, offset = nextbit(data, bit, offset)
+            btype0, bit, offset = nextbit(data, bit, offset)
+            btype1, bit, offset = nextbit(data, bit, offset)
+            btype = (btype1 << 1) | btype0
+            if btype == 0:  # no compression
+                bit, offset = 0, offset + 1
+                length = struct.unpack('<H', data[offset:offset + 2])[0]
+                nlength = struct.unpack('<H', data[offset + 2:offset + 4])[0]
+                offset += 4
+                if length != ~nlength:
+                    raise ValueError('LEN and NLEN fail match:'
+                                     ' 0x%04x != 0x%04x' % (length, nlength))
+                else:
+                    break  # enough for tonight
+            else:
+                break  # enough for tonight
+        # force end to data processing while script is incomplete
         offset = len(data)
+
+def nextbit(data, bit, offset):
+    '''
+    Return next bit from data, and return it with updated bit and offset
+    '''
+    value = (data[offset] >> bit) & 1
+    logging.debug('bit %d from byte 0x%02x at offset %d has value %d',
+                  bit, data[offset], offset, value)
+    bit += 1
+    if bit == 8:
+        bit, offset = 0, offset + 1
+    return value, bit, offset
 
 if __name__ == '__main__':
     COMMAND = sys.argv[1]

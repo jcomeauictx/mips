@@ -60,5 +60,7 @@ unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 emulation: 1.dat.parts/loader.emulation
 %.emulation: %.dat
 	python mips.py emulate $<
+decompress: trxgzip.py 1.dat.parts/loader.raw
+	cat $(word 2,$+) | python3 $< $@
 .FORCE:
 .PRECIOUS: %.asm

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 '''
-reversible gzip for trx unpacking/repacking
+Reversible gzip for trx unpacking/repacking
 
-will be slow compared to standard Python module, but will provide all data
+Will be slow compared to standard Python module, but will provide all data
 necessary to rebuild a trx identical to the original.
 
 RFCs 1952 (gzip) and 1951 (deflate) are attached for reference.
@@ -1600,35 +1600,6 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
    L. Peter Deutsch <ghost@aladdin.com> and
    Glenn Randers-Pehrson <randeg@alumni.rpi.edu>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Deutsch                      Informational                     [Page 17]
 '''
 import sys, os, struct, logging
@@ -1645,11 +1616,48 @@ def compress(infilespec=None, outfilespec=None):
         infile = sys.stdin
     if outfilespec:
         outfile = open(outfilespec, 'wb')
+    elif infilespec:
+        outfile = open(infilespec + '.gz', 'wb')
     else:
         outfile = sys.stdout
     data = infile.read()
     infile.close()
     logging.debug('compressing %r...', data[:16])
+    offset = 0
+
+def decompress(infilespec=None, outfilespec=None):
+    '''
+    decompress data according to gzip specification
+    '''
+    if infilespec:
+        infile = open(infilespec, 'rb')
+    else:
+        infile = sys.stdin.buffer
+    if outfilespec:
+        outfile = open(outfilespec, 'wb')
+    elif infilespec and infilespec.endswith('.gz'):
+        outfile = open(infilespec[:-3], 'wb')
+    else:
+        outfile = sys.stdout.buffer
+    data = infile.read()
+    infile.close()
+    logging.debug('compressing %r...', data[:16])
+    offset = 0
+    while offset < len(data):
+        id1 = data[offset]
+        id2 = data[offset + 1]
+        cm = data[offset + 2]
+        flg = data[offset + 3]
+        mtime = data[offset + 4:offset + 8]
+        xfl = data[offset + 8]
+        os = data[offset + 9]
+        logging.debug('locals: %s', {key: value for key, value in
+                                     locals().items()
+                                     if not hasattr(value, '__len__') or
+                                     0 < len(value) < 16})
+        logging.debug('remainder of file: %r', data[10:][:128])
+        offset = len(data)
 
 if __name__ == '__main__':
-    compress(*sys.argv[1:])
+    COMMAND = sys.argv[1]
+    eval(COMMAND)(*sys.argv[2:])

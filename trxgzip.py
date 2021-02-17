@@ -1606,6 +1606,23 @@ import sys, os, struct, logging
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
+OS = [
+    'FAT filesystem (MS-DOS, OS/2, NT/Win32)',
+    'Amiga',
+    'VMS (or OpenVMS)',
+    'Unix',
+    'VM/CMS',
+    'Atari TOS',
+    'HPFS filesystem (OS/2, NT)',
+    'Macintosh',
+    'Z-System',
+    'CP/M',
+    'TOPS-20',
+    'NTFS filesystem (NT)',
+    'QDOS',
+    'Acorn RISCOS',
+]  #  255 - unknown
+
 def compress(infilespec=None, outfilespec=None):
     '''
     compress data to gzip specification
@@ -1658,6 +1675,25 @@ def decompress(infilespec=None, outfilespec=None):
         if id1 != 0x1f or id2 != 0x8b:
             raise ValueError('File magic %r is wrong for gzip!' %
                              data[offset:offset + 2])
+        try:
+            os_string = OS[os]
+        except IndexError:
+            if os == 255:
+                os_string = 'unknown'
+            else:
+                os_string = 'reserved value %d' % os
+        logging.debug('operating system: %s (%d)', os_string, os)
+        if cm == 8:
+            compression = 'deflate (8)'
+            if xfl == 2:
+                compression += ', maximum compression (2)'
+            elif xfl == 4:
+                compression += ', minimum compression (4)'
+            elif xfl == 0:
+                compression += ', compression level unspecified (0)'
+            else:
+                compression += ', compression level unknown (%d)' % xfl
+        logging.debug('compression method: %s', compression)
         logging.debug('remainder of file: %r', data[10:][:128])
         offset = len(data)
 

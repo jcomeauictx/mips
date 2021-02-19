@@ -1500,6 +1500,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 Deutsch                      Informational                     [Page 17]
 '''
 import sys, os, struct, logging
+from datetime import datetime
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -1584,7 +1585,8 @@ def decompress(infilespec=None, outfilespec=None):
         id2 = data[offset + 1]
         cm = data[offset + 2]
         flg = data[offset + 3]
-        mtime = data[offset + 4:offset + 8]
+        mtime = struct.unpack('<L', data[offset + 4:offset + 8])[0]
+        logging.debug('mtime: %s', datetime.fromtimestamp(mtime))
         xfl = data[offset + 8]
         os = data[offset + 9]
         logging.debug('locals: %s', {key: value for key, value in

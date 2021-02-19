@@ -61,6 +61,10 @@ unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 emulation: 1.dat.parts/loader.emulation
 %.emulation: %.dat
 	python mips.py emulate $<
+recompress: 1.dat.parts/loader.new
+1.dat.parts/loader.new: 1.dat.parts/loader.dat
+	cat $< | gzip --no-name --best --to-stdout > $@
+	truncate --size=%4 $@  # match padding on files from mtd partitions
 decompress: trxgzip.py 1.dat.parts/loader.raw
 	cat $(word 2,$+) | python3 $< $@
 %.py.doctest: %.py

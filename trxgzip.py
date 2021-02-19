@@ -1606,6 +1606,16 @@ import sys, os, struct, logging
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
+try:
+    EXECUTABLE, COMMAND, *ARGS = sys.argv
+except ValueError:
+    raise ValueError('Must specify command and args for that function')
+EXEC = os.path.splitext(os.path.basename(EXECUTABLE))[0]
+if EXEC == 'doctest':
+    DOCTESTDEBUG = logging.debug
+else:
+    DOCTESTDEBUG = lambda *args, **kwargs: None
+
 OS = [
     'FAT filesystem (MS-DOS, OS/2, NT/Win32)',
     'Amiga',
@@ -1806,21 +1816,23 @@ def nextbits(count, data, bit, offset, reverse=False):
     the MSBs.
 
     >>> nextbits(1, b'\x02', 1, 0)
-    (1, 1, 0)
+    (1, 2, 0)
+    >>> nextbits(8, b'\xff\x00', 7, 0)
+    (1, 7, 1)
     '''
     if count > 25:
         raise NotImplementedError('Bit counts > 25 not supported')
     if count > 8 - bit:
         # grab a 32-bit chunk
-        number = struct.unpack('<L', (data + '\0\0\0')[offset:offset + 4])[0]
+        number = struct.unpack('<L', (data + b'\0\0\0')[offset:offset + 4])[0]
     else:
         number = data[offset]
     shift = 0 if bit == 0 else 8 - bit
     mask = (1 << count) - 1
+    DOCTESTDEBUG('shift: %d, mask: %s', shift, bin(mask))
     value = (number >> shift) & mask
-    adjustment, bit = divmod(count - bit, 8)
+    adjustment, bit = divmod(count + bit, 8)
     return value, bit, offset + adjustment
 
 if __name__ == '__main__':
-    COMMAND = sys.argv[1]
     eval(COMMAND)(*sys.argv[2:])

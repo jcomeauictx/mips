@@ -1586,7 +1586,7 @@ def decompress(infilespec=None, outfilespec=None):
         cm = data[offset + 2]
         flg = data[offset + 3]
         mtime = struct.unpack('<L', data[offset + 4:offset + 8])[0]
-        logging.debug('mtime: %s', datetime.fromtimestamp(mtime))
+        logging.debug('mtime: %s', datetime.utcfromtimestamp(mtime))
         xfl = data[offset + 8]
         os = data[offset + 9]
         logging.debug('locals: %s', {key: value for key, value in

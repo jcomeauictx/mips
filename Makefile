@@ -9,6 +9,7 @@ INSERT := s/^\(\w\+:\)\?\(\s\+\)\(0x\)/\1\2.word\t\3/
 MATCH := ^$(LABEL)$(DUMP)$(INSTR)$(ARG)$
 QUIET ?= -OO  # quiet by default
 SIDEBYSIDE ?= -y  # set to empty string for normal diff
+SCRIPTS := $(wildcard *.py)
 export
 check: 0.img
 %.img: %.asm mips.py
@@ -62,5 +63,8 @@ emulation: 1.dat.parts/loader.emulation
 	python mips.py emulate $<
 decompress: trxgzip.py 1.dat.parts/loader.raw
 	cat $(word 2,$+) | python3 $< $@
+%.py.doctest: %.py
+	python3 -m doctest $<
+doctest: $(SCRIPTS:.py=.py.doctest)
 .FORCE:
 .PRECIOUS: %.asm

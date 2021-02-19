@@ -1781,10 +1781,8 @@ def decompress(infilespec=None, outfilespec=None):
          We now specify each compression method in turn.
         '''
         while True:
-            bfinal, bit, offset = nextbit(data, bit, offset)
-            btype0, bit, offset = nextbit(data, bit, offset)
-            btype1, bit, offset = nextbit(data, bit, offset)
-            btype = (btype1 << 1) | btype0
+            bfinal, bit, offset = nextbits(1, data, bit, offset)
+            btype, bit, offset = nextbits(2, data, bit, offset)
             if btype == 0:  # no compression
                 bit, offset = 0, offset + 1
                 length = struct.unpack('<H', data[offset:offset + 2])[0]
@@ -1800,17 +1798,28 @@ def decompress(infilespec=None, outfilespec=None):
         # force end to data processing while script is incomplete
         offset = len(data)
 
-def nextbit(data, bit, offset):
+def nextbits(count, data, bit, offset, reverse=False):
+    r'''
+    Fetch next 'count' bits from data, and return with updated bit and offset
+
+    Huffman codes should be reversed before returning; the LSBs are actually
+    the MSBs.
+
+    >>> nextbits(1, b'\x02', 1, 0)
+    (1, 1, 0)
     '''
-    Return next bit from data, and return it with updated bit and offset
-    '''
-    value = (data[offset] >> bit) & 1
-    logging.debug('bit %d from byte 0x%02x at offset %d has value %d',
-                  bit, data[offset], offset, value)
-    bit += 1
-    if bit == 8:
-        bit, offset = 0, offset + 1
-    return value, bit, offset
+    if count > 25:
+        raise NotImplementedError('Bit counts > 25 not supported')
+    if count > 8 - bit:
+        # grab a 32-bit chunk
+        number = struct.unpack('<L', (data + '\0\0\0')[offset:offset + 4])[0]
+    else:
+        number = data[offset]
+    shift = 0 if bit == 0 else 8 - bit
+    mask = (1 << count) - 1
+    value = (number >> shift) & mask
+    adjustment, bit = divmod(count - bit, 8)
+    return value, bit, offset + adjustment
 
 if __name__ == '__main__':
     COMMAND = sys.argv[1]

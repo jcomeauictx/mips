@@ -50,16 +50,8 @@ Abstract
    implemented readily in a manner not covered by patents.
 
 
-
-
-
-
-
-
-
-
 Deutsch                      Informational                      [Page 1]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -111,11 +103,8 @@ Table of Contents
             will be able to read data produced by the existing gzip
             compressor.
 
-
-
-
 Deutsch                      Informational                      [Page 2]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -168,10 +157,8 @@ RFC 1952             GZIP File Format Specification             May 1996
       and post-conditioning.  Version 4.3 is a conversion of the
       specification to RFC style.
 
-
-
 Deutsch                      Informational                      [Page 3]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -224,10 +211,8 @@ RFC 1952             GZIP File Format Specification             May 1996
           |        + more significant byte = 2 x 256
           + less significant byte = 8
 
-
-
 Deutsch                      Informational                      [Page 4]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -279,11 +264,8 @@ RFC 1952             GZIP File Format Specification             May 1996
          |     CRC32     |     ISIZE     |
          +---+---+---+---+---+---+---+---+
 
-
-
-
 Deutsch                      Informational                      [Page 5]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -336,10 +318,8 @@ RFC 1952             GZIP File Format Specification             May 1996
             If FEXTRA is set, optional extra fields are present, as
             described in a following section.
 
-
-
 Deutsch                      Informational                      [Page 6]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -389,13 +369,8 @@ RFC 1952             GZIP File Format Specification             May 1996
             convention for text files.  The currently defined values are
             as follows:
 
-
-
-
-
-
 Deutsch                      Informational                      [Page 7]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -448,10 +423,8 @@ RFC 1952             GZIP File Format Specification             May 1996
          IDs with SI2 = 0 are reserved for future use.  The following
          IDs are currently defined:
 
-
-
 Deutsch                      Informational                      [Page 8]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -504,10 +477,8 @@ RFC 1952             GZIP File Format Specification             May 1996
        Look-Up", Communications of the ACM, 31(8), pp.1008-1013.
 
 
-
-
 Deutsch                      Informational                      [Page 9]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -560,10 +531,8 @@ RFC 1952             GZIP File Format Specification             May 1996
    L. Peter Deutsch <ghost@aladdin.com> and
    Glenn Randers-Pehrson <randeg@alumni.rpi.edu>
 
-
-
 Deutsch                      Informational                     [Page 10]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -616,10 +585,8 @@ RFC 1952             GZIP File Format Specification             May 1996
       {
         unsigned long c;
 
-
-
 Deutsch                      Informational                     [Page 11]
-
+
 RFC 1952             GZIP File Format Specification             May 1996
 
 
@@ -672,14 +639,7 @@ RFC 1952             GZIP File Format Specification             May 1996
       }
 
 
-
-
 Deutsch                      Informational                     [Page 12]
-
-
-
-
-
 
 
 Network Working Group                                         P. Deutsch
@@ -727,14 +687,8 @@ Abstract
    covered by patents.
 
 
-
-
-
-
-
-
 Deutsch                      Informational                      [Page 1]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -790,7 +744,7 @@ Table of Contents
 
 
 Deutsch                      Informational                      [Page 2]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -846,7 +800,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
 Deutsch                      Informational                      [Page 3]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -893,16 +847,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
    the compressed data for that block.
 
 
-
-
-
-
-
-
-
-
 Deutsch                      Informational                      [Page 4]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -955,10 +901,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
          bits of a byte are transmitted on a bit-sequential medium,
          since the final data format described here is byte- rather than
 
-
-
 Deutsch                      Informational                      [Page 5]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1004,17 +948,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
          the root to the leaf labeled with that symbol.  For example:
 
 
-
-
-
-
-
-
-
-
-
 Deutsch                      Informational                      [Page 6]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1059,18 +994,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
              * Shorter codes lexicographically precede longer codes.
 
 
-
-
-
-
-
-
-
-
-
-
 Deutsch                      Informational                      [Page 7]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1124,9 +1049,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
                     }
 
 
-
 Deutsch                      Informational                      [Page 8]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1178,11 +1102,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
          number of bytes.
 
 
-
-
-
 Deutsch                      Informational                      [Page 9]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1238,7 +1159,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
 Deutsch                      Informational                     [Page 10]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1278,23 +1199,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
          (possibly in conjunction with extra bits following the symbol
          code) as follows:
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Deutsch                      Informational                     [Page 11]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1347,10 +1253,8 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
                    280 - 287     8          11000000 through
                                             11000111
 
-
-
 Deutsch                      Informational                     [Page 12]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1402,8 +1306,6 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
                5 Bits: HLIT, # of Literal/Length codes - 257 (257 - 286)
                5 Bits: HDIST, # of Distance codes - 1        (1 - 32)
                4 Bits: HCLEN, # of Code Length codes - 4     (4 - 19)
-
-
 
 Deutsch                      Informational                     [Page 13]
 
@@ -1459,8 +1361,6 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
    algorithm presented here, which is known not to be patented per se.
    The material in this section is not part of the definition of the
 
-
-
 Deutsch                      Informational                     [Page 14]
 
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
@@ -1512,9 +1412,6 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
    strings in the hash table only when no match was found, or when the
    match is not "too long".  This degrades the compression ratio but
    saves time since there are both fewer insertions and fewer searches.
-
-
-
 
 
 Deutsch                      Informational                     [Page 15]
@@ -1793,7 +1690,8 @@ def decompress(infilespec=None, outfilespec=None):
         while True:
             bfinal, bit, offset = nextbits(1, data, bit, offset)
             btype, bit, offset = nextbits(2, data, bit, offset)
-            if btype == 0:  # no compression
+            if btype == 0:
+                logging.debug('data in this block is uncompressed')
                 bit, offset = 0, offset + 1
                 length = struct.unpack('<H', data[offset:offset + 2])[0]
                 nlength = struct.unpack('<H', data[offset + 2:offset + 4])[0]
@@ -1803,22 +1701,28 @@ def decompress(infilespec=None, outfilespec=None):
                                      ' 0x%04x != 0x%04x' % (length, nlength))
                 else:
                     break  # enough for tonight
+            elif btype == 0b01:
+                logging.debug('block compressed with fixed Huffman codes')
+            elif btype == 0b10:
+                logging.debug('block compressed with dynamic Huffman codes')
             else:
                 break  # enough for tonight
         # force end to data processing while script is incomplete
         offset = len(data)
 
-def nextbits(count, data, bit, offset, reverse=False):
+def nextbits(count, data, bit, offset, reverse=0):
     r'''
-    Fetch next 'count' bits from data, and return with updated bit and offset
+    Fetch next `count` bits from data, and return with updated bit and offset
 
     Huffman codes should be reversed before returning; the LSBs are actually
-    the MSBs.
+    the MSBs. Reverse is either False or True; `count` bits are reversed.
 
     >>> nextbits(1, b'\x02', 1, 0)
     (1, 2, 0)
     >>> nextbits(8, b'\xff\x00', 7, 0)
     (1, 7, 1)
+    >>> nextbits(7, b'\x5a', 0, 0, True)
+    (45, 7, 0)
     '''
     if count > 25:
         raise NotImplementedError('Bit counts > 25 not supported')
@@ -1831,6 +1735,11 @@ def nextbits(count, data, bit, offset, reverse=False):
     DOCTESTDEBUG('shift: %d, mask: %s', bit, bin(mask))
     value = (number >> bit) & mask
     adjustment, bit = divmod(count + bit, 8)
+    if reverse > 0:
+        # slow but foolproof
+        DOCTESTDEBUG('reversing value %s', bin(value)[2:].zfill(count))
+        value = int(bin(value)[2:].zfill(count)[::-1], 2)
+        DOCTESTDEBUG('reversed value is %s', bin(value)[2:].zfill(count))
     return value, bit, offset + adjustment
 
 if __name__ == '__main__':

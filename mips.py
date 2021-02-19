@@ -1,7 +1,8 @@
-#!/usr/bin/python -OO
+#!/usr/bin/python3 -OO
 '''
 Intelligently disassemble and reassemble MIPS binaries
 '''
+from __future__ import print_function
 import sys, os, struct, ctypes, re, logging, pdb
 from collections import OrderedDict, defaultdict
 
@@ -2115,7 +2116,7 @@ def disassemble(filespec):
     '''
     primitive disassembler
     '''
-    print '.set noat'  # get rid of warnings for using $at register
+    print('.set noat')  # get rid of warnings for using $at register
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
         # store labels of b, j, etc. instruction targets, to print later
@@ -2246,7 +2247,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     pattern = PATTERN[style]
     line = pattern % locals()
     if loop == 1:
-        print line
+        print(line)
     return line
 
 def init():
@@ -2370,7 +2371,7 @@ def rebuildargs(args, pseudoop_args, newargs):
     '0,0'
     '''
     logging.debug('rebuildargs args: %s', locals())
-    argslist = [argsplit(string) for string in args, pseudoop_args, newargs]
+    argslist = [argsplit(string) for string in (args, pseudoop_args, newargs)]
     logging.debug('argslist before rebuild: %s', argslist)
     if len(argslist[0]) != len(argslist[1]):
         raise ValueError('Length mismatch: %s' % argslist[:2])
@@ -2483,7 +2484,7 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                           arg, REGISTER_REFERENCE)
                             raise ValueError('Cannot process arg %r' % arg)
         elif reference.get('action') is not None:
-            exec reference['action'] in globals(), locals()
+            exec(reference['action'] in globals(), locals())
             instruction = None
         elif reference.get('alias_of') is not None:
             aliases = reference['alias_of']
@@ -2537,7 +2538,7 @@ def emulate(filespec):
         pc += 4
         for code in emulation[0]:
             logging.info('executing: %s', code)
-            print >>sys.stderr, state
+            print(state, file=sys.stderr)
             pdb.set_trace()
             exec(code, globals(), locals())
         

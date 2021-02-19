@@ -1308,7 +1308,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
                4 Bits: HCLEN, # of Code Length codes - 4     (4 - 19)
 
 Deutsch                      Informational                     [Page 13]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1362,7 +1362,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
    The material in this section is not part of the definition of the
 
 Deutsch                      Informational                     [Page 14]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1415,7 +1415,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
 Deutsch                      Informational                     [Page 15]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1471,7 +1471,7 @@ RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
 Deutsch                      Informational                     [Page 16]
-
+
 RFC 1951      DEFLATE Compressed Data Format Specification      May 1996
 
 
@@ -1687,7 +1687,7 @@ def decompress(infilespec=None, outfilespec=None):
 
          We now specify each compression method in turn.
         '''
-        while True:
+        while offset < len(data):
             bfinal, bit, offset = nextbits(1, data, bit, offset)
             btype, bit, offset = nextbits(2, data, bit, offset)
             if btype == 0:
@@ -1700,19 +1700,91 @@ def decompress(infilespec=None, outfilespec=None):
                     raise ValueError('LEN and NLEN fail match:'
                                      ' 0x%04x != 0x%04x' % (length, nlength))
                 else:
-                    break  # enough for tonight
+                    outfile.write(data[offset:offset + length])
+                    offset += length
+                continue  # start processing next block
+            elif btype == 0b11:
+                raise ValueError('Reserved btype 0b11 '
+                                 'ending at byte %d bit %d' % (offset, bit))
             elif btype == 0b01:
                 logging.debug('block compressed with fixed Huffman codes')
-                code, bit, offset = nextcode(data, bit, offset)
-                logging.debug('first code: %s', bin(code))
-                break  # enough for tonight
-            elif btype == 0b10:
+            else:  # btype == 0b10
                 logging.debug('block compressed with dynamic Huffman codes')
-                break  # enough for tonight
-            else:
-                break  # enough for tonight
-        # force end to data processing while script is incomplete
-        offset = len(data)
+                hlit, bit, offset = nextbits(5, data, bit, offset)
+                hdist, bit, offset = nextbits(5, data, bit, offset)
+                hclen, bit, offset = nextbits(4, data, bit, offset)
+                logging.debug('hlit: %d, hdist: %d, hclen: %d',
+                              hlit, hdist, hclen)
+                '''
+      3.2.7. Compression with dynamic Huffman codes (BTYPE=10)
+
+         The Huffman codes for the two alphabets appear in the block
+         immediately after the header bits and before the actual
+         compressed data, first the literal/length code and then the
+         distance code.  Each code is defined by a sequence of code
+         lengths, as discussed in Paragraph 3.2.2, above.  For even
+         greater compactness, the code length sequences themselves are
+         compressed using a Huffman code.  The alphabet for code lengths
+         is as follows:
+
+               0 - 15: Represent code lengths of 0 - 15
+                   16: Copy the previous code length 3 - 6 times.
+                       The next 2 bits indicate repeat length
+                             (0 = 3, ... , 3 = 6)
+                          Example:  Codes 8, 16 (+2 bits 11),
+                                    16 (+2 bits 10) will expand to
+                                    12 code lengths of 8 (1 + 6 + 5)
+                   17: Repeat a code length of 0 for 3 - 10 times.
+                       (3 bits of length)
+                   18: Repeat a code length of 0 for 11 - 138 times
+                       (7 bits of length)
+
+         A code length of 0 indicates that the corresponding symbol in
+         the literal/length or distance alphabet will not occur in the
+         block, and should not participate in the Huffman code
+         construction algorithm given earlier.  If only one distance
+         code is used, it is encoded using one bit, not zero bits; in
+         this case there is a single code length of one, with one unused
+         code.  One distance code of zero bits means that there are no
+         distance codes used at all (the data is all literals).
+
+         We can now define the format of the block:
+
+               5 Bits: HLIT, # of Literal/Length codes - 257 (257 - 286)
+               5 Bits: HDIST, # of Distance codes - 1        (1 - 32)
+               4 Bits: HCLEN, # of Code Length codes - 4     (4 - 19)
+
+               (HCLEN + 4) x 3 bits: code lengths for the code length
+                  alphabet given just above, in the order: 16, 17, 18,
+                  0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
+
+                  These code lengths are interpreted as 3-bit integers
+                  (0-7); as above, a code length of 0 means the
+                  corresponding symbol (literal/length or distance code
+                  length) is not used.
+
+               HLIT + 257 code lengths for the literal/length alphabet,
+                  encoded using the code length Huffman code
+
+               HDIST + 1 code lengths for the distance alphabet,
+                  encoded using the code length Huffman code
+
+               The actual compressed data of the block,
+                  encoded using the literal/length and distance Huffman
+                  codes
+
+               The literal/length symbol 256 (end of data),
+                  encoded using the literal/length Huffman code
+
+         The code length repeat codes can cross from HLIT + 257 to the
+         HDIST + 1 code lengths.  In other words, all code lengths form
+         a single sequence of HLIT + HDIST + 258 values.
+                '''
+            # common code for both types of Huffman encoding
+            code, bit, offset = nextcode(data, bit, offset)
+            logging.debug('first code: %s', bin(code))
+            break  # force end to block processing while script is incomplete
+        break # force end to data processing while script is incomplete
 
 def nextbits(count, data, bit, offset, reverse=False):
     r'''

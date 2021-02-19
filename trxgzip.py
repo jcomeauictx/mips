@@ -1749,9 +1749,10 @@ def nextbits(count, data, bit, offset, reverse=False):
 def nextcode(data, bit, offset):
     '''
     Get next Huffman code from stream
-    >>> nextcode(b'\x10', 0, 0)
+    >>> nextcode(bytes((0b10000,)), 0, 0)
     (260, 7, 0)
-
+    >>> nextcode(bytes((0b10000000, 0b00000001)), 7, 0)
+    (280, 7, 1)
     '''
     saved = (bit, offset)
     code, bit, offset = nextbits(7, data, bit, offset, reverse=True)

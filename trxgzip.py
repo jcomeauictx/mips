@@ -1750,22 +1750,26 @@ def nextcode(data, bit, offset):
     '''
     Get next Huffman code from stream
     >>> nextcode(b'\x10', 0, 0)
-    (4, 7, 0)
+    (260, 7, 0)
 
     '''
     saved = (bit, offset)
     code, bit, offset = nextbits(7, data, bit, offset, reverse=True)
     if 0b0000000 <= code <= 0b0010111:
         DOCTESTDEBUG('got code between 256 and 279')
+        code += 256
     else:
         code, bit, offset = nextbits(8, data, *saved, reverse=True)
         if 0b00110000 <= code <= 0b10111111:
             DOCTESTDEBUG('got code between 0 and 143')
+            code -= 0b00110000
         elif 0b11000000 <= code <= 0b11000111:
             DOCTESTDEBUG('got code between 280 and 287')
+            code += 88  # 280 - 0b11000000 (192) = 88
         else:
             code, bit, offset = nextbits(9, data, *saved, reverse=True)
             DOCTESTDEBUG('got code between 144 and 255')
+            code -= 256
     return code, bit, offset
 
 if __name__ == '__main__':

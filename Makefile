@@ -66,5 +66,8 @@ decompress: trxgzip.py 1.dat.parts/loader.raw
 %.py.doctest: %.py
 	python3 -m doctest $<
 doctest: $(SCRIPTS:.py=.py.doctest)
+%.py.pylint: %.py
+	-pylint3 $<
+pylint: $(SCRIPTS:.py=.py.pylint)
 .FORCE:
 .PRECIOUS: %.asm

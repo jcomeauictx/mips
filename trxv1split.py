@@ -5,6 +5,7 @@ Tiny replacement for Heffner/Collake FMK, just for TRX version 1 LE MIPS images
 Tested only with an older OpenWrt CFE partition image.
 Using Python3 for native lzma support
 '''
+# pylint disable=multiple-imports
 import sys, os, re, subprocess, logging, lzma, gzip, zlib
 from socket import ntohl
 

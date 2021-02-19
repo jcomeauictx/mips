@@ -7,6 +7,8 @@ and, for 3.0, //github.com/plougher/squashfs-tools/squashfs-tools/squashfs_fs.h,
 checkout tag 3.1
 '''
 import sys, os, struct, lzma, gzip, zlib, logging
+from datetime import datetime
+from collections import OrderedDict
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -25,6 +27,7 @@ HEADER_SPEC = [  # called struct squashfs_super_block in squashfs_fs.h
     ['block_log', 2, '<H'],
     ['flags', 1, 'B'],
     ['no_uids', 1, 'B'],
+    ['no_guids', 1, 'B'],
     # bad design idea to have an int on an unaligned boundary...
     # would have been better to have an unused byte here and align mkfs_time
     ['mkfs_time', 4, '<L'],  # filesystem creation or last modification
@@ -41,20 +44,28 @@ HEADER_SPEC = [  # called struct squashfs_super_block in squashfs_fs.h
     ['unused', 8, '<q'],
 ]
 
+TRANSFORM = {
+    'mkfs_time': 'datetime.utcfromtimestamp',
+}
+
 def unsquash(filespec):
     '''
     uncompress the entire filesystem
     '''
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
-    header = {}
+    header = OrderedDict()
     offset = 0
     for name, count, packformat in HEADER_SPEC:
         logging.debug('processing %s in header', [name, count, packformat])
         value = chunk = filedata[offset:offset + count]
+        logging.debug('chunk: %r', chunk)
         if packformat:
             value = struct.unpack(packformat, chunk)[0]
-        header[name] = value
+        if name in TRANSFORM:
+            header[name] = eval(TRANSFORM[name])(value)
+        else:
+            header[name] = value
         offset += count
     return header
 

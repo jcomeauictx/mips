@@ -1710,7 +1710,7 @@ def decompress(infilespec=None, outfilespec=None):
         # force end to data processing while script is incomplete
         offset = len(data)
 
-def nextbits(count, data, bit, offset, reverse=0):
+def nextbits(count, data, bit, offset, reverse=False):
     r'''
     Fetch next `count` bits from data, and return with updated bit and offset
 
@@ -1741,6 +1741,28 @@ def nextbits(count, data, bit, offset, reverse=0):
         value = int(bin(value)[2:].zfill(count)[::-1], 2)
         DOCTESTDEBUG('reversed value is %s', bin(value)[2:].zfill(count))
     return value, bit, offset + adjustment
+
+def nextcode(data, bit, offset):
+    '''
+    Get next Huffman code from stream
+    >>> nextcode(b'\x10', 0, 0)
+    (4, 7, 0)
+
+    '''
+    saved = (bit, offset)
+    code, bit, offset = nextbits(7, data, bit, offset, reverse=True)
+    if 0b0000000 <= code <= 0b0010111:
+        DOCTESTDEBUG('got code between 256 and 279')
+    else:
+        code, bit, offset = nextbits(8, data, *saved, reverse=True)
+        if 0b00110000 <= code <= 0b10111111:
+            DOCTESTDEBUG('got code between 0 and 143')
+        elif 0b11000000 <= code <= 0b11000111:
+            DOCTESTDEBUG('got code between 280 and 287')
+        else:
+            code, bit, offset = nextbits(9, data, *saved, reverse=True)
+            DOCTESTDEBUG('got code between 144 and 255')
+    return code, bit, offset
 
 if __name__ == '__main__':
     eval(COMMAND)(*sys.argv[2:])

@@ -1827,10 +1827,9 @@ def nextbits(count, data, bit, offset, reverse=False):
         number = struct.unpack('<L', (data + b'\0\0\0')[offset:offset + 4])[0]
     else:
         number = data[offset]
-    shift = 0 if bit == 0 else 8 - bit
     mask = (1 << count) - 1
-    DOCTESTDEBUG('shift: %d, mask: %s', shift, bin(mask))
-    value = (number >> shift) & mask
+    DOCTESTDEBUG('shift: %d, mask: %s', bit, bin(mask))
+    value = (number >> bit) & mask
     adjustment, bit = divmod(count + bit, 8)
     return value, bit, offset + adjustment
 

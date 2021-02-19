@@ -1,6 +1,8 @@
+#!/usr/bin/python3 -OO
+'''
+Reversible lzma compression and decompression
 
-
-
+RFC7932 attached in its entirety to serve as a guide for coding.
 
 
 
@@ -56,7 +58,7 @@ Copyright Notice
 
 
 Alakuijala & Szabadka         Informational                     [Page 1]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -112,7 +114,7 @@ Table of Contents
 
 
 Alakuijala & Szabadka         Informational                     [Page 2]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -168,7 +170,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 3]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -224,7 +226,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 4]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -280,7 +282,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 5]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -336,7 +338,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 6]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -392,7 +394,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 7]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -448,7 +450,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 8]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -504,7 +506,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                     [Page 9]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -560,7 +562,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 10]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -616,7 +618,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 11]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -672,7 +674,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 12]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -728,7 +730,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 13]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -784,7 +786,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 14]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -840,7 +842,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 15]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -896,7 +898,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 16]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -952,7 +954,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 17]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1008,7 +1010,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 18]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1064,7 +1066,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 19]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1120,7 +1122,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 20]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1176,7 +1178,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 21]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1232,7 +1234,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 22]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1288,7 +1290,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 23]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1344,7 +1346,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 24]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1400,7 +1402,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 25]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1456,7 +1458,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 26]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1512,7 +1514,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 27]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1568,7 +1570,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 28]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1624,7 +1626,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 29]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1680,7 +1682,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 30]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1736,7 +1738,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 31]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1792,7 +1794,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 32]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1848,7 +1850,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 33]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1904,7 +1906,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 34]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -1960,7 +1962,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 35]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2016,7 +2018,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 36]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2072,7 +2074,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 37]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2128,7 +2130,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 38]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2184,7 +2186,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 39]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2240,7 +2242,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 40]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2296,7 +2298,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 41]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2352,7 +2354,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 42]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2408,7 +2410,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 43]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2464,7 +2466,7 @@ Appendix A.  Static Dictionary Data
 
 
 Alakuijala & Szabadka         Informational                    [Page 44]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2520,7 +2522,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 45]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2576,7 +2578,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 46]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2632,7 +2634,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 47]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2688,7 +2690,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 48]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2744,7 +2746,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 49]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2800,7 +2802,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 50]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2856,7 +2858,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 51]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2912,7 +2914,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 52]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -2968,7 +2970,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 53]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3024,7 +3026,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 54]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3080,7 +3082,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 55]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3136,7 +3138,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 56]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3192,7 +3194,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 57]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3248,7 +3250,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 58]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3304,7 +3306,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 59]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3360,7 +3362,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 60]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3416,7 +3418,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 61]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3472,7 +3474,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 62]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3528,7 +3530,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 63]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3584,7 +3586,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 64]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3640,7 +3642,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 65]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3696,7 +3698,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 66]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3752,7 +3754,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 67]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3808,7 +3810,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 68]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3864,7 +3866,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 69]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3920,7 +3922,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 70]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -3976,7 +3978,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 71]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4032,7 +4034,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 72]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4088,7 +4090,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 73]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4144,7 +4146,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 74]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4200,7 +4202,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 75]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4256,7 +4258,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 76]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4312,7 +4314,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 77]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4368,7 +4370,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 78]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4424,7 +4426,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 79]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4480,7 +4482,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 80]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4536,7 +4538,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 81]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4592,7 +4594,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 82]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4648,7 +4650,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 83]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4704,7 +4706,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 84]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4760,7 +4762,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 85]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4816,7 +4818,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 86]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4872,7 +4874,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 87]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4928,7 +4930,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 88]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -4984,7 +4986,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 89]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5040,7 +5042,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 90]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5096,7 +5098,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 91]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5152,7 +5154,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 92]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5208,7 +5210,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 93]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5264,7 +5266,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 94]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5320,7 +5322,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 95]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5376,7 +5378,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 96]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5432,7 +5434,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 97]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5488,7 +5490,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 98]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5544,7 +5546,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                    [Page 99]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5600,7 +5602,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 100]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5656,7 +5658,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 101]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5712,7 +5714,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 102]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5768,7 +5770,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 103]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5824,7 +5826,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 104]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5880,7 +5882,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 105]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5936,7 +5938,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 106]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -5992,7 +5994,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 107]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6048,7 +6050,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 108]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6104,7 +6106,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 109]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6160,7 +6162,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 110]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6216,7 +6218,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 111]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6272,7 +6274,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 112]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6328,7 +6330,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 113]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6384,7 +6386,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 114]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6440,7 +6442,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 115]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6496,7 +6498,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 116]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6552,7 +6554,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 117]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6608,7 +6610,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 118]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6664,7 +6666,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 119]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6720,7 +6722,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 120]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6776,7 +6778,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 121]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6832,7 +6834,7 @@ RFC 7932                         Brotli                        July 2016
 
 
 Alakuijala & Szabadka         Informational                   [Page 122]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -6886,9 +6888,8 @@ RFC 7932                         Brotli                        July 2016
       a4bfe0a482e0a497e0a4b8e0a581e0a4b0e0a495e0a58de0a4b7e0a4bfe0a4a4
 
 
-
 Alakuijala & Szabadka         Informational                   [Page 123]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -7099,20 +7100,8 @@ Acknowledgments
    writing an independent decompressor, and suggesting improvements to
    the format and the text of the specification.
 
-
-
-
-
-
-
-
-
-
-
-
-
 Alakuijala & Szabadka         Informational                   [Page 127]
-
+
 RFC 7932                         Brotli                        July 2016
 
 
@@ -7129,43 +7118,5 @@ Authors' Addresses
 
    Email: szabadka@google.com
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Alakuijala & Szabadka         Informational                   [Page 128]
-
+'''

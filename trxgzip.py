@@ -1703,8 +1703,12 @@ def decompress(infilespec=None, outfilespec=None):
                     break  # enough for tonight
             elif btype == 0b01:
                 logging.debug('block compressed with fixed Huffman codes')
+                code, bit, offset = nextcode(data, bit, offset)
+                logging.debug('first code: %s', bin(code))
+                break  # enough for tonight
             elif btype == 0b10:
                 logging.debug('block compressed with dynamic Huffman codes')
+                break  # enough for tonight
             else:
                 break  # enough for tonight
         # force end to data processing while script is incomplete

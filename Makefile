@@ -60,7 +60,7 @@ unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 	python3 $(word 2, $+) unsquash $<
 emulation: 1.dat.parts/loader.emulation
 %.emulation: %.dat
-	python mips.py emulate $<
+	python $(QUIET) mips.py emulate $<
 recompress: 1.dat.parts/loader.new
 1.dat.parts/loader.new: 1.dat.parts/loader.dat
 	cat $< | gzip --no-name --best --to-stdout > $@

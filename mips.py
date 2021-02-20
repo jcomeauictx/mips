@@ -2082,19 +2082,21 @@ class Register(object):
     def __new__(cls, *args, **kwargs):
         name = args[0]
         if name in cls.registers:
-            logging.debug('returning already existing register %s', name)
-            return cls.registers[name]
+            register = cls.registers[name]
+            logging.debug('returning already existing register %s', register)
+            return register
         else:
             logging.debug('creating new Register(%s)', name)
             return super(Register, cls).__new__(cls, *args, **kwargs)
     def __init__(self, name, number=None, value=0): 
-        self.name = name
-        if number is None:
-            number = REGISTER_REFERENCE[name]
-        self.number = number
-        self.value = value
-        self.registers[name] = self
-        self.registers[number] = self
+        if not name in self.registers:
+            self.name = name
+            if number is None:
+                number = REGISTER_REFERENCE[name]
+            self.number = number
+            self.value = value
+            self.registers[name] = self
+            self.registers[number] = self
 
     def __index__(self):
         return self.value
@@ -2539,7 +2541,10 @@ def emulate(filespec):
         for code in emulation[0]:
             logging.info('executing: %s', code)
             print(state, file=sys.stderr)
-            pdb.set_trace()
+            if __debug__:
+                pdb.set_trace()
+            else:
+                raw_input('Continue -> ')
             exec(code, globals(), locals())
         
 if __name__ == '__main__':

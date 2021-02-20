@@ -509,7 +509,11 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': ['rt.value = rs + immediate'],
+        'emulation': [
+            'shadow = c_int32(rs)',
+            'shadow.value += immediate',
+            'rt.value = shadow.value',
+        ],
     },
     'addiu': {
         'fields': [
@@ -520,9 +524,9 @@ REFERENCE = {
         ],
         'args': ['rt,rs,immediate'],
         'emulation': [
-            'disable(MipsOverflow)',
-            'rt.value = rs + immediate',
-            'enable(MipsOverflow)',
+            'shadow = c_int32(rs)',  # shadow register
+            'shadow.value += immediate',
+            'rt.value = shadow.value'
         ],
     },
     'addu': {
@@ -846,8 +850,11 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': ['disable(MipsOverflow); rt.value = rs + immediate; '
-                     'enable(MipsOverflow)'],
+        'emulation': [
+            'shadow = c_int64(rs)',
+            'shadow.value += immediate',
+            'rt.value = shadow.value',
+        ],
     },
     'daddu': {
         'fields': [
@@ -1768,7 +1775,14 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': ['memory[base + offset] = rt.value'],
+        'emulation': [
+            'shadow = c_int32(base)',
+            'shadow.value += offset',
+            'value = struct.pack("<L", rt.value)',
+            'logging.debug("memory before SW: %s", memory[shadow.value:][:4])',
+            'memory[shadow.value:shadow.value + 4] = list(value)',
+            'logging.debug("memory after SW: %s", memory[shadow.value:][:4])',
+        ],
     },
     'swc1': {
         'fields': [
@@ -2104,9 +2118,6 @@ class Register(object):
 
     def __int__(self):
         return self.value
-
-    def __add__(self, other):
-        return self.value + int(other)
 
     def __str__(self):
         return self.name

@@ -2527,7 +2527,8 @@ def emulate(filespec):
     '''
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
-    memory = list(filedata)  # mutable copy of filedata, byte-addressable
+    memory = bytearray(filedata)  # mutable copy of filedata, byte-addressable
+    memory.extend(bytes(4096))  # add room for stack (enough?)
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
     pc = 0x8c000000  # program counter on reset
     index = 0
@@ -2553,7 +2554,7 @@ def emulate(filespec):
             if __debug__:
                 pdb.set_trace()
             else:
-                raw_input('Continue -> ')
+                input('Continue -> ')
             exec(code, globals(), locals())
         
 if __name__ == '__main__':

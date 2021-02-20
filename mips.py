@@ -2096,20 +2096,31 @@ class Register(object):
     registers = {}
     def __new__(cls, *args, **kwargs):
         name = args[0]
-        if name in cls.registers:
+        if name[1:].isdigit():
+            number = int(name[1:])
+            if number in cls.registers:
+                register = cls.registers[number]
+                logging.debug('returning existing register %s', register)
+            else:
+                raise ValueError('Cannot create register with numeric name')
+        elif name in cls.registers:
             register = cls.registers[name]
             logging.debug('returning already existing register %s', register)
             return register
         else:
             logging.debug('creating new Register(%s)', name)
             return super().__new__(cls)
+
     def __init__(self, name, number=None, value=0): 
         if not name in self.registers:
             self.name = name
             if number is None:
                 number = REGISTER_REFERENCE[name]
             self.number = number
-            self.value = value
+            if name == '$zero':
+                self.value = property(lambda *args: 0, self._warn)
+            else:
+                self.value = value
             self.registers[name] = self
             self.registers[number] = self
 
@@ -2123,7 +2134,14 @@ class Register(object):
         return self.name
 
     def __repr__(self):
-        return '<%s(%d)=%d>' % (self.name, self.number, self.value)
+        if self.name == '$zero':
+            return '<$zr(0)=0>'
+        else:
+            return '<%s(%d)=%d>' % (self.name, self.number, self.value)
+
+    def _warn(self, value):
+        if value != 0:
+            logging.debug('Attempt to set zero register to %r', value)
 
 def disassemble(filespec):
     '''
@@ -2550,7 +2568,7 @@ def emulate(filespec):
         pc += 4
         for code in emulation[0]:
             logging.info('executing: %s', code)
-            print(state, emulation, file=sys.stderr)
+            print(state.values(), emulation, code, file=sys.stderr)
             if __debug__:
                 pdb.set_trace()
             else:

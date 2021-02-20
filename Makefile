@@ -13,7 +13,7 @@ SCRIPTS := $(wildcard *.py)
 export
 check: 0.img
 %.img: %.asm mips.py
-	-python $(QUIET) mips.py assemble $< > $@tmp
+	-python3 $(QUIET) mips.py assemble $< > $@tmp
 	if [ -s $@tmp ]; then \
 		mv $@tmp $@; \
 	else \
@@ -21,7 +21,7 @@ check: 0.img
 		rm -f $@tmp; \
 	fi
 %.asm: %.dat
-	python $(QUIET) mips.py disassemble $< > $@tmp
+	python3 $(QUIET) mips.py disassemble $< > $@tmp
 	mv $@tmp $@
 debug:
 	$(MAKE) QUIET= check
@@ -60,7 +60,7 @@ unsquash: 1.dat.parts/0x0007d400.raw.unsquashed
 	python3 $(word 2, $+) unsquash $<
 emulation: 1.dat.parts/loader.emulation
 %.emulation: %.dat
-	python $(QUIET) mips.py emulate $<
+	python3 $(QUIET) mips.py emulate $<
 recompress: 1.dat.parts/loader.new
 1.dat.parts/loader.new: 1.dat.parts/loader.dat
 	cat $< | gzip --no-name --best --to-stdout > $@

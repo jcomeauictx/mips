@@ -5,7 +5,7 @@ Intelligently disassemble and reassemble MIPS binaries
 from __future__ import print_function
 import sys, os, struct, ctypes, re, logging, pdb
 from collections import OrderedDict, defaultdict
-from ctypes import c_int16, c_int32
+from ctypes import c_byte, c_int16, c_int32, c_int64
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -15,8 +15,8 @@ MATCH_OBJDUMP_DISASSEMBLY = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLY'))
 USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLY
 INTCTLVS = os.getenv('MIPS_INTCTLVS', '00100')  # IntCtlVS
 VECTORS = os.getenv('VECTORS', 32)  # 64 on 64 bit machines (?)
-logging.warn('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
-             AGGRESSIVE_WORDING)
+logging.warning('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
+                AGGRESSIVE_WORDING)
 
 LABELS = {}  # filled in by init()
 
@@ -2077,7 +2077,7 @@ CONVERSION = {
 
 class Register(object):
     '''
-    Represent a MIPS general register
+    Represent a MIPS general register for emulation
     '''
     registers = {}
     def __new__(cls, *args, **kwargs):
@@ -2088,7 +2088,7 @@ class Register(object):
             return register
         else:
             logging.debug('creating new Register(%s)', name)
-            return super(Register, cls).__new__(cls, *args, **kwargs)
+            return super().__new__(cls)
     def __init__(self, name, number=None, value=0): 
         if not name in self.registers:
             self.name = name
@@ -2300,9 +2300,9 @@ def init():
         # objdump dumps div, ddiv, divu, and ddivu as arithlog
         for item in SPECIAL:
             if item[0] in ('div', 'divu', 'ddiv', 'ddivu'):
-                logging.warn('Making %r incorrectly dump as "arithlog"'
-                             ' to match objdump disassembly',
-                             item[0])
+                logging.warning('Making %r incorrectly dump as "arithlog"'
+                                ' to match objdump disassembly',
+                                item[0])
                 item[1] = 'arithlog'
     else:
         # need to be able to interpret register $s8 when assembling
@@ -2514,7 +2514,7 @@ def emulate(filespec):
     '''
     primitive MIPS emulator
     '''
-    with open(filespec) as infile:
+    with open(filespec, 'rb') as infile:
         filedata = infile.read()
     memory = list(filedata)  # mutable copy of filedata, byte-addressable
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]

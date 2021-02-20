@@ -5,6 +5,7 @@ Intelligently disassemble and reassemble MIPS binaries
 from __future__ import print_function
 import sys, os, struct, ctypes, re, logging, pdb
 from collections import OrderedDict, defaultdict
+from ctypes import c_int16, c_int32
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
@@ -1148,7 +1149,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': ['rt.value = sign_extend(byte_contents(base + offset))'],
+        'emulation': ['rt.value = c_byte(memory[base + offset]).value'],
     },
     'ld': {
         'fields': [
@@ -1272,7 +1273,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,immediate'],
-        'emulation': 'rt.value = sign_extend(immediate << 16)',
+        'emulation': ['rt.value = c_int16(immediate).value'],
     },
     'lw': {
         'fields': [
@@ -1878,7 +1879,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.value >= sign_extend(immediate): mips_trap()',
+        'emulation': 'if rs.value >= c_int16(immediate).value: mips_trap()',
     },
     'tgeiu': {
         'fields': [
@@ -1888,7 +1889,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.uvalue >= unsigned(sign_extend(immediate)): '
+        'emulation': 'if rs.uvalue >= c_int16(immediate).value & 0xffffffff): '
                      'mips_trap(0)',
     },
     'tgeu': {
@@ -1942,7 +1943,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs < sign_extend(immediate): mips_trap()',
+        'emulation': 'if rs < c_int16(immediate).value: mips_trap()',
     },
     'tltiu': {
         'fields': [
@@ -1952,7 +1953,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.uvalue < unsigned(sign_extend(immediate)):'
+        'emulation': 'if rs.uvalue < c_int16(immediate).value & 0xffffffff):'
         ' mips_trap()',
     },
     'tltu': {
@@ -2111,8 +2112,7 @@ class Register(object):
         return self.name
 
     def __repr__(self):
-        return '<Register_%s(%d) value=%d>' % (self.name, self.number,
-                                               self.value)
+        return '<%s(%d)=%d>' % (self.name, self.number, self.value)
 
 def disassemble(filespec):
     '''
@@ -2516,10 +2516,8 @@ def emulate(filespec):
     '''
     with open(filespec) as infile:
         filedata = infile.read()
+    memory = list(filedata)  # mutable copy of filedata, byte-addressable
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
-    memory = defaultdict(int)
-    memory.update({i * 4: struct.unpack('<L', program[i])[0]
-                   for i in range(len(program))})
     pc = 0x8c000000  # program counter on reset
     index = 0
     state = OrderedDict()
@@ -2540,7 +2538,7 @@ def emulate(filespec):
         pc += 4
         for code in emulation[0]:
             logging.info('executing: %s', code)
-            print(state, file=sys.stderr)
+            print(state, emulation, file=sys.stderr)
             if __debug__:
                 pdb.set_trace()
             else:

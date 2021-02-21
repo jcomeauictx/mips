@@ -499,7 +499,7 @@ REFERENCE = {
             ['ADD', '100000'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['rd.value = rs + rt'],
+        'emulation': ['rd.value = mips_add(rs, rt, 32, False)'],
     },
     'addi': {
         'fields': [
@@ -509,11 +509,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': [
-            'shadow = c_int32(rs)',
-            'shadow.value += immediate',
-            'rt.value = shadow.value',
-        ],
+        'emulation': ['arg = c_int16(immediate).value',
+                      'rt.value = mips_add(rs, arg, 32, False)']
     },
     'addiu': {
         'fields': [
@@ -523,11 +520,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': [
-            'shadow = c_int32(rs)',  # shadow register
-            'shadow.value += immediate',
-            'rt.value = shadow.value'
-        ],
+        'emulation': ['arg = c_int16(immediate).value',  # sign-extend it
+                      'rt.value = mips_add(rs, rt, 32, True)'],
     },
     'addu': {
         'fields': [
@@ -539,7 +533,7 @@ REFERENCE = {
             ['ADDU', '100001'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['rd.value = rs + rt'],
+        'emulation': ['rd.value = mips_add(rs, rt, 32, True)'],
     },
     'and': {
         'fields': [
@@ -830,7 +824,7 @@ REFERENCE = {
             ['DADD', '101100'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['rd.value = rs + rt'],
+        'emulation': ['rd.value = mips_add(rs, rt, 64, False)'],
     },
     'daddi': {
         'fields': [
@@ -840,7 +834,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': ['pushbits(32); rt.value = rs + immediate; popbits()'],
+        'emulation': ['arg = c_int16(immediate).value',  # sign-extend it
+                      'rt.value = mips_add(rs, arg, 64, False)'],
     },
     'daddiu': {
         'fields': [
@@ -850,11 +845,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': [
-            'shadow = c_int64(rs)',
-            'shadow.value += immediate',
-            'rt.value = shadow.value',
-        ],
+        'emulation': ['arg = c_int16(immediate).value',  # sign-extend it
+                      'rt.value = mips_add(rs, arg, 64, True)'],
     },
     'daddu': {
         'fields': [
@@ -866,8 +858,7 @@ REFERENCE = {
             ['DADDU', '101101'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['disable(MipsOverflow); rd = rs + rt; '
-                     'enable(MipsOverflow)'],
+        'emulation': ['rd.value = mips_add(rs, rt, 64, True)'],
     },
     'ddiv': {
         # obdjump incorrectly dumps ddiv as arithlog
@@ -875,13 +866,13 @@ REFERENCE = {
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            #['0', '0000000000'], # correct, but replaced by following 2 lines
             ['rd', 'bbbbb'],
             ['0', '00000'],
             ['DDIV', '011110'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': ['mips_div(rs, rt, bits=64)'],
+        'emulation': ['lo.value, hi.value = mips_div(rs, rt, 64, False)'],
     },
     'ddivu': {
         # obdjump incorrectly dumps ddivu as arithlog
@@ -889,13 +880,13 @@ REFERENCE = {
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            #['0', '0000000000'], # correct, but replaced by following 2 lines
             ['rd', 'bbbbb'],
             ['0', '00000'],
             ['DDIVU', '011111'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': ['mips_div(rs, rt, bits=64, signed=False)'],
+        'emulation': ['lo.value, hi.value = mips_div(rs, rt, 64, True)'],
     },
     'deret': {
         'fields': [
@@ -913,13 +904,13 @@ REFERENCE = {
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            #['0', '0000000000'], # correct, but replaced by following 2 lines
             ['rd', 'bbbbb'],
             ['0', '00000'],
             ['DIV', '011010'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': ['mips_div(rs, rt)'],
+        'emulation': ['lo.value, hi.value = mips_div(rs, rt, 32, False)'],
     },
     'divu': {
         # obdjump incorrectly dumps ddiv as arithlog
@@ -927,13 +918,13 @@ REFERENCE = {
             ['SPECIAL', '000000'],
             ['rs', 'bbbbb'],
             ['rt', 'bbbbb'],
-            # ['0', '0000000000'], # correct, but replaced by following 2 lines
+            #['0', '0000000000'], # correct, but replaced by following 2 lines
             ['rd', 'bbbbb'],
             ['0', '00000'],
             ['DIVU', '011011'],
         ],
         'args': ['rd,rs,rt', ['rs,rt', '$zero,rs,rt']],
-        'emulation': ['mips_div(rs, rt, unsigned=True)'],
+        'emulation': ['lo.value, hi.value = mips_div(rs, rt, 32, True)'],
     },
     'dmult': {
         'fields': [
@@ -944,7 +935,7 @@ REFERENCE = {
             ['DMULT', '011100'],
         ],
         'args': ['rs, rt'],
-        'emulation': ['mips_mult(rs, rt, bits=64)'],
+        'emulation': ['mips_mult(rs, rt, 64, False)'],
     },
     'dmultu': {
         'fields': [
@@ -955,7 +946,7 @@ REFERENCE = {
             ['DMULTU', '011101'],
         ],
         'args': ['rs, rt'],
-        'emulation': ['mips_mult(rs, rt, bits=64, signed=False)'],
+        'emulation': ['mips_mult(rs, rt, 64, True)'],
     },
     'dneg': {
         'alias_of': [['dsub', 'rd,$zero,rt']],
@@ -1083,7 +1074,7 @@ REFERENCE = {
             ['DSUB', '101110'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['rd.value = mips_sub(rs, rt)'],
+        'emulation': ['rd.value = mips_sub(rs, rt, 64, False)'],
     },
     'dsubu': {
         'fields': [
@@ -1095,7 +1086,7 @@ REFERENCE = {
             ['DSUB', '101111'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': ['rd.value = mips_sub(rs, rt, overflow=False)'],
+        'emulation': ['rd.value = mips_sub(rs, rt, 64, True)'],
     },
     'ehb': {
         'alias_of': [['sll', '$zero,$zero,3']],
@@ -1461,7 +1452,7 @@ REFERENCE = {
             ['MUL', '000010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs * rt',
+        'emulation': 'rd.value = mips_mult(rs, rt, 32, False, True)',
     },
     'mult': {
         'fields': [
@@ -1472,7 +1463,7 @@ REFERENCE = {
             ['MULT', '011000'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs.value, rt.value)',
+        'emulation': 'mips_mult(rs, rt, 32, False)',
     },
     'multu': {
         'fields': [
@@ -1483,7 +1474,7 @@ REFERENCE = {
             ['MULTU', '011001'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs.value, rt.value, ignore_overflow=True)',
+        'emulation': 'mips_mult(rs, rt, 32, True)',
     },
     'neg': {
         'alias_of': [['sub', 'rd,$zero,rt']],
@@ -1753,7 +1744,7 @@ REFERENCE = {
             ['SUB', '100010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value - rt.value',
+        'emulation': 'rd.value = mips_subtract(rs, rt, 32, False)',
     },
     'subu': {
         'fields': [
@@ -1765,7 +1756,7 @@ REFERENCE = {
             ['SUBU', '100011'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value - rt.value',
+        'emulation': 'rd.value = mips_subtract(rs, rt, 32, True)',
     },
     'sw': {
         'fields': [
@@ -2092,6 +2083,9 @@ CONVERSION = {
 class Register(object):
     '''
     Represent a MIPS general register for emulation
+
+    >>> init()
+    >>> Register('$zero').value = 2
     '''
     registers = {}
     def __new__(cls, *args, **kwargs):
@@ -2109,6 +2103,8 @@ class Register(object):
             return register
         else:
             logging.debug('creating new Register(%s)', name)
+            if name == '$zero':
+                cls.value = property(lambda *args: 0, cls._warn)
             return super().__new__(cls)
 
     def __init__(self, name, number=None, value=0): 
@@ -2117,12 +2113,9 @@ class Register(object):
             if number is None:
                 number = REGISTER_REFERENCE[name]
             self.number = number
-            if name == '$zero':
-                self.value = property(lambda *args: 0, self._warn)
-            else:
-                self.value = value
             self.registers[name] = self
             self.registers[number] = self
+            self.value = value
 
     def __index__(self):
         return self.value
@@ -2574,7 +2567,77 @@ def emulate(filespec):
             else:
                 input('Continue -> ')
             exec(code, globals(), locals())
-        
+
+def mips_add(augend, addend, bits=32, ignore_overflow=False):
+    '''
+    Add a number to a MIPS register
+
+    MIPS always uses 32 or 64 bit integers.
+
+    Its "unsigned" operations are actually signed, but simply ignore
+    arithmetic overflow.
+    '''
+    c_int = c_int32 if bits == 32 else c_int64
+    adder = c_int(augend)
+    adder.value += addend
+    total = adder.value  # I'd use `sum` but it's bad practice
+    if not ignore_overflow:
+        check_sum = augend + addend  # check using Python's bignums
+        if total != check_sum:
+            raise ArithmeticOverflow('MIPS sum 0x%x != Python sum 0x%x' %
+                                     (total, check_sum))
+    return total
+ 
+def mips_subtract(subtrahend, minuend, bits=32, ignore_overflow=False):
+    '''
+    Subtract a number from a MIPS register
+    
+    MIPS always uses 32 or 64 bit integers.
+
+    Its "unsigned" operations are actually signed, but simply ignore
+    arithmetic overflow.
+    '''
+    return mips_add(subtrahend, -minuend, bits, ignore_overflow)
+
+def mips_multiply(multiplicand, multiplier, bits=32, unsigned=False,
+        return_as_int=False):
+    '''
+    Multiply a number to a MIPS register
+
+    MIPS always uses 32 or 64 bit integers.
+
+    Most of its "unsigned" operations are actually signed, but simply ignore
+    arithmetic overflow. MIPS multiplication always ignores overflow, but has
+    signed and unsigned variants.
+
+    When `return` is True, the product is returned as a single 32-bit integer.
+    Otherwise, it's still returned, but as a tuple for the (hi, lo) special
+    registers.
+
+    See https://devblogs.microsoft.com/oldnewthing/20180404-00/?p=98435
+    '''
+    c_int = eval('c_int%du' % bits) if unsigned else eval('c_int%d' % bits)
+    register = c_int(multiplicand)
+    register.value *= multiplier
+    product = register.value
+    return product if return_as_int else divmod(product, 1 << bits)
+ 
+def mips_div(dividend, divisor, bits=32, ignore_overflow=False):
+    '''
+    Divide a MIPS register by a number
+
+    MIPS always uses 32 or 64 bit integers.
+
+    Most of its "unsigned" operations are actually signed, but simply ignore
+    arithmetic overflow. Division is exceptional because it cannot overflow.
+
+    See https://devblogs.microsoft.com/oldnewthing/20180404-00/?p=98435
+    '''
+    c_int = c_uint32 if bits == 32 else c_uint64
+    register = c_int(dividend)
+    quotient, remainder = divmod(register.value, divisor)
+    return quotient, remainder
+ 
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])

@@ -1189,7 +1189,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_load(1, rt, base, offset)',
+        'emulation': ['mips_coprocessor_load(1, rt, base, offset)'],
     },
     'ldc2': {
         'fields': [
@@ -1199,7 +1199,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_load(2, rt, base, offset)',
+        'emulation': ['mips_coprocessor_load(2, rt, base, offset)'],
     },
     'lh': {
         'fields': [
@@ -1209,7 +1209,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_load(rt, base, offset, "h")',
+        'emulation': ['mips_load(rt, base, offset, "h")'],
     },
     'll': {
         'fields': [
@@ -1219,7 +1219,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_load(base, offset)',
+        'emulation': ['rt.value = mips_load(base, offset)'],
     },
     'lld': {
         'fields': [
@@ -1229,7 +1229,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_load(base, offset, bits=64)',
+        'emulation': ['rt.value = mips_load(base, offset, bits=64)'],
     },
     'jr': {
         'fields': [
@@ -1239,7 +1239,7 @@ REFERENCE = {
             ['JR', '001000'],
         ],
         'args': ['rs'],
-        'emulation': 'mips_jump(rs.value)',
+        'emulation': ['mips_jump(rs.value)'],
     },
     'lbu': {
         'fields': [
@@ -1249,7 +1249,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_load(base, offset, "b", signed=False)',
+        'emulation': ['rt.value = mips_load(base, offset, "b", signed=False)'],
     },
     'ldl': {
         'fields': [
@@ -1259,7 +1259,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_ldl(rt, base, offset)',
+        'emulation': ['mips_ldl(rt, base, offset)'],
     },
     'ldr': {
         'fields': [
@@ -1269,7 +1269,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_ldr(rt, base, offset)',
+        'emulation': ['mips_ldr(rt, base, offset)'],
     },
     'lhu': {
         'fields': [
@@ -1279,7 +1279,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.uvalue = mips_load(offset, base, "h")',
+        'emulation': ['rt.uvalue = mips_load(offset, base, "h")'],
     },
     'li': {
         'alias_of': [['addiu', 'rt,$zero,offset'], ['ori', 'rt,$zero,offset']],
@@ -1313,7 +1313,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_load(1, rt, offset, base, "w")',
+        'emulation': ['mips_coprocessor_load(1, rt, offset, base, "w")'],
     },
     'lwc2': {
         'fields': [
@@ -1323,7 +1323,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_load(2, rt, offset, base, "w")',
+        'emulation': ['mips_coprocessor_load(2, rt, offset, base, "w")'],
     },
     'lwc3': {
         'fields': [
@@ -1333,7 +1333,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_load(3, rt, offset, base, "w")',
+        'emulation': ['mips_coprocessor_load(3, rt, offset, base, "w")'],
     },
     'lwl': {
         'fields': [
@@ -1343,7 +1343,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_lw(rt, offset, base, "left")',
+        'emulation': ['mips_lw(rt, offset, base, "left")'],
     },
     'lwr': {
         'fields': [
@@ -1353,7 +1353,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_lw(rt, offset, base, "right")',
+        'emulation': ['mips_lw(rt, offset, base, "right")'],
     },
     'lwu': {
         'fields': [
@@ -1363,7 +1363,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.uvalue = mips_load(offset, base)',
+        'emulation': ['rt.uvalue = mips_load(offset, base)'],
     },
     'mfc0': {
         'fields': [
@@ -1375,7 +1375,7 @@ REFERENCE = {
             ['sel', 'bbb'],
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
-        'emulation': 'rt.value = mips_mfc(0, rd, sel)',
+        'emulation': ['rt.value = mips_mfc(0, rd, sel)'],
     },
     'mfhi': {
         'fields': [
@@ -1386,7 +1386,7 @@ REFERENCE = {
             ['MFHI', '010000'],
         ],
         'args': ['rd'],
-        'emulation': 'rd.value = hi.value',
+        'emulation': ['rd.value = hi.value'],
     },
     'mflo': {
         'fields': [
@@ -1397,7 +1397,7 @@ REFERENCE = {
             ['MFLO', '010010'],
         ],
         'args': ['rd'],
-        'emulation': 'rd.value = lo.value',
+        'emulation': ['rd.value = lo.value'],
     },
     'move': {
         'alias_of': [
@@ -1406,7 +1406,7 @@ REFERENCE = {
             ['or', 'rd,rs,$zero'],
         ],
         'args': 'rd,rs',
-        'emulation': 'rd.value = rs.value',
+        'emulation': ['rd.value = rs.value'],
     },
     'movn': {
         'fields': [
@@ -1418,7 +1418,7 @@ REFERENCE = {
             ['MOVN', '001011'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'if rt != 0: rd.value = rs',
+        'emulation': ['if rt != 0: rd.value = rs'],
     },
     'movz': {
         'fields': [
@@ -1430,7 +1430,7 @@ REFERENCE = {
             ['MOVZ', '001010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'if rt == 0: rd.value = rs',
+        'emulation': ['if rt == 0: rd.value = rs'],
     },
     'mtc0': {
         'fields': [
@@ -1442,7 +1442,7 @@ REFERENCE = {
             ['sel', 'bbb'],
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
-        'emulation': 'mips_mtc(0, rd, sel, rt.value)',
+        'emulation': ['mips_mtc(0, rd, sel, rt.value)'],
     },
     'mthi': {
         'fields': [
@@ -1452,7 +1452,7 @@ REFERENCE = {
             ['MTHI', '010001'],
         ],
         'args': ['rs'],
-        'emulation': 'mips_mthi(rs.value)',
+        'emulation': ['mips_mthi(rs.value)'],
     },
     'mtlo': {
         'fields': [
@@ -1462,7 +1462,7 @@ REFERENCE = {
             ['MTLO', '010011'],
         ],
         'args': ['rs'],
-        'emulation': 'mips_mtlo(rs.value)',
+        'emulation': ['mips_mtlo(rs.value)'],
     },
     'mul': {
         'fields': [
@@ -1474,7 +1474,7 @@ REFERENCE = {
             ['MUL', '000010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_mult(rs, rt, 32, False, True)',
+        'emulation': ['rd.value = mips_mult(rs, rt, 32, False, True)'],
     },
     'mult': {
         'fields': [
@@ -1485,7 +1485,7 @@ REFERENCE = {
             ['MULT', '011000'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs, rt, 32, False)',
+        'emulation': ['mips_mult(rs, rt, 32, False)'],
     },
     'multu': {
         'fields': [
@@ -1496,7 +1496,7 @@ REFERENCE = {
             ['MULTU', '011001'],
         ],
         'args': ['rs, rt'],
-        'emulation': 'mips_mult(rs, rt, 32, True)',
+        'emulation': ['mips_mult(rs, rt, 32, True)'],
     },
     'neg': {
         'alias_of': [['sub', 'rd,$zero,rt']],
@@ -1520,7 +1520,7 @@ REFERENCE = {
             ['NOR', '100111'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = (rs.value | rt.value) ^ -1',
+        'emulation': ['rd.value = (rs.value | rt.value) ^ -1'],
     },
     'or': {
         'fields': [
@@ -1532,7 +1532,7 @@ REFERENCE = {
             ['OR', '100101'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs.value | rt.value',
+        'emulation': ['rd.value = rs.value | rt.value'],
     },
     'ori': {
         'fields': [
@@ -1542,7 +1542,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = rs | immediate',
+        'emulation': ['rt.value = rs | immediate'],
     },
     'sb': {
         'fields': [
@@ -1552,7 +1552,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(offset, base, value, "b")',
+        'emulation': ['mips_store(offset, base, value, "b")'],
     },
     'sc': {
         'fields': [
@@ -1562,7 +1562,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(rt, base, offset, atomic=True)'
+        'emulation': ['mips_store(rt, base, offset, atomic=True)'],
     },
     'scd': {
         'fields': [
@@ -1572,7 +1572,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(rt, base, offset, "d", atomic=True)'
+        'emulation': ['mips_store(rt, base, offset, "d", atomic=True)'],
     },
     'sd': {
         'fields': [
@@ -1582,7 +1582,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(offset + contents(base), contents(rt))',
+        'emulation': ['mips_store(offset + contents(base), contents(rt))'],
     },
     'sdc1': {
         'fields': [
@@ -1592,7 +1592,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_store(1, rt, offset, base, rt, "d")',
+        'emulation': ['mips_coprocessor_store(1, rt, offset, base, rt, "d")'],
     },
     'sdc2': {
         'fields': [
@@ -1602,7 +1602,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_store(2, rt, offset, base, rt, "d")',
+        'emulation': ['mips_coprocessor_store(2, rt, offset, base, rt, "d")'],
     },
     'sdl': {
         'fields': [
@@ -1612,7 +1612,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(offset, base, rt, "d", "left")',
+        'emulation': ['mips_store(offset, base, rt, "d", "left")'],
     },
     'sdr': {
         'fields': [
@@ -1622,7 +1622,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(offset, base, rt, "d", "right")',
+        'emulation': ['mips_store(offset, base, rt, "d", "right")'],
     },
     'sh': {
         'fields': [
@@ -1632,7 +1632,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(rt, offset, base, "h")',
+        'emulation': ['mips_store(rt, offset, base, "h")'],
     },
     'sll': {
         'fields': [
@@ -1644,7 +1644,7 @@ REFERENCE = {
             ['SLL', '000000'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = rt.value << sa',
+        'emulation': ['rd.value = rt.value << sa'],
     },
     'sllv': {
         'fields': [
@@ -1656,7 +1656,7 @@ REFERENCE = {
             ['SLLV', '000100'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.value = rt.value << rs.value & 0b11111',
+        'emulation': ['rd.value = rt.value << rs.value & 0b11111'],
     },
     'slt': {
         'fields': [
@@ -1678,8 +1678,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = mips_signed(rs.value, rs.size) < '
-                     'mips_signed(immediate, 16)',
+        'emulation': ['rt.value = mips_signed(rs.value, rs.size) < '
+                     'mips_signed(immediate, 16)'],
     },
     'sltiu': {
         'fields': [
@@ -1689,7 +1689,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = rs.value < immediate',
+        'emulation': ['rt.value = rs.value < immediate'],
     },
     'sltu': {
         'fields': [
@@ -1701,7 +1701,7 @@ REFERENCE = {
             ['SLTU', '101011'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs < rt',
+        'emulation': ['rd.value = rs < rt'],
     },
     'sra': {
         'fields': [
@@ -1713,7 +1713,7 @@ REFERENCE = {
             ['SRA', '000011'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = mips_sra(rt.value, sa)',
+        'emulation': ['rd.value = mips_sra(rt.value, sa)'],
     },
     'srav': {
         'fields': [
@@ -1725,7 +1725,7 @@ REFERENCE = {
             ['SRAV', '000111'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.value = rt >> rs',
+        'emulation': ['rd.value = rt >> rs'],
     },
     'srl': {
         'fields': [
@@ -1737,7 +1737,7 @@ REFERENCE = {
             ['SRL', '000010'],
         ],
         'args': ['rd,rt,sa'],
-        'emulation': 'rd.value = mips_srl(rt.value, sa)',
+        'emulation': ['rd.value = mips_srl(rt.value, sa)'],
     },
     'srlv': {
         'fields': [
@@ -1749,7 +1749,7 @@ REFERENCE = {
             ['SRLV', '000110'],
         ],
         'args': ['rd,rt,rs'],
-        'emulation': 'rd.value = mips_srl(rt, rs)',
+        'emulation': ['rd.value = mips_srl(rt, rs)'],
     },
     'ssnop': {
         'alias_of': [['sll', '$zero,$zero,1']],
@@ -1765,7 +1765,7 @@ REFERENCE = {
             ['SUB', '100010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_subtract(rs, rt, 32, False)',
+        'emulation': ['rd.value = mips_subtract(rs, rt, 32, False)'],
     },
     'subu': {
         'fields': [
@@ -1777,7 +1777,7 @@ REFERENCE = {
             ['SUBU', '100011'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_subtract(rs, rt, 32, True)',
+        'emulation': ['rd.value = mips_subtract(rs, rt, 32, True)'],
     },
     'sw': {
         'fields': [
@@ -1804,7 +1804,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_store(1, offset, base, rt)',
+        'emulation': ['mips_coprocessor_store(1, offset, base, rt)'],
     },
     'swc2': {
         'fields': [
@@ -1814,7 +1814,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_store(2, offset, base, rt)',
+        'emulation': ['mips_coprocessor_store(2, offset, base, rt)'],
     },
     'swc3': {
         'fields': [
@@ -1824,7 +1824,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_coprocessor_store(3, offset, base, rt)',
+        'emulation': ['mips_coprocessor_store(3, offset, base, rt)'],
     },
     'swl': {
         'fields': [
@@ -1834,7 +1834,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(rt, offset, base, "w", "left")',
+        'emulation': ['mips_store(rt, offset, base, "w", "left")'],
     },
     'swr': {
         'fields': [
@@ -1844,7 +1844,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'mips_store(rt, offset, base, "w", "right")',
+        'emulation': ['mips_store(rt, offset, base, "w", "right")'],
     },
     'sync': {
         'fields': [
@@ -1854,7 +1854,7 @@ REFERENCE = {
             ['SYNC', '001111'],
         ],
         'args': ['stype', [None, '0']],
-        'emulation': 'mips_sync(stype)',
+        'emulation': ['mips_sync(stype)'],
     },
     'syscall': {
         'fields': [
@@ -1863,7 +1863,7 @@ REFERENCE = {
             ['SYSCALL', '001100'],
         ],
         'args': ['code', [None, '0']],
-        'emulation': 'mips_syscall()',
+        'emulation': ['mips_syscall()'],
     },
     'teq': {
         'fields': [
@@ -1874,7 +1874,7 @@ REFERENCE = {
             ['TEQ', '110100'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if rs.value == rt.value: mips_trap(code)',
+        'emulation': ['if rs.value == rt.value: mips_trap(code)'],
     },
     'teqi': {
         'fields': [
@@ -1884,7 +1884,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs == immediate: mips_trap(code)',
+        'emulation': ['if rs == immediate: mips_trap(code)'],
     },
     'tge': {
         'fields': [
@@ -1895,7 +1895,7 @@ REFERENCE = {
             ['TGE', '110000'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if mips_signed(rs) > mips_signed(rt): mips_trap(code)',
+        'emulation': ['if mips_signed(rs) > mips_signed(rt): mips_trap(code)'],
     },
     'tgei': {
         'fields': [
@@ -1905,7 +1905,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.value >= c_int16(immediate).value: mips_trap()',
+        'emulation': ['if rs.value >= c_int16(immediate).value: mips_trap()'],
     },
     'tgeiu': {
         'fields': [
@@ -1915,8 +1915,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.uvalue >= c_int16(immediate).value & 0xffffffff): '
-                     'mips_trap(0)',
+        'emulation': ['if rs.uvalue >= c_int16(immediate).value & 0xffffffff): '
+                     'mips_trap(0)'],
     },
     'tgeu': {
         'fields': [
@@ -1927,7 +1927,7 @@ REFERENCE = {
             ['TGEU', '110001'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if rs > rt: mips_trap(code)',
+        'emulation': ['if rs > rt: mips_trap(code)'],
     },
     'tlbwi': {
         'fields': [
@@ -1937,7 +1937,7 @@ REFERENCE = {
             ['TLBWI', '000010'],
         ],
         'args': [None],
-        'emulation': 'mips_tlbwi()',
+        'emulation': ['mips_tlbwi()'],
     },
     'tlbwr': {
         'fields': [
@@ -1947,7 +1947,7 @@ REFERENCE = {
             ['TLBWR', '000110'],
         ],
         'args': [None],
-        'emulation': 'mips_tlbwr()',
+        'emulation': ['mips_tlbwr()'],
     },
     'tlt': {
         'fields': [
@@ -1958,8 +1958,8 @@ REFERENCE = {
             ['TLT', '110010'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if mips_signed(rs.value, rs.size) < '
-                     'mips_signed(rt.value, rt.size): mips_trap()',
+        'emulation': ['if mips_signed(rs.value, rs.size) < '
+                     'mips_signed(rt.value, rt.size): mips_trap()'],
     },
     'tlti': {
         'fields': [
@@ -1969,7 +1969,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs < c_int16(immediate).value: mips_trap()',
+        'emulation': ['if rs < c_int16(immediate).value: mips_trap()'],
     },
     'tltiu': {
         'fields': [
@@ -1979,8 +1979,8 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rs,immediate'],
-        'emulation': 'if rs.uvalue < c_int16(immediate).value & 0xffffffff):'
-        ' mips_trap()',
+        'emulation': ['if rs.uvalue < c_int16(immediate).value & 0xffffffff):'
+        ' mips_trap()'],
     },
     'tltu': {
         'fields': [
@@ -1991,7 +1991,7 @@ REFERENCE = {
             ['TLTU', '110011'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if rs.value < rt.value: mips_trap()',
+        'emulation': ['if rs.value < rt.value: mips_trap()'],
     },
     'tne': {
         'fields': [
@@ -2002,7 +2002,7 @@ REFERENCE = {
             ['TNE', '110110'],
         ],
         'args': ['rs,rt,code', ['rs,rt', 'rs,rt,0']],
-        'emulation': 'if rs.value != rt.value: mips_trap(code)',
+        'emulation': ['if rs.value != rt.value: mips_trap(code)'],
     },
     'wait': {
         'fields': [
@@ -2012,7 +2012,7 @@ REFERENCE = {
             ['WAIT', '100000'],
         ],
         'args': ['code', [None, '0']],
-        'emulation': 'mips_wait(code)',
+        'emulation': ['mips_wait(code)'],
     },
     'xor': {
         'fields': [
@@ -2024,7 +2024,7 @@ REFERENCE = {
             ['XOR', '100110'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = rs ^ rt',
+        'emulation': ['rd.value = rs ^ rt'],
     },
     'xori': {
         'fields': [
@@ -2034,7 +2034,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,rs,immediate'],
-        'emulation': 'rt.value = rs ^ immediate',
+        'emulation': ['rt.value = rs ^ immediate'],
     },
 }
 

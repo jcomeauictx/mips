@@ -2358,7 +2358,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
             raise ValueError('CONVERSION[%r] improperly formatted: %s' %
                              (mnemonic, CONVERSION[mnemonic]))
     if USE_LABELS and labeled and offset not in LABELS and offset <= maxoffset:
-        LABELS[offset] = '%s' % hex(offset)
+        LABELS[offset] = 's%s' % hex(offset).lstrip('0x')
         #logging.debug('LABELS: %s', LABELS)
     pattern = PATTERN[style]
     line = pattern % locals()

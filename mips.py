@@ -2250,7 +2250,7 @@ def assemble(filespec):
     # first pass, just build labels
     for loop in range(2):
         if loop == 1:
-            outfile = sys.stdout
+            outfile = sys.stdout.buffer
             debug = logging.debug
             logging.debug('labels at start of 2nd pass: %s', LABELS)
         else:
@@ -2272,7 +2272,10 @@ def assemble(filespec):
             if instruction is not None:
                 if outfile is not None:
                     debug('assembled instruction: 0x%08x', instruction)
-                    outfile.write(struct.pack('<L', instruction))
+                    try:
+                        outfile.write(struct.pack('<L', instruction))
+                    except TypeError:
+                        raise(TypeError('Cannot write bytes to %s' % outfile))
                 elif label:
                     if label in LABELS:
                         raise ValueError('Label %r already in LABELS as %r' %
@@ -2610,8 +2613,12 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                                           arg, REGISTER_REFERENCE)
                             raise ValueError('Cannot process arg %r' % arg)
         elif reference.get('action') is not None:
-            exec(reference['action'] in globals(), locals())
-            instruction = None
+            logging.warning('exec %r', reference['action'])
+            try:
+                exec(reference['action'], globals(), locals())
+                instruction = None
+            except (TypeError, ValueError):
+                raise ValueError('Cannot exec %s action' % reference)
         elif reference.get('alias_of') is not None:
             aliases = reference['alias_of']
             expected = reference['args']

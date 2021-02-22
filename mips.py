@@ -1666,8 +1666,7 @@ REFERENCE = {
             ['SLT', '101010'],
         ],
         'args': ['rd,rs,rt'],
-        'emulation': 'rd.value = mips_signed(rs.value, rs.size) < '
-                     'mips_signed(rt.value, rt.size)',
+        'emulation': ['rd.value = c_int32(rs).value < c_int32(rt).value'],
     },
     'slti': {
         'fields': [

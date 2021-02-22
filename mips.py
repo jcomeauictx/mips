@@ -109,7 +109,7 @@ ARGS = {
     'S': '\t0x%(longcode)x',
     'sync': '\t0x%(amount)x',
 }
-COMMENT = '\t# %(index)x: %(chunk)r %(comment)s'
+COMMENT = '\t# %(index)x: %(chunkstring)s %(comment)s'
 
 PATTERN = {
     'arithlog': LABEL + MNEMONIC + ARGS['dst'] + COMMENT,
@@ -151,7 +151,7 @@ PATTERN = {
 ARGSEP = r'[,()]\s*'
 
 PACKFORMAT = {
-    # should be signed values, for Register.bytevalue?
+    # for Register.bytevalue
     32: '<L',
     64: '<Q',
 }
@@ -2152,10 +2152,7 @@ class Register(object):
         return self.name
 
     def __repr__(self):
-        if self.name == '$zero':
-            return '<$zr(0)=0>'
-        else:
-            return '<%s(%d)=%d>' % (self.name, self.number, self.value)
+        return '<%s(%d)=%d>' % (self.name, self.number, self.value)
 
     @property
     def bytevalue(self):
@@ -2182,19 +2179,17 @@ class Register(object):
 
 class ZeroRegister(Register):
     '''
-    def __new__(cls, *args, **kwargs):
-        super().__new__(cls, *args, **kwargs)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+    Special case for $zero
     '''
-
     def _warn(self, value):
         if value != 0:
             logging.info('Attempt to set zero register to %r', value)
 
     # This subclass has a fixed value
     value = property(lambda *args: 0, _warn)
+
+    def __repr__(self):
+        return '<$zr(0)=0>'
 
 def disassemble(filespec):
     '''
@@ -2255,6 +2250,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     build labels dict in first loop, output assembly language in second
     '''
     instruction = struct.unpack('<L', chunk)[0]
+    chunkstring = repr(chunk)[1:]  # to make assembly output match python2
     logging.debug('chunk: %r, instruction: 0x%08x', chunk, instruction)
     label = LABELS.get(index, '')
     label += ':' if label else ''

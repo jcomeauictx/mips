@@ -22,6 +22,8 @@ LABELS = {}  # filled in by init()
 
 STATE = OrderedDict()  # filled in by init()
 
+MEMORY = bytearray()
+
 REGISTER = [
     '$' + registername for registername in [
         'zero',
@@ -1155,7 +1157,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': ['rt.value = c_byte(memory[base + offset]).value'],
+        'emulation': ['rt.value = c_byte(MEMORY[base + offset]).value'],
     },
     'ld': {
         'fields': [
@@ -1778,9 +1780,9 @@ REFERENCE = {
             'shadow = c_int32(base)',
             'shadow.value += offset',
             'value = struct.pack("<L", rt.value)',
-            'logging.debug("memory before SW: %s", memory[shadow.value:][:4])',
-            'memory[shadow.value:shadow.value + 4] = list(value)',
-            'logging.debug("memory after SW: %s", memory[shadow.value:][:4])',
+            'logging.debug("memory before SW: %s", MEMORY[shadow.value:][:4])',
+            'MEMORY[shadow.value:shadow.value + 4] = list(value)',
+            'logging.debug("memory after SW: %s", MEMORY[shadow.value:][:4])',
         ],
     },
     'swc1': {
@@ -2584,8 +2586,8 @@ def emulate(filespec):
     '''
     with open(filespec, 'rb') as infile:
         filedata = infile.read()
-    memory = bytearray(filedata)  # mutable copy of filedata, byte-addressable
-    memory.extend(bytes(4096))  # add room for stack (enough?)
+    MEMORY.extend(filedata)  # mutable copy of filedata, byte-addressable
+    MEMORY.extend(bytes(4096))  # add room for stack (enough?)
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
     pc = 0x8c000000  # program counter on reset
     index = 0
@@ -2692,11 +2694,11 @@ def mips_lw(rt, offset, base, half='both'):
     length = 4 - loadoffset
     if half == 'left':
         rt.bytevalue[loadoffset:loadoffset + length + 1] = \
-            memory[offset:offset + length + 1]
+            MEMORY[offset:offset + length + 1]
     elif half == 'right':
-        rt.bytevalue[length:4 - length] = memory[offset + length:offset + 4]
+        rt.bytevalue[length:4 - length] = MEMORY[offset + length:offset + 4]
     else:  # both
-        rt.bytevalue = memory[offset:offset + 4]
+        rt.bytevalue = MEMORY[offset:offset + 4]
 
 if __name__ == '__main__':
     init()

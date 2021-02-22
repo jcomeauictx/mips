@@ -11,13 +11,17 @@ logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
 try:
     EXECUTABLE, COMMAND, *ARGV = sys.argv
+    EXEC = os.path.splitext(os.path.basename(EXECUTABLE))[0]
+    if EXEC == 'doctest':
+        DOCTESTDEBUG = logging.debug
+    else:
+        DOCTESTDEBUG = lambda *args, **kwargs: None
 except ValueError:
-    raise ValueError('Must specify command and args for that function')
-EXEC = os.path.splitext(os.path.basename(EXECUTABLE))[0]
-if EXEC == 'doctest':
-    DOCTESTDEBUG = logging.debug
-else:
-    DOCTESTDEBUG = lambda *args, **kwargs: None
+    logging.error('sys.argv: %s', sys.argv)
+    if len(sys.argv) == 1 and sys.argv[0] == '':
+        logging.info('module being imported, not a problem')
+    else:
+        raise ValueError('Must specify command and args for that function')
 MATCH_OBJDUMP_DISASSEMBLY = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLY'))
 
 # labels will cause objdump -D output and mips disassemble output to differ
@@ -395,25 +399,43 @@ COP3 = [
 ]
 
 COREGISTER = {
+    # see https://en.wikichip.org/wiki/mips/coprocessor_0
     0b00000: 'c%d_index',
+    0b00001: 'c%d_random',
     0b00010: 'c%d_entrylo0',
     0b00011: 'c%d_entrylo1',
     0b00100: 'c%d_context',
     0b00101: 'c%d_pagemask',
+    0b00110: 'c%d_wired',
+    0b00111: 'c%d_hwrena',
     0b01000: 'c%d_badvaddr',
     0b01001: 'c%d_count',
     0b01010: 'c%d_entryhi',
     0b01011: 'c%d_compare',
-    0b01100: 'c%d_sr',
+    0b01100: 'c%d_sr',  # selector 0
+    # with selector 1: intctl, interrupt vector setup
+    # with selector 2: srsctl, shadow register control
+    # with selector 3: srsmap, shadow register map
     0b01101: 'c%d_cause',
     0b01110: 'c%d_epc',
-    0b01111: 'c%d_prid',
+    0b01111: 'c%d_prid',  # selector 0
+    # with selector 1: ebase, exception entry point base address
     0b10000: 'c%d_config',
+    # with selector 1, 2, 3: config1, config2, config3
+    0b10001: 'c%d_lladdr',
     0b10010: 'c%d_watchlo',
     0b10011: 'c%d_watchhi',
-    0b10110: '$22',
-    0b11100: 'c%d_taglo',
-    0b11101: 'c%d_taghi',
+    # 20, 21, 22 unused(?)
+    0b10111: 'c%d_debug',
+    0b11000: 'c%d_depc',
+    0b11001: 'c%d_perfctl', # selector 0
+    # with selector 1: perfcnt
+    0b11010: 'c%d_ecc',
+    0b11011: 'c%d_cacheerr',
+    0b11100: 'c%d_taglo', # selector 0
+    # with selector 1: datalo
+    0b11101: 'c%d_taghi', # selector 0
+    # with selector 1: datahi
 }
 
 INSTRUCTIONS = {
@@ -2193,6 +2215,18 @@ class ZeroRegister(Register):
     def __repr__(self):
         return '<$zr(0)=0>'
 
+class CoprocessorRegister(object):
+    '''
+    Separate from general registers.
+
+    Each coprocessor 0 register number has up to 4 actual registers,
+    determined by a 3-bit selector.
+    '''
+    registers = {0: {}, 1: {}, 2: {}, 3: {}}
+
+    def __new__(cls, name, number=0, selector=0):
+        pass
+
 def disassemble(filespec):
     '''
     primitive disassembler
@@ -2348,6 +2382,9 @@ def init():
                 listing.insert(listing.index(item), WORD)
         while len(listing) < size:
             listing.append(WORD)
+    for index in range(32):
+        if index != COREGISTER.keys():
+            COREGISTER[index] = '$%d' % index
     if USE_LABELS:
         LABELS[0] = 'start'
         # see //s3-eu-west-1.amazonaws.com/downloads-mips/I7200/
@@ -2715,6 +2752,12 @@ def mips_lw(rt, offset, base, half='both'):
         rt.bytevalue = (MEMORY[offset + length:offset + 4], length)
     else:  # both
         rt.bytevalue = (MEMORY[offset:offset + 4], 0)
+
+def mips_mfc(coprocessor, rd, selector):
+    '''
+    Return contents of coprocessor register rd
+    '''
+    logging.debug('mips_mfc disregarding selector contents %d', selector)
 
 if __name__ == '__main__':
     init()

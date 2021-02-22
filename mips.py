@@ -471,7 +471,9 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': ['raise Exception("0x%x not executable code", immediate)'],
+        'emulation': [
+            'raise Exception("%s not executable code", hex(immediate))',
+        ],
     },
     'abs.s': {
         'fields': [
@@ -783,7 +785,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': ['logging.debug("ignoring c0 0x%x", immediate)'],
+        'emulation': ['logging.debug("ignoring c0 %s", hex(immediate))'],
     },
     'c1': {
         'fields': [
@@ -792,7 +794,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': ['logging.debug("ignoring c1 0x%x", immediate)'],
+        'emulation': ['logging.debug("ignoring c1 %s", hex(immediate))'],
     },
     'c2': {
         'fields': [
@@ -801,7 +803,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': ['logging.debug("ignoring c2 0x%x", immediate)'],
+        'emulation': ['logging.debug("ignoring c2 %s", hex(immediate))'],
     },
     'c3': {
         'fields': [
@@ -810,7 +812,7 @@ REFERENCE = {
             ['immediate', 'bbbbbbbbbbbbbbbbbbbbbbbbb'],
         ],
         'args': ['immediate'],
-        'emulation': ['logging.debug("ignoring c3 0x%x", immediate)'],
+        'emulation': ['logging.debug("ignoring c3 %s", hex(immediate))'],
     },
     'cache': {
         'fields': [
@@ -2243,7 +2245,7 @@ def assemble(filespec):
                                          (label, LABELS[label]))
                     LABELS[label] = offset
                 offset += 4
-                debug('offset now: 0x%x', offset)
+                debug('offset now: %s', hex(offset))
 
 def disassemble_chunk(loop, index, chunk, maxoffset):
     '''
@@ -2305,9 +2307,9 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     offset = index + 4 + (immediate << 2)
     # don't use labels until we've ascertained that output is like objdump
     if USE_LABELS:
-        destination = LABELS.get(offset, '0x%x' % offset)
+        destination = LABELS.get(offset, hex(offset))
     else:
-        destination = '0x%x' % offset
+        destination = hex(offset)
     if mnemonic in CONVERSION:
         try:
             for condition, result in CONVERSION[mnemonic]:
@@ -2322,7 +2324,7 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
             raise ValueError('CONVERSION[%r] improperly formatted: %s' %
                              (mnemonic, CONVERSION[mnemonic]))
     if USE_LABELS and labeled and offset not in LABELS and offset <= maxoffset:
-        LABELS[offset] = 's%x' % offset
+        LABELS[offset] = '%s' % hex(offset)
         #logging.debug('LABELS: %s', LABELS)
     pattern = PATTERN[style]
     line = pattern % locals()
@@ -2487,15 +2489,15 @@ def smart_mask(number, name, offset, argsdict, maskbits):
                   hex(number), name, argsdict, maskbits)
     if number < 0:
         number = (1 << 32) + number  # two's complement
-        logging.debug('negative number now 0x%x', number)
+        logging.debug('negative number now %s', hex(number))
     if name  == 'offset' and not 'base' in argsdict:
         number = (number - offset - 4) >> 2
-        logging.debug('branch offset now 0x%x', number)
+        logging.debug('branch offset now %s', hex(number))
     elif name == 'target':
         number >>= 2  # jump targets are *not* PC-relative
-        logging.debug('jump target now 0x%x', number)
+        logging.debug('jump target now %s', hex(number))
     number = number & maskbits
-    logging.debug('number after mask operation: 0x%x', number)
+    logging.debug('number after mask operation: %s', hex(number))
     return number & maskbits
 
 def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
@@ -2534,21 +2536,21 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                         number = eval(arg)
                         if name in fieldsdict:
                             fieldsdict[name] = number
-                        logging.debug('before merging number %r: 0x%x',
-                                      arg, instruction)
+                        logging.debug('before merging number %r: %s',
+                                      arg, hex(instruction))
                         instruction |= smart_mask(number, name, offset,
                                                   argsdict, mask)
-                        logging.debug('after merging number %r: 0x%x',
-                                      arg, instruction)
+                        logging.debug('after merging number %r: %s',
+                                      arg, hex(instruction))
                     elif arg in LABELS:
                         if name in fieldsdict:
                             fieldsdict[name] = LABELS[arg]
-                        logging.debug('before merging label %r (0x%x): 0x%x',
-                                      arg, LABELS[arg], instruction)
+                        logging.debug('before merging label %r (%s): %s',
+                                      arg, hex(LABELS[arg]), hex(instruction))
                         instruction |= smart_mask(LABELS[arg], name, offset,
                                                   argsdict, mask)
-                        logging.debug('after merging label %r (0x%x): 0x%x',
-                                      arg, LABELS[arg], instruction)
+                        logging.debug('after merging label %r (%s): %s',
+                                      arg, hex(LABELS[arg]), hex(instruction))
                     else:
                         # check for coprocessor register special names
                         if '_' in arg:
@@ -2559,9 +2561,10 @@ def assemble_instruction(loop, offset, mnemonic=None, args=None, was=''):
                         if arg in REGISTER_REFERENCE:
                             if name in fieldsdict:
                                 fieldsdict[name] = Register(arg)
-                            logging.debug('before %r: 0x%x', arg, instruction)
+                            logging.debug('before %r: %s',
+                                          arg, hex(instruction))
                             instruction |= REGISTER_REFERENCE[arg]
-                            logging.debug('after %r: 0x%x', arg, instruction)
+                            logging.debug('after %r: %s', arg, hex(instruction))
                         elif loop == 0:
                             instruction = 'pending label list completion'
                             break
@@ -2644,8 +2647,8 @@ def mips_add(augend, addend, bits=32, ignore_overflow=False):
     if not ignore_overflow:
         check_sum = augend.value + addend  # check using Python's bignums
         if total != check_sum:
-            raise ArithmeticOverflow('MIPS sum 0x%x != Python sum 0x%x' %
-                                     (total, check_sum))
+            raise ArithmeticOverflow('MIPS sum %s != Python sum %s' %
+                                     (hex(total), hex(check_sum)))
     return total
  
 def mips_subtract(subtrahend, minuend, bits=32, ignore_overflow=False):

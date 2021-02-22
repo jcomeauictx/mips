@@ -10,7 +10,7 @@ from ctypes import c_byte, c_int16, c_int32, c_int64
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
 try:
-    EXECUTABLE, COMMAND, *ARGS = sys.argv
+    EXECUTABLE, COMMAND, *ARGV = sys.argv
 except ValueError:
     raise ValueError('Must specify command and args for that function')
 EXEC = os.path.splitext(os.path.basename(EXECUTABLE))[0]
@@ -2720,6 +2720,6 @@ def mips_lw(rt, offset, base, half='both'):
 
 if __name__ == '__main__':
     init()
-    eval(COMMAND)(*ARGS[2:])
+    eval(COMMAND)(*ARGV)
 else:
     init()

@@ -400,41 +400,41 @@ COP3 = [
 
 COREGISTER = {
     # see https://en.wikichip.org/wiki/mips/coprocessor_0
-    0b00000: 'c%d_index',
-    0b00001: 'c%d_random',
-    0b00010: 'c%d_entrylo0',
-    0b00011: 'c%d_entrylo1',
-    0b00100: 'c%d_context',
-    0b00101: 'c%d_pagemask',
-    0b00110: 'c%d_wired',
-    0b00111: 'c%d_hwrena',
-    0b01000: 'c%d_badvaddr',
-    0b01001: 'c%d_count',
-    0b01010: 'c%d_entryhi',
-    0b01011: 'c%d_compare',
-    0b01100: 'c%d_sr',  # selector 0
+    0b00000: 'c0_index',
+    0b00001: 'c0_random',
+    0b00010: 'c0_entrylo0',
+    0b00011: 'c0_entrylo1',
+    0b00100: 'c0_context',
+    0b00101: 'c0_pagemask',
+    0b00110: 'c0_wired',
+    0b00111: 'c0_hwrena',
+    0b01000: 'c0_badvaddr',
+    0b01001: 'c0_count',
+    0b01010: 'c0_entryhi',
+    0b01011: 'c0_compare',
+    0b01100: 'c0_sr',  # selector 0
     # with selector 1: intctl, interrupt vector setup
     # with selector 2: srsctl, shadow register control
     # with selector 3: srsmap, shadow register map
-    0b01101: 'c%d_cause',
-    0b01110: 'c%d_epc',
-    0b01111: 'c%d_prid',  # selector 0
+    0b01101: 'c0_cause',
+    0b01110: 'c0_epc',
+    0b01111: 'c0_prid',  # selector 0
     # with selector 1: ebase, exception entry point base address
-    0b10000: 'c%d_config',
+    0b10000: 'c0_config',
     # with selector 1, 2, 3: config1, config2, config3
-    0b10001: 'c%d_lladdr',
-    0b10010: 'c%d_watchlo',
-    0b10011: 'c%d_watchhi',
+    0b10001: 'c0_lladdr',
+    0b10010: 'c0_watchlo',
+    0b10011: 'c0_watchhi',
     # 20, 21, 22 unused(?)
-    0b10111: 'c%d_debug',
-    0b11000: 'c%d_depc',
-    0b11001: 'c%d_perfctl', # selector 0
+    0b10111: 'c0_debug',
+    0b11000: 'c0_depc',
+    0b11001: 'c0_perfctl', # selector 0
     # with selector 1: perfcnt
-    0b11010: 'c%d_ecc',
-    0b11011: 'c%d_cacheerr',
-    0b11100: 'c%d_taglo', # selector 0
+    0b11010: 'c0_ecc',
+    0b11011: 'c0_cacheerr',
+    0b11100: 'c0_taglo', # selector 0
     # with selector 1: datalo
-    0b11101: 'c%d_taghi', # selector 0
+    0b11101: 'c0_taghi', # selector 0
     # with selector 1: datahi
 }
 
@@ -1397,7 +1397,7 @@ REFERENCE = {
             ['sel', 'bbb'],
         ],
         'args': ['rt,rd,sel', ['rt,rd', 'rt,rd,0']],
-        'emulation': ['rt.value = mips_mfc(0, rd, sel)'],
+        'emulation': ['rt.value = mips_mfc0(rd, sel)'],
     },
     'mfhi': {
         'fields': [
@@ -2224,7 +2224,47 @@ class CoprocessorRegister(object):
     '''
     registers = {0: {}, 1: {}, 2: {}, 3: {}}
 
-    def __new__(cls, name, number=0, selector=0):
+    def __new__(cls, coprocessor, name, number=0, selector=None):
+        if name[1:].isdigit():  # register in $28 form
+            number = int(name[1:])
+            if number in cls.registers[coprocessor]:
+                register = cls.registers[coprocessor][number]
+                logging.debug('returning existing register %s', register)
+        elif name in cls.registers:
+            register = cls.registers[coprocessor][name]
+            logging.debug('returning already existing register %s', register)
+            return register
+        else:
+            logging.debug('creating new CoprocessorRegister(%s)', name)
+            return super().__new__(cls)
+
+    def __init__(self, coprocessor, name, number=None, selector=None): 
+        logging.debug('initializing coprocessor register %s', name)
+        if not name in self.registers[coprocessor]:
+            self.name = name
+            if number is None:
+                if coprocessor == 0:
+                    number = COREGISTER.index(name)
+                elif name[1:].isdigit():  # '$11' form
+                    number = int(name[1:])
+                else:
+                    number = int(name[2:])  # '$f12' form
+            self.number = number
+            self.registers[name] = self
+            self.registers[number] = self
+            self.value = value
+
+    def __index__(self):
+        return self.value
+
+    def __int__(self):
+        return self.value
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return '<%s(%d)=%d>' % (self.name, self.number, self.value)
         pass
 
 def disassemble(filespec):
@@ -2327,10 +2367,13 @@ def disassemble_chunk(loop, index, chunk, maxoffset):
     elif mnemonic == 'REGIMM':
         mnemonic, style, labeled, condition, signed = REGIMM[target][:5]
     elif mnemonic.startswith('COP'):
-        coprocessor = int(mnemonic[-1])
-        coregister = COREGISTER.get(dest, 'c%d_unknown')
-        if '%d' in coregister:
-            coregister = coregister % coprocessor
+        coprocessor = int(mnemonic[-1:])
+        coregister = (
+            COREGISTER.get(dest, '$%d' % dest),
+            '$f%d' % dest,
+            '$%d' % dest,
+            '$%d' % dest
+        )[coprocessor]
         listing = INSTRUCTIONS[mnemonic]
         longimmediate = (instruction & 0x1ffffff)  # low 25 bits
         mnemonic, style, labeled, condition, signed = listing[source][:5]
@@ -2386,7 +2429,7 @@ def init():
         while len(listing) < size:
             listing.append(WORD)
     for index in range(32):
-        if index != COREGISTER.keys():
+        if index not in COREGISTER.keys():
             COREGISTER[index] = '$%d' % index
     if USE_LABELS:
         LABELS[0] = 'start'
@@ -2760,11 +2803,10 @@ def mips_lw(rt, offset, base, half='both'):
     else:  # both
         rt.bytevalue = (MEMORY[offset:offset + 4], 0)
 
-def mips_mfc(coprocessor, rd, selector):
+def mips_mfc0(rd, selector):
     '''
-    Return contents of coprocessor register rd
+    Return contents of coprocessor 0 register rd with selector
     '''
-    logging.debug('mips_mfc disregarding selector contents %d', selector)
 
 if __name__ == '__main__':
     init()

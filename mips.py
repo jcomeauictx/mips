@@ -20,6 +20,8 @@ logging.warning('USE_LABELS = %s, AGGRESSIVE_WORDING=%s', USE_LABELS,
 
 LABELS = {}  # filled in by init()
 
+STATE = OrderedDict()  # filled in by init()
+
 REGISTER = [
     '$' + registername for registername in [
         'zero',
@@ -135,6 +137,12 @@ PATTERN = {
 }
 
 ARGSEP = r'[,()]\s*'
+
+PACKFORMAT = {
+    # should be signed values, for Register.bytevalue?
+    32: '<L',
+    64: '<Q',
+}
 
 INSTRUCTION = [
     # mnemonic, print pattern, save branch label, condition, signed, index
@@ -1281,7 +1289,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_lw(offset, base)',
+        'emulation': ['mips_lw(rt, offset, base)'],
     },
     'lwc1': {
         'fields': [
@@ -1321,7 +1329,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_lw(offset, base, "left")',
+        'emulation': 'mips_lw(rt, offset, base, "left")',
     },
     'lwr': {
         'fields': [
@@ -1331,7 +1339,7 @@ REFERENCE = {
             ['offset', 'bbbbbbbbbbbbbbbb'],
         ],
         'args': ['rt,offset(base)'],
-        'emulation': 'rt.value = mips_lw(offset, base, "right")',
+        'emulation': 'mips_lw(rt, offset, base, "right")',
     },
     'lwu': {
         'fields': [
@@ -2081,11 +2089,18 @@ CONVERSION = {
 }
 
 class Register(object):
-    '''
+    r'''
     Represent a MIPS general register for emulation
 
-    >>> init()
+    >>> logging.debug('All registers should have been created by now!')
     >>> Register('$zero').value = 2
+    >>> register = Register('$at')
+    >>> logging.debug('setting $at to 0xffffffff')
+    >>> register.value = 0xffffffff
+    >>> logging.warning('setting $at register bytevalue')
+    >>> register.bytevalue[1:4] = b'\x55\x44\x33'
+    >>> '0x%08x' % register.value
+    '0xff554433'
     '''
     registers = {}
     def __new__(cls, *args, **kwargs):
@@ -2103,11 +2118,10 @@ class Register(object):
             return register
         else:
             logging.debug('creating new Register(%s)', name)
-            if name == '$zero':
-                cls.value = property(lambda *args: 0, cls._warn)
             return super().__new__(cls)
 
     def __init__(self, name, number=None, value=0): 
+        logging.debug('initializing register %s', name)
         if not name in self.registers:
             self.name = name
             if number is None:
@@ -2132,9 +2146,35 @@ class Register(object):
         else:
             return '<%s(%d)=%d>' % (self.name, self.number, self.value)
 
+    @property
+    def bytevalue(self, bits=32):
+        '''
+        Return register contents as bytearray
+        '''
+        return bytearray(struct.pack(PACKFORMAT[bits], self.value))
+
+    @bytevalue.setter
+    def bytevalue(self, databytes, bits=32):
+        r'''
+        Store bytes in register
+        '''
+        self.value = struct.unpack(PACKFORMAT[bits], databytes)[0]
+
+class ZeroRegister(Register):
+    '''
+    def __new__(cls, *args, **kwargs):
+        super().__new__(cls, *args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+    '''
+
     def _warn(self, value):
         if value != 0:
-            logging.debug('Attempt to set zero register to %r', value)
+            logging.info('Attempt to set zero register to %r', value)
+
+    # This subclass has a fixed value
+    value = property(lambda *args: 0, _warn)
 
 def disassemble(filespec):
     '''
@@ -2342,6 +2382,12 @@ def init():
                 raise ValueError(
                     'REFERENCE[%r] fields are incorrect: %d != 32' %
                     (key, length))
+    # STATE is used only by emulator, but initialize it anyway because it
+    # makes sure all the registers are created correctly and in order
+    STATE[REGISTER[0]] = ZeroRegister('$zero', 0)
+    for index in range(1, len(REGISTER)):
+        STATE[REGISTER[index]] = Register(REGISTER[index], index)
+
 def shorten(hashtable):
     '''
     Get rid of anything huge in locals(), for debugging purposes
@@ -2543,9 +2589,7 @@ def emulate(filespec):
     program = [filedata[i:i + 4] for i in range(0, len(filedata), 4)]
     pc = 0x8c000000  # program counter on reset
     index = 0
-    state = OrderedDict()
-    for i in range(len(REGISTER)):
-        state[REGISTER[i]] = Register(REGISTER[i], i)
+    run = False  # setting to True below will run code until error or ^C
     while True:
         instruction = disassemble_chunk(0, index, program[index], len(filedata))
         logging.debug('executing %s', instruction)
@@ -2559,14 +2603,14 @@ def emulate(filespec):
         locals().update(emulation[1])
         index += 1
         pc += 4
+        print(STATE.values(), emulation, file=sys.stderr)
         for code in emulation[0]:
-            logging.info('executing: %s', code)
-            print(state.values(), emulation, code, file=sys.stderr)
-            if __debug__:
-                pdb.set_trace()
-            else:
-                input('Continue -> ')
             exec(code, globals(), locals())
+        if __debug__:
+            pdb.set_trace()
+        elif not run:
+            run = bool(input('Continue -> '))
+            logging.warning('`run` set to %r', run)
 
 def mips_add(augend, addend, bits=32, ignore_overflow=False):
     '''
@@ -2579,10 +2623,10 @@ def mips_add(augend, addend, bits=32, ignore_overflow=False):
     '''
     c_int = c_int32 if bits == 32 else c_int64
     adder = c_int(augend)
-    adder.value += addend
+    adder.value += int(addend)
     total = adder.value  # I'd use `sum` but it's bad practice
     if not ignore_overflow:
-        check_sum = augend + addend  # check using Python's bignums
+        check_sum = augend.value + addend  # check using Python's bignums
         if total != check_sum:
             raise ArithmeticOverflow('MIPS sum 0x%x != Python sum 0x%x' %
                                      (total, check_sum))
@@ -2638,6 +2682,24 @@ def mips_div(dividend, divisor, bits=32, ignore_overflow=False):
     quotient, remainder = divmod(register.value, divisor)
     return quotient, remainder
  
+def mips_lw(rt, offset, base, half='both'):
+    '''
+    Load 32-bit register 'rt' from memory. Supports 'lw', 'lwl', and 'lwr'.
+    '''
+    register = c_int32(base)
+    register.value += offset
+    loadoffset = register.value % 4
+    length = 4 - loadoffset
+    if half == 'left':
+        rt.bytevalue[loadoffset:loadoffset + length + 1] = \
+            memory[offset:offset + length + 1]
+    elif half == 'right':
+        rt.bytevalue[length:4 - length] = memory[offset + length:offset + 4]
+    else:  # both
+        rt.bytevalue = memory[offset:offset + 4]
+
 if __name__ == '__main__':
     init()
     eval(sys.argv[1])(*sys.argv[2:])
+else:
+    init()

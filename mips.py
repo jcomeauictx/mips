@@ -9,7 +9,17 @@ from ctypes import c_byte, c_int16, c_int32, c_int64
 
 logging.basicConfig(level=logging.DEBUG if __debug__ else logging.WARN)
 
+try:
+    EXECUTABLE, COMMAND, *ARGS = sys.argv
+except ValueError:
+    raise ValueError('Must specify command and args for that function')
+EXEC = os.path.splitext(os.path.basename(EXECUTABLE))[0]
+if EXEC == 'doctest':
+    DOCTESTDEBUG = logging.debug
+else:
+    DOCTESTDEBUG = lambda *args, **kwargs: None
 MATCH_OBJDUMP_DISASSEMBLY = bool(os.getenv('MATCH_OBJDUMP_DISASSEMBLY'))
+
 # labels will cause objdump -D output and mips disassemble output to differ
 # same if instructions with bad args are turned into .word 0xNNNNNNNN
 USE_LABELS = AGGRESSIVE_WORDING = not MATCH_OBJDUMP_DISASSEMBLY
@@ -2100,9 +2110,9 @@ class Register(object):
     >>> logging.debug('setting $at to 0xffffffff')
     >>> register.value = 0xffffffff
     >>> logging.warning('setting $at register bytevalue')
-    >>> register.bytevalue[1:4] = b'\x55\x44\x33'
+    >>> register.bytevalue = (b'\x55\x44\x33', 1)
     >>> '0x%08x' % register.value
-    '0xff554433'
+    '0x334455ff'
     '''
     registers = {}
     def __new__(cls, *args, **kwargs):
@@ -2149,18 +2159,27 @@ class Register(object):
             return '<%s(%d)=%d>' % (self.name, self.number, self.value)
 
     @property
-    def bytevalue(self, bits=32):
+    def bytevalue(self):
         '''
-        Return register contents as bytearray
+        Return 32-bit register contents as bytes
         '''
-        return bytearray(struct.pack(PACKFORMAT[bits], self.value))
+        array = struct.pack(PACKFORMAT[32], self.value)
+        DOCTESTDEBUG('Register.bytevalue returning bytes %s', array)
+        return array
 
     @bytevalue.setter
-    def bytevalue(self, databytes, bits=32):
-        r'''
-        Store bytes in register
+    def bytevalue(self, args):
         '''
-        self.value = struct.unpack(PACKFORMAT[bits], databytes)[0]
+        Store bytes in 32-bit register
+        '''
+        DOCTESTDEBUG('Register.bytevalue setter args: %s', args)
+        databytes, start = args
+        array = bytearray(self.bytevalue)
+        DOCTESTDEBUG('setting bytevalue at offset %d to %r', start, databytes)
+        array[start:start + len(databytes)] = databytes
+        value = struct.unpack(PACKFORMAT[32], array)[0]
+        DOCTESTDEBUG('Storing updated value 0x%08x in register %s', value, self)
+        self.value = value
 
 class ZeroRegister(Register):
     '''
@@ -2693,15 +2712,14 @@ def mips_lw(rt, offset, base, half='both'):
     loadoffset = register.value % 4
     length = 4 - loadoffset
     if half == 'left':
-        rt.bytevalue[loadoffset:loadoffset + length + 1] = \
-            MEMORY[offset:offset + length + 1]
+        rt.bytevalue = (MEMORY[offset:offset + length + 1], 0)
     elif half == 'right':
-        rt.bytevalue[length:4 - length] = MEMORY[offset + length:offset + 4]
+        rt.bytevalue = (MEMORY[offset + length:offset + 4], length)
     else:  # both
-        rt.bytevalue = MEMORY[offset:offset + 4]
+        rt.bytevalue = (MEMORY[offset:offset + 4], 0)
 
 if __name__ == '__main__':
     init()
-    eval(sys.argv[1])(*sys.argv[2:])
+    eval(COMMAND)(*ARGS[2:])
 else:
     init()

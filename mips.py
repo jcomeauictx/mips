@@ -2252,7 +2252,7 @@ class CoprocessorRegister(object):
             self.number = number
             self.registers[name] = self
             self.registers[number] = self
-            self.value = value
+            self.value = 0
 
     def __index__(self):
         return self.value
@@ -2428,6 +2428,7 @@ def init():
                 listing.insert(listing.index(item), WORD)
         while len(listing) < size:
             listing.append(WORD)
+    # fill in missing coprocessor 0 registers
     for index in range(32):
         if index not in COREGISTER.keys():
             COREGISTER[index] = '$%d' % index
@@ -2488,6 +2489,11 @@ def init():
     STATE[REGISTER[0]] = ZeroRegister('$zero', 0)
     for index in range(1, len(REGISTER)):
         STATE[REGISTER[index]] = Register(REGISTER[index], index)
+        logging.debug('Creating COP0 register %s (%d)',
+                      COREGISTER[index], index)
+        STATE[COREGISTER[index]] = CoprocessorRegister(0,
+                                                       COREGISTER[index],
+                                                       index)
 
 def shorten(hashtable):
     '''

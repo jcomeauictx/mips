@@ -2444,19 +2444,19 @@ def init():
     if MATCH_OBJDUMP_DISASSEMBLY:
         # objdump sync becomes .word if stype set in amount field, and
         # simple "sync" if amount is zero
-        CONVERSION['sync'] = [[
-            'amount == 0',
-            ['sync', 'simple', False, 'True', False],
-        ]]
-        CONVERSION['sync'] = [['amount != 0', WORD]]
+        CONVERSION['sync'] = [
+            [ 'amount == 0', ['sync', 'simple', False, 'True', False]],
+            ['amount != 0', WORD]
+        ]
         # objdump disassembly returns .word for sel != 0
         CONVERSION['mtc0'] = [['sel != 0', WORD]]
         CONVERSION['mfc0'] = [['sel != 0', WORD]]
         # objdump disassembly always returns just the .word for movz and movn
         CONVERSION['movz'] = [['True', WORD]]
         CONVERSION['movn'] = [['True', WORD]]
-        # objdump has no 'deret'
+        # objdump has no 'deret' nor 'mul'
         CONVERSION['c0'][0][1] = ['c0', 'coprocessor', False, 'True', False]
+        CONVERSION['mul'] = [['True', WORD]]
         # objdump doesn't show register $s8 as frame pointer
         REGISTER_REFERENCE['$fp'] = REGISTER.index('$fp')
         REGISTER[REGISTER.index('$fp')] = '$s8'

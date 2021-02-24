@@ -2471,7 +2471,10 @@ def init():
     else:
         # need to be able to interpret register $s8 when assembling
         REGISTER_REFERENCE['$s8'] = REGISTER.index('$fp')
-    REGISTER_REFERENCE.update({value: key for key, value in COREGISTER.items()})
+    REGISTER_REFERENCE.update({value: key for key, value
+                               in COREGISTER.items()
+                               if value.startswith('c')
+                             })
     for listing in REGISTER, ALTREG, FLOATREG:
         hashtable = zip(listing, range(len(listing)))
         REGISTER_REFERENCE.update(hashtable)
